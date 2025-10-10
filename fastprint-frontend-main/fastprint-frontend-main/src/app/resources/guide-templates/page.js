@@ -8,10 +8,11 @@ import maskgroup from "@/assets/images/guide-mask-group.png";
 import bannerimg from "@/assets/images/banner/guide-banner.png";
 import ourBlogBGImg from "@/assets/images/our-blog-bg-img.png";
 import img1 from "@/assets/images/Group-1261153897.png";
-import img3 from "@/assets/images/Group-1261153896.png";
+import img3 from "@/assets/images/ddd.png";
 import a5Image from "@/assets/images/image-30-1.png";
 import usTradeImage from "@/assets/images/image-31-1.png";
 import usLetterImage from "@/assets/images/image-32-1.png";
+import laptop from "@/assets/images/Group-1261153732.jpg";
 import { FaDownload } from "react-icons/fa";
 import Faq from "@/components/Faq";
 
@@ -164,15 +165,7 @@ const GuideTemplate = () => {
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center  md:text-left  items-center">
-              <motion.p 
-                className="uppercase text-lg font-semibold text-[#2A428C] mb-2"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                READ
-              </motion.p>
+              
               <motion.h3 
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -193,13 +186,7 @@ const GuideTemplate = () => {
                 printing services help turn your ideas into professionally bound
                 books.
               </motion.p>
-              <motion.button 
-                className="bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] text-white font-semibold py-2 px-4 rounded-full"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Read More
-              </motion.button>
+       
             </div>
             <motion.div 
               className="md:w-1/2 flex justify-center"
@@ -225,15 +212,7 @@ const GuideTemplate = () => {
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center md:text-left">
-              <motion.p 
-                className="uppercase text-lg font-semibold text-[#2A428C] mb-2"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                WATCH
-              </motion.p>
+             
               <motion.h3 
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -254,13 +233,7 @@ const GuideTemplate = () => {
                 Discover industry formatting standards, layout best practices,
                 and design tips to make your book print-ready.
               </motion.p>
-              <motion.button 
-                className="bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] text-white font-semibold py-2 px-4 rounded-full"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Watch Now
-              </motion.button>
+              
             </div>
             <motion.div 
               className="md:w-1/2 flex justify-center"
@@ -286,15 +259,7 @@ const GuideTemplate = () => {
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center md:text-left">
-              <motion.p 
-                className="uppercase text-lg font-semibold text-[#2A428C] mb-2"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                CREATE
-              </motion.p>
+             
               <motion.h3 
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -316,13 +281,7 @@ const GuideTemplate = () => {
                 guide. Learn how to upload, format, and print your first
                 project.
               </motion.p>
-              <motion.button 
-                className="custom-btn-gradient text-white font-semibold py-2 px-4 rounded-full"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Read More
-              </motion.button>
+              
             </div>
             <motion.div 
               className="md:w-1/2 flex justify-center"
@@ -377,8 +336,8 @@ const GuideTemplate = () => {
             transition={{ type: "spring", stiffness: 300 }}
           >
             <div className="p-6 flex flex-col h-full">
-              <img
-                src="https://fastprintguys.com/wp-content/uploads/2025/05/image-31-1.png"
+              <Image
+                src={a5Image}
                 alt="US Trade Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
@@ -417,8 +376,8 @@ const GuideTemplate = () => {
             transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
           >
             <div className="p-6 flex flex-col h-full">
-              <img
-                src="https://fastprintguys.com/wp-content/uploads/2025/05/image-31-1.png"
+              <Image
+                src={usLetterImage}
                 alt="US Trade Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
@@ -456,8 +415,8 @@ const GuideTemplate = () => {
             transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
           >
             <div className="p-6 flex flex-col h-full">
-              <img
-                src="https://fastprintguys.com/wp-content/uploads/2025/05/image-31-1.png"
+              <Image
+                src={usTradeImage}
                 alt="US Trade Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
@@ -567,8 +526,8 @@ const GuideTemplate = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <img
-                  src="https://fastprintguys.com/wp-content/uploads/2025/05/Group-1261153732.png"
+                <Image
+                  src={laptop}
                   alt="Laptop Graphic"
                   className="w-full max-w-[500px] h-auto object-contain"
                 />

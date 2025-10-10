@@ -246,17 +246,7 @@ const UserDashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-gray-500 uppercase">In Cart</p>
-                  <p className="text-3xl font-bold text-emerald-600 mt-1">{getUserCart().length}</p>
-                </div>
-                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 rounded-2xl">
-                  <FaChartLine className="text-white text-xl" />
-                </div>
-              </div>
-            </div>
+        
           </div>
 
           {/* Table */}

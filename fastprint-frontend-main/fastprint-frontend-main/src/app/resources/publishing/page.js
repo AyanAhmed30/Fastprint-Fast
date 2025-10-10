@@ -389,7 +389,8 @@ const Publishing = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Contact Us Now to Get Started
+              Contact Us Now 
+              +1 469-277-7489
             </motion.button>
           </motion.div>
         </motion.section>

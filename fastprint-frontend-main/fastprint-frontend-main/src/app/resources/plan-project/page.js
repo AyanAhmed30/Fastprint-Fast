@@ -41,6 +41,7 @@ import pricing from "@/assets/images/Group 1261153902.png";
 
 import { FaArrowRight, FaDownload } from "react-icons/fa";
 import Faq from "@/components/Faq";
+import Link from "next/link";
 
 const services = [
   {
@@ -440,9 +441,10 @@ const GuideTemplate = () => {
                 format variations, retail pricing, and shipping for custom books
                 or calendars.
               </p>
+             <Link href={'/calculator/printbook'} >
               <button className="custom-btn-gradient text-white  font-semibold py-2 px-4 rounded-full">
                 Price Your Book
-              </button>
+              </button></Link>
             </div>
           </div>
         </div>

@@ -404,12 +404,6 @@ const UserDashboard = () => {
                       {book.category || "General"}
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleAddToCart(book)}
-                        className="px-3 py-1 bg-gradient-to-r from-[#016AB3] to-[#0096CD] text-white rounded-full text-xs font-semibold"
-                      >
-                        Add to Cart
-                      </button>
                       <button onClick={() => handleEdit(book)} className="p-2 text-[#016AB3] hover:bg-blue-50 rounded-lg">
                         <FaEdit className="text-xs" />
                       </button>

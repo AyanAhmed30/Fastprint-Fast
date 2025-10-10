@@ -2,6 +2,7 @@
 name: Deploy Frontend to Production
 
 on:
+
   push:
     branches:
       - main

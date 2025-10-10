@@ -29,7 +29,7 @@ import image39 from "@/assets/images/image39.png";
 import image40 from "@/assets/images/image40.png";
 import image41 from "@/assets/images/image41.png";
 import image42 from "@/assets/images/image42.png";
-import image43 from "@/assets/images/image43.jpg";
+import image43 from "@/assets/images/image4332.png";
 import Image from "next/image";
 import Faq from "@/components/Faq";
 

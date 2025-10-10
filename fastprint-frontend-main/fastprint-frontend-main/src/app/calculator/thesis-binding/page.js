@@ -6,7 +6,6 @@ import Image from "next/image";
 // Components
 import Carousel from "@/components/Carousel";
 import PricingBanner from "@/components/PricingBanner";
-
 import RedirectButton from "@/components/RedirectButton";
 import ShippingEstimate from "@/components/ShippingEstimate";
 
@@ -27,38 +26,13 @@ import pg4 from "@/assets/images/qa4.png";
 // Consolidated data structure with image URLs
 const OPTIONS = {
   binding: [
-    {
-      id: "leather_case_wrap",
-      name: "Leather Case Wrap",
-      price: 79.0,
-      image: lt2,
-    },
-    {
-      id: "faux_leather_case_wrap",
-      name: "Faux Leather Case Wrap",
-      price: 69.0,
-      image: lt3,
-    },
-    {
-      id: "polythin_rexine_case_wrap",
-      name: "Polythin Rexine Case Wrap",
-      price: 59.0,
-      image: lt1,
-    },
+    { id: "leather_case_wrap", name: "Leather Case Wrap", price: 79.0, image: lt2 },
+    { id: "faux_leather_case_wrap", name: "Faux Leather Case Wrap", price: 69.0, image: lt3 },
+    { id: "polythin_rexine_case_wrap", name: "Polythin Rexine Case Wrap", price: 59.0, image: lt1 },
   ],
   spine: [
-    {
-      id: "round",
-      name: "Round",
-      price: 5.0,
-      image: ltt1,
-    },
-    {
-      id: "flat",
-      name: "Flat",
-      price: 0.0,
-      image: ltt2,
-    },
+    { id: "round", name: "Round", price: 5.0, image: ltt1 },
+    { id: "flat", name: "Flat", price: 0.0, image: ltt2 },
   ],
   exteriorColor: [
     {
@@ -66,68 +40,60 @@ const OPTIONS = {
       name: "Black",
       price: 5.0,
       bg: "bg-black",
-      image:
-        "https://tse1.mm.bing.net/th/id/OIP.eDT_6SV4EMT_EIvLNI1jZgHaFj?pid=Api&P=0&h=220",
+      image: "https://tse1.mm.bing.net/th/id/OIP.eDT_6SV4EMT_EIvLNI1jZgHaFj?pid=Api&P=0&h=220",
     },
     {
       id: "brown",
       name: "Brown",
       price: 3.0,
       bg: "bg-amber-800",
-      image:
-        "https://tse1.mm.bing.net/th/id/OIP.2MCU2S3LitdZbInyvu_4-QHaE8?pid=Api&P=0&h=220",
+      image: "https://tse1.mm.bing.net/th/id/OIP.2MCU2S3LitdZbInyvu_4-QHaE8?pid=Api&P=0&h=220",
     },
     {
       id: "maroon",
       name: "Maroon",
       price: 5.0,
       bg: "bg-red-800",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.m096lDro6ncKKg4DwPmUUwHaEo?pid=Api&P=0&h=220",
+      image: "https://tse4.mm.bing.net/th/id/OIP.m096lDro6ncKKg4DwPmUUwHaEo?pid=Api&P=0&h=220",
     },
     {
       id: "dark_blue",
       name: "Dark Blue",
       price: 5.0,
       bg: "bg-blue-900",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.bdBwPN-71Sz4S2yShDWCaAHaEK?pid=Api&P=0&h=220",
+      image: "https://tse4.mm.bing.net/th/id/OIP.bdBwPN-71Sz4S2yShDWCaAHaEK?pid=Api&P=0&h=220",
     },
   ],
   foilStamping: [
     {
-      id: "golden",
+      id: "golden_foil",
       name: "Golden",
       price: 10.0,
       bg: "bg-yellow-400",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.yN-LJTTQxlR-ZWO2YN_CIQHaHa?pid=Api&P=0&h=220",
+      image: "https://tse4.mm.bing.net/th/id/OIP.yN-LJTTQxlR-ZWO2YN_CIQHaHa?pid=Api&P=0&h=220",
     },
     {
-      id: "silver",
+      id: "silver_foil",
       name: "Silver",
       price: 15.0,
       bg: "bg-gray-300",
-      image:
-        "https://i.pinimg.com/736x/fd/ac/b0/fdacb002da9862d86bc871f7ee160383.jpg",
+      image: "https://i.pinimg.com/736x/fd/ac/b0/fdacb002da9862d86bc871f7ee160383.jpg",
     },
   ],
   screenStamping: [
     {
-      id: "golden",
+      id: "golden_screen",
       name: "Golden",
       price: 10.0,
       bg: "bg-yellow-400",
-      image:
-        "https://www.48hrbooks.com/asset/index/213ba005-4db4-4ecd-a4cd-01f77b04994b",
+      image: "https://www.48hrbooks.com/asset/index/213ba005-4db4-4ecd-a4cd-01f77b04994b",
     },
     {
-      id: "silver",
+      id: "silver_screen",
       name: "Silver",
       price: 15.0,
       bg: "bg-gray-300",
-      image:
-        "https://smartpressblog.imgix.net/wp-content/uploads/2022/08/foil-perfect-bound-booklets_silver_02.png?auto=format%2Ccompress&ixlib=php-3.3.0&s=15005f4e66b0f086cf9041bef5b826cf&w=900",
+      image: "https://smartpressblog.imgix.net/wp-content/uploads/2022/08/foil-perfect-bound-booklets_silver_02.png?auto=format%2Ccompress&ixlib=php-3.3.0&s=15005f4e66b0f086cf9041bef5b826cf&w=900",
     },
   ],
   cornerProtector: [
@@ -141,63 +107,30 @@ const OPTIONS = {
       id: "gold_round_corner",
       name: "Gold Round Corner",
       price: 4.0,
-      image:
-        "https://m.media-amazon.com/images/I/51OxPftmiwL.__AC_SX300_SY300_QL70_FMwebp_.jpg",
+      image: "https://m.media-amazon.com/images/I/51OxPftmiwL.__AC_SX300_SY300_QL70_FMwebp_.jpg",
     },
     {
       id: "vintage_designs_corner",
       name: "Vintage Designs Corner",
       price: 6.0,
-      image:
-        "https://m.media-amazon.com/images/I/81Cud1uamaL.__AC_SX300_SY300_QL70_FMwebp_.jpg",
+      image: "https://m.media-amazon.com/images/I/81Cud1uamaL.__AC_SX300_SY300_QL70_FMwebp_.jpg",
     },
   ],
   interiorColor: [
-    {
-      id: "premium_bw",
-      name: "Premium Black & White",
-      pricePerPage: 0.03,
-      image: PremiumBlackandWhite,
-    },
-    {
-      id: "premium_color",
-      name: "Premium Color",
-      pricePerPage: 0.19,
-      image: Premium,
-    },
+    { id: "premium_bw", name: "Premium Black & White", pricePerPage: 0.03, image: PremiumBlackandWhite },
+    { id: "premium_color", name: "Premium Color", pricePerPage: 0.19, image: Premium },
   ],
   paperType: [
-    {
-      id: "70_white_uncoated",
-      name: "70# White-Uncoated",
-      pricePerPage: 0.02,
-      image: pg1,
-    },
-    {
-      id: "60_cream_uncoated",
-      name: "60# Cream-Uncoated",
-      pricePerPage: 0.01,
-      image: pg2,
-    },
-    {
-      id: "60_white_uncoated",
-      name: "60# White-Uncoated",
-      pricePerPage: 0.01,
-      image: pg3,
-    },
-    {
-      id: "80_white_coated",
-      name: "80# White-Coated",
-      pricePerPage: 0.03,
-      image: pg4,
-    },
+    { id: "70_white_uncoated", name: "60# Cream-Uncoated", pricePerPage: 0.02, image: pg1 },
+    { id: "60_cream_uncoated", name: "60# White-Uncoated", pricePerPage: 0.01, image: pg2 },
+    { id: "60_white_uncoated", name: "80# White-Uncoated", pricePerPage: 0.01, image: pg3 },
+    { id: "80_white_coated", name: "100# White-Coated", pricePerPage: 0.03, image: pg4 },
   ],
 };
 
 const BOOK_SIZES = [
   "A4 (8.27 x 11.69 in / 210 x 297 mm)",
   "US Letter (8.5 x 11 in / 216 x 279 mm)",
-  "Comic Book (6.625 x 10.25 in / 168 x 260 mm)",
 ];
 
 const DISCOUNT_TIERS = [
@@ -207,16 +140,7 @@ const DISCOUNT_TIERS = [
 ];
 
 // Utility Components
-const Input = ({
-  type = "text",
-  name,
-  value,
-  onChange,
-  placeholder,
-  disabled,
-  min,
-  max,
-}) => (
+const Input = ({ type = "text", name, value, onChange, placeholder, disabled, min, max }) => (
   <input
     type={type}
     name={name}
@@ -248,6 +172,7 @@ const Select = ({ name, value, onChange, options, placeholder }) => (
   </select>
 );
 
+// 🔑 Updated OptionCard: now uses global stamping state
 const OptionCard = ({
   item,
   fieldName,
@@ -255,14 +180,24 @@ const OptionCard = ({
   onSelect,
   accessible = true,
   hasImage = true,
+  isStamping = false,
+  selectedStampingId = "",
 }) => {
   const isSelected = fieldValue === item.id;
-  const opacity = accessible ? 1 : 0.3;
+  
+  // For stamping options: keep all options accessible
+  let isAccessible = accessible;
+  if (isStamping) {
+    isAccessible = accessible; // Don't disable based on selection
+  }
+
+  const opacity = isAccessible ? 1 : 0.3;
+
 
   return (
     <label
       className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${
-        !accessible ? "cursor-not-allowed" : ""
+        !isAccessible ? "cursor-not-allowed" : ""
       }`}
       style={{ opacity }}
     >
@@ -272,8 +207,8 @@ const OptionCard = ({
           name={fieldName}
           value={item.id}
           checked={isSelected}
-          onChange={() => accessible && onSelect(item.id)}
-          disabled={!accessible}
+          onChange={() => isAccessible && onSelect(item.id)}
+          disabled={!isAccessible}
           className="absolute top-1 left-1 z-10 w-3 h-3"
         />
         {hasImage ? (
@@ -285,7 +220,7 @@ const OptionCard = ({
                 width={100}
                 height={64}
                 className="w-full h-full object-cover"
-                unoptimized // for external or local static images
+                unoptimized
               />
             ) : (
               <span className="text-xs text-gray-500">IMG</span>
@@ -324,6 +259,8 @@ const OptionSection = ({
   onSelect,
   accessible = true,
   hasImage = true,
+  isStamping = false,
+  selectedStampingId = "",
 }) => (
   <>
     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">
@@ -339,6 +276,8 @@ const OptionSection = ({
           onSelect={onSelect}
           accessible={accessible}
           hasImage={hasImage}
+          isStamping={isStamping}
+          selectedStampingId={selectedStampingId}
         />
       ))}
     </div>
@@ -362,7 +301,6 @@ const ThesisPricingCalculator = () => {
 
   const [result, setResult] = useState(null);
 
-  // Step accessibility
   const fieldOrder = [
     "bookSize",
     "pageCount",
@@ -383,7 +321,63 @@ const ThesisPricingCalculator = () => {
     return form[prevStep] !== "";
   };
 
-  // Calculate pricing
+  // 🔑 Handle stamping selection (mutual exclusivity)
+  const handleStampingSelect = (id) => {
+    setForm((prev) => {
+      const newForm = { ...prev };
+
+      // Clear both first
+      newForm.foil_stamping_id = "";
+      newForm.screen_stamping_id = "";
+
+      // Set the selected one
+      if (OPTIONS.foilStamping.some(opt => opt.id === id)) {
+        newForm.foil_stamping_id = id;
+      } else if (OPTIONS.screenStamping.some(opt => opt.id === id)) {
+        newForm.screen_stamping_id = id;
+      }
+
+      // Reset fields after stamping
+      const maxIndex = Math.max(
+        fieldOrder.indexOf("foil_stamping_id"),
+        fieldOrder.indexOf("screen_stamping_id")
+      );
+      fieldOrder.slice(maxIndex + 1).forEach((field) => {
+        newForm[field] = "";
+      });
+
+      return newForm;
+    });
+    setResult(null);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type } = e.target;
+    let val = value;
+
+    if (type === "number") {
+      val = value === "" ? "" : Number(value);
+      if (name === "pageCount" && val > 800) {
+        val = 800;
+      }
+    }
+
+    setForm((prev) => {
+      const newForm = { ...prev, [name]: val };
+      const currentIndex = fieldOrder.indexOf(name);
+      if (currentIndex !== -1) {
+        fieldOrder.slice(currentIndex + 1).forEach((field) => {
+          newForm[field] = "";
+        });
+      }
+      return newForm;
+    });
+    setResult(null);
+  };
+
+  // Get currently selected stamping ID (from either field)
+  const selectedStampingId = form.foil_stamping_id || form.screen_stamping_id;
+
   const calculatePrice = useMemo(() => {
     const requiredFields = [
       "bookSize",
@@ -398,10 +392,13 @@ const ThesisPricingCalculator = () => {
       "paper_type_id",
     ];
 
-    if (
-      !requiredFields.every((field) => form[field] !== "") ||
-      form.quantity <= 0
-    ) {
+    const nonStampingFilled = requiredFields
+      .filter((f) => !["foil_stamping_id", "screen_stamping_id"].includes(f))
+      .every((field) => form[field] !== "");
+
+    const hasStamping = form.foil_stamping_id || form.screen_stamping_id;
+
+    if (!nonStampingFilled || !hasStamping || form.quantity <= 0) {
       return null;
     }
 
@@ -412,14 +409,8 @@ const ThesisPricingCalculator = () => {
     const spine = findOption("spine", form.spine_id);
     const exteriorColor = findOption("exteriorColor", form.exterior_color_id);
     const foilStamping = findOption("foilStamping", form.foil_stamping_id);
-    const screenStamping = findOption(
-      "screenStamping",
-      form.screen_stamping_id
-    );
-    const cornerProtector = findOption(
-      "cornerProtector",
-      form.corner_protector_id
-    );
+    const screenStamping = findOption("screenStamping", form.screen_stamping_id);
+    const cornerProtector = findOption("cornerProtector", form.corner_protector_id);
     const interiorColor = findOption("interiorColor", form.interior_color_id);
     const paperType = findOption("paperType", form.paper_type_id);
 
@@ -451,47 +442,6 @@ const ThesisPricingCalculator = () => {
     };
   }, [form]);
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    let val = value;
-
-    if (type === "number") {
-      val = value === "" ? "" : Number(value);
-      // Enforce maximum of 800 for pageCount
-      if (name === "pageCount" && val > 800) {
-        val = 800;
-      }
-    }
-
-    setForm((prev) => {
-      const newForm = { ...prev, [name]: val };
-      // Optionally, reset subsequent fields
-      const currentIndex = fieldOrder.indexOf(name);
-      if (currentIndex !== -1) {
-        fieldOrder.slice(currentIndex + 1).forEach((field) => {
-          newForm[field] = "";
-        });
-      }
-      return newForm;
-    });
-    setResult(null);
-  };
-
-  const handleSelect = (fieldName, value) => {
-    setForm((prev) => {
-      const newForm = { ...prev, [fieldName]: value };
-      const currentIndex = fieldOrder.indexOf(fieldName);
-      if (currentIndex !== -1) {
-        fieldOrder.slice(currentIndex + 1).forEach((field) => {
-          newForm[field] = "";
-        });
-      }
-      return newForm;
-    });
-    setResult(null);
-  };
-
-  // Auto-calculate when form is complete
   useEffect(() => {
     if (calculatePrice) {
       setResult(calculatePrice);
@@ -510,7 +460,6 @@ const ThesisPricingCalculator = () => {
       <Carousel />
 
       <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex flex-col xl:flex-row gap-6 xl:gap-8 bg-gray-50">
-        {/* Main Form Section */}
         <div className="w-full xl:w-3/5 bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 lg:p-8 rounded-2xl">
           <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-[#2A428C]">
             Thesis Binding Calculator
@@ -542,21 +491,27 @@ const ThesisPricingCalculator = () => {
                   type="number"
                   placeholder="Enter Page Count"
                   min="3"
-                  max="800" // already set
+                  max="800"
                   disabled={!isStepAccessible("pageCount")}
                 />
               </div>
             </div>
           </div>
 
-          {/* All Option Sections */}
           <Section title="Binding Type">
             <OptionSection
               title="Select Binding Type"
               options={OPTIONS.binding}
               fieldName="binding_id"
               fieldValue={form.binding_id}
-              onSelect={(value) => handleSelect("binding_id", value)}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, binding_id: value };
+                  fieldOrder.slice(fieldOrder.indexOf("binding_id") + 1).forEach(f => newForm[f] = "");
+                  return newForm;
+                });
+                setResult(null);
+              }}
               accessible={isStepAccessible("binding_id")}
             />
           </Section>
@@ -567,7 +522,14 @@ const ThesisPricingCalculator = () => {
               options={OPTIONS.spine}
               fieldName="spine_id"
               fieldValue={form.spine_id}
-              onSelect={(value) => handleSelect("spine_id", value)}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, spine_id: value };
+                  fieldOrder.slice(fieldOrder.indexOf("spine_id") + 1).forEach(f => newForm[f] = "");
+                  return newForm;
+                });
+                setResult(null);
+              }}
               accessible={isStepAccessible("spine_id")}
             />
           </Section>
@@ -578,33 +540,46 @@ const ThesisPricingCalculator = () => {
               options={OPTIONS.exteriorColor}
               fieldName="exterior_color_id"
               fieldValue={form.exterior_color_id}
-              onSelect={(value) => handleSelect("exterior_color_id", value)}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, exterior_color_id: value };
+                  fieldOrder.slice(fieldOrder.indexOf("exterior_color_id") + 1).forEach(f => newForm[f] = "");
+                  return newForm;
+                });
+                setResult(null);
+              }}
               accessible={isStepAccessible("exterior_color_id")}
               hasImage={true}
             />
           </Section>
 
+          {/* 🔸 Foil Stamping — now part of unified group */}
           <Section title="Foil Stamping">
             <OptionSection
               title="Select Foil Stamping"
               options={OPTIONS.foilStamping}
               fieldName="foil_stamping_id"
               fieldValue={form.foil_stamping_id}
-              onSelect={(value) => handleSelect("foil_stamping_id", value)}
-              accessible={isStepAccessible("foil_stamping_id")}
+              onSelect={handleStampingSelect}
+              accessible={isStepAccessible("exterior_color_id")} // Always open after exterior color
               hasImage={true}
+              isStamping={true}
+              selectedStampingId={selectedStampingId}
             />
           </Section>
 
+          {/* 🔸 Screen Stamping — now part of unified group */}
           <Section title="Screen Stamping">
             <OptionSection
               title="Select Screen Stamping"
               options={OPTIONS.screenStamping}
               fieldName="screen_stamping_id"
               fieldValue={form.screen_stamping_id}
-              onSelect={(value) => handleSelect("screen_stamping_id", value)}
-              accessible={isStepAccessible("screen_stamping_id")}
+              onSelect={handleStampingSelect}
+              accessible={isStepAccessible("exterior_color_id")} // Always open after exterior color
               hasImage={true}
+              isStamping={true}
+              selectedStampingId={selectedStampingId}
             />
           </Section>
 
@@ -614,8 +589,15 @@ const ThesisPricingCalculator = () => {
               options={OPTIONS.cornerProtector}
               fieldName="corner_protector_id"
               fieldValue={form.corner_protector_id}
-              onSelect={(value) => handleSelect("corner_protector_id", value)}
-              accessible={isStepAccessible("corner_protector_id")}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, corner_protector_id: value };
+                  fieldOrder.slice(fieldOrder.indexOf("corner_protector_id") + 1).forEach(f => newForm[f] = "");
+                  return newForm;
+                });
+                setResult(null);
+              }}
+              accessible={selectedStampingId ? true : isStepAccessible("corner_protector_id")}
             />
           </Section>
 
@@ -625,8 +607,15 @@ const ThesisPricingCalculator = () => {
               options={OPTIONS.interiorColor}
               fieldName="interior_color_id"
               fieldValue={form.interior_color_id}
-              onSelect={(value) => handleSelect("interior_color_id", value)}
-              accessible={isStepAccessible("interior_color_id")}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, interior_color_id: value };
+                  fieldOrder.slice(fieldOrder.indexOf("interior_color_id") + 1).forEach(f => newForm[f] = "");
+                  return newForm;
+                });
+                setResult(null);
+              }}
+              accessible={selectedStampingId ? true : isStepAccessible("interior_color_id")}
             />
           </Section>
 
@@ -636,8 +625,14 @@ const ThesisPricingCalculator = () => {
               options={OPTIONS.paperType}
               fieldName="paper_type_id"
               fieldValue={form.paper_type_id}
-              onSelect={(value) => handleSelect("paper_type_id", value)}
-              accessible={isStepAccessible("paper_type_id")}
+              onSelect={(value) => {
+                setForm((prev) => {
+                  const newForm = { ...prev, paper_type_id: value };
+                  return newForm;
+                });
+                setResult(null);
+              }}
+              accessible={selectedStampingId ? true : isStepAccessible("paper_type_id")}
             />
           </Section>
 
@@ -665,7 +660,6 @@ const ThesisPricingCalculator = () => {
               </div>
             </div>
 
-            {/* Bulk Discount Tiers */}
             <div className="p-4 bg-gray-50 rounded-lg mb-4">
               <h3 className="text-sm font-semibold text-[#2A428C] mb-2">
                 Bulk Discount Tiers
@@ -694,7 +688,6 @@ const ThesisPricingCalculator = () => {
               </div>
             </div>
 
-            {/* Results */}
             {result && (
               <div className="bg-white/20 rounded-lg p-4 text-white">
                 <h4 className="font-semibold mb-2">Pricing Results:</h4>
@@ -724,8 +717,7 @@ const ThesisPricingCalculator = () => {
             )}
           </div>
 
-                          <ShippingEstimate bookSpecs={form} pricingResult={result} />{" "}
-
+          <ShippingEstimate bookSpecs={form} pricingResult={result} />
         </div>
 
         {/* Summary Section */}
@@ -745,7 +737,6 @@ const ThesisPricingCalculator = () => {
             </h2>
             <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
 
-            {/* Summary Grid */}
             <div className="space-y-2 text-sm mb-6">
               {[
                 [
@@ -787,26 +778,20 @@ const ThesisPricingCalculator = () => {
               ].map(([label1, value1, label2, value2], i) => (
                 <React.Fragment key={i}>
                   <div className="flex justify-between items-start mb-1 text-sm">
-                    {/* LEFT COLUMN */}
                     <div className="text-left">
                       <p className="font-semibold text-gray-600">{label1}</p>
                       <p className="text-black">{value1}</p>
                     </div>
-
-                    {/* RIGHT COLUMN */}
                     <div className="text-right">
                       <p className="font-semibold text-gray-600">{label2}</p>
                       <p className="text-black">{value2}</p>
                     </div>
                   </div>
-
-                  {/* Divider after each row except last */}
                   <div className="w-full h-px bg-gray-200 my-2"></div>
                 </React.Fragment>
               ))}
             </div>
 
-            {/* Button */}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
                 <RedirectButton />

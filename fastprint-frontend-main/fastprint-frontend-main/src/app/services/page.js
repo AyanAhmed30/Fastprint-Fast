@@ -378,12 +378,13 @@ const Services = () => {
               isVisible['cta'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 leading-tight">
-              <span className="text-gray-900">Ready to Bring Your </span>
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
-                Book to Life
-              </span>
-            </h2>
+           <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 leading-tight whitespace-nowrap">
+  <span className="text-gray-900">Ready to Bring Your </span>
+  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+    Book to Life
+  </span>
+</h2>
+
             <p className="text-xl text-black/90 mb-8 max-w-2xl mx-auto">
               Join thousands of satisfied authors who have trusted us with their publishing dreams. Get started today with a free consultation.
             </p>

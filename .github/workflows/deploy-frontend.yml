@@ -22,16 +22,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Navigate to frontend directory
+        run: cd fastprint-frontend-main/fastprint-frontend-main
 
       - name: Install dependencies
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm ci
 
       - name: Run ESLint
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm run lint
         continue-on-error: true
 
       - name: Build application
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm run build
 
   deploy:

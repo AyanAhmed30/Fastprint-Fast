@@ -36,7 +36,6 @@ import {
 import { BASE_URL } from "@/services/baseUrl";
 
 // PDF.js worker setup
-// ✅ Move pdfjsLib loading to a dynamic import
 let pdfjsLib = null;
 
 const loadPdfLib = async () => {
@@ -45,10 +44,7 @@ const loadPdfLib = async () => {
 
   try {
     const lib = await import("pdfjs-dist");
-
-    // ✅ Use public folder (works in dev & prod)
     lib.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.js";
-
     pdfjsLib = lib;
     return lib;
   } catch (err) {
@@ -414,7 +410,8 @@ const CoverDesign = ({
         <button
           type="button"
           className="bg-[#2A428C] text-white font-semibold px-4 py-2 rounded-full shadow hover:bg-[#1d326c] transition ml-4"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             handleCoverFileChange({ target: { files: [] } });
             if (coverFileInputRef.current) coverFileInputRef.current.value = "";
             coverFileInputRef.current?.click();
@@ -426,10 +423,6 @@ const CoverDesign = ({
     )}
   </div>
 );
-
-const handlePrintAndSubmit = () => {
-  handleSubmit(); // Call your existing submission logic
-};
 
 const DesignProjectPreview = () => {
   const { token } = useContext(AuthContext);
@@ -475,18 +468,16 @@ const DesignProjectPreview = () => {
   // State for project data and ID
   const [hasProjectId, setHasProjectId] = useState(false);
 
-  // ✅ FIXED: Get projectData from localStorage - client-side only
+  // Get projectData from localStorage - client-side only
   useEffect(() => {
     try {
-      // Check if we're in the browser
       if (typeof window !== "undefined") {
         const saved = localStorage.getItem("projectData");
         if (saved) {
           const data = JSON.parse(saved);
-          updateState({ projectData: data }); // ✅ Fixed: Don't double-parse
+          updateState({ projectData: data });
           setHasProjectId(!!(data && data.projectId));
         } else {
-          // Optional: Redirect if no data
           router.push("/start-project");
         }
       }
@@ -811,9 +802,7 @@ const DesignProjectPreview = () => {
     updateState({ result });
   };
 
-  // =========== Book Size Handling ==============
-
-  // Helper: Parse size string like "5 x 8 in" or "127 x 203 mm"
+  // Book Size Handling
   const parseSizeString = (sizeStr) => {
     const inchMatch = sizeStr.match(/([\d.]+)\s*x\s*([\d.]+)\s*in/);
     if (inchMatch) {
@@ -834,12 +823,10 @@ const DesignProjectPreview = () => {
     return null;
   };
 
-  // Helper: Convert PDF page size (in points) to inches
   const pointsToInches = (points) => points / 72;
 
-  // Helper: Match detected size to BOOK_SIZES
   const findClosestBookSize = (widthIn, heightIn) => {
-    const toleranceIn = 0.15; // ±0.15 inch tolerance
+    const toleranceIn = 0.15;
     for (const sizeName of BOOK_SIZES) {
       const parsed = parseSizeString(sizeName);
       if (!parsed) continue;
@@ -851,7 +838,6 @@ const DesignProjectPreview = () => {
         targetH /= 25.4;
       }
 
-      // Check both orientations (portrait/landscape)
       const match1 =
         Math.abs(widthIn - targetW) <= toleranceIn &&
         Math.abs(heightIn - targetH) <= toleranceIn;
@@ -897,7 +883,6 @@ const DesignProjectPreview = () => {
       return;
     }
 
-    // ✅ Save design + project data
     localStorage.setItem("designForm", JSON.stringify(state.form));
     localStorage.setItem("projectData", JSON.stringify(state.projectData));
     localStorage.setItem("bindings", JSON.stringify(state.bindings));
@@ -918,7 +903,6 @@ const DesignProjectPreview = () => {
       JSON.stringify(state.dropdowns.trim_sizes || [])
     );
 
-    // ✅ ALSO SAVE shopData (pricing info) so it survives to /shop
     const quantity = state.form.quantity || 1;
     const originalTotalCost =
       state.result?.original_total_cost ??
@@ -931,7 +915,7 @@ const DesignProjectPreview = () => {
         originalTotalCost: state.result?.original_total_cost ?? 0,
         finalTotalCost: state.result?.total_cost ?? 0,
         totalCost: state.result?.total_cost ?? 0,
-        productQuantity: state.form.quantity ,
+        productQuantity: state.form.quantity,
         costPerBook: state.result?.cost_per_book ?? 0,
       })
     );
@@ -941,7 +925,7 @@ const DesignProjectPreview = () => {
   };
 
   useEffect(() => {
-    loadPdfLib(); // Preload PDF.js in background
+    loadPdfLib();
   }, []);
 
   const handleFileChange = async (e) => {
@@ -985,16 +969,13 @@ const DesignProjectPreview = () => {
             return;
           }
 
-          // ✅ Get first page size
           const firstPage = await pdf.getPage(1);
           const { width, height } = firstPage.getViewport({ scale: 1 });
           const widthIn = pointsToInches(width);
           const heightIn = pointsToInches(height);
 
-          // ✅ Match to BOOK_SIZES
           const matchedSizeName = findClosestBookSize(widthIn, heightIn);
 
-          // ✅ Find corresponding trim_size_id
           let matchedId = "";
           if (matchedSizeName) {
             const trimOption = state.dropdowns.trim_sizes?.find(
@@ -1005,7 +986,6 @@ const DesignProjectPreview = () => {
             }
           }
 
-          // ✅ Update form with page count and (if found) trim size
           updateForm({
             page_count: pageCount,
             ...(matchedId && { trim_size_id: matchedId }),
@@ -1045,16 +1025,13 @@ const DesignProjectPreview = () => {
   };
 
   const handleSubmit = async () => {
-    // Determine if in edit mode
     const isEditMode = isEditUrl && hasProjectId;
 
     const isCalendar = state.projectData?.category === "Calender";
 
-    // Upload or update based on mode
     if (isEditMode) {
-      // Call update API
-      await updateBook(projectData.projectId, isCalendar);
-      return; // Exit after update
+      await updateBook(state.projectData.projectId, isCalendar);
+      return;
     }
 
     if (!state.selectedFile) return alert("Please upload your book PDF file");
@@ -1164,9 +1141,6 @@ const DesignProjectPreview = () => {
           state.result?.cost_per_book * quantity;
         const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
 
-        // localStorage.removeItem("projectData");
-        // localStorage.removeItem("designForm");
-
         localStorage.setItem(
           "shopData",
           JSON.stringify({
@@ -1179,7 +1153,6 @@ const DesignProjectPreview = () => {
         );
 
         router.push("/shop");
-        // Optional: Use URL params or localStorage to pass cost data
       } else {
         alert(
           "Submission failed: " + (response.data.message || "Unknown error")
@@ -1266,8 +1239,6 @@ const DesignProjectPreview = () => {
         }
       );
 
-      // localStorage.removeItem("projectData");
-
       if (response.data?.status === "success") {
         localStorage.setItem(
           "shopData",
@@ -1282,8 +1253,6 @@ const DesignProjectPreview = () => {
 
         alert("Project updated successfully!");
         router.push("/shop");
-
-        // Optionally, refresh or redirect
       } else {
         alert("Failed to update project.");
       }
@@ -1659,6 +1628,25 @@ const DesignProjectPreview = () => {
             coverFile={state.coverFile}
           />
 
+          {state.coverFile && (
+            <div className="w-full mt-6 md:mt-10">
+              <h2 className="text-[#2A428C] font-bold text-xl md:text-[36px] mb-4">
+                Preview Book Cover Design
+              </h2>
+              <div className="w-full bg-white border border-gray-300 rounded-lg p-4 md:p-6 flex justify-center items-center">
+                <div className="relative w-full max-w-md h-96 md:h-[500px]">
+                  <Image
+                    src={URL.createObjectURL(state.coverFile)}
+                    alt="Book Cover Preview"
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col items-center gap-4 md:gap-6 mt-6 md:mt-10">
             <button
               onClick={handleContactExpert}
@@ -1684,7 +1672,6 @@ const DesignProjectPreview = () => {
 
             <button
               onClick={() => {
-                // Validate all required fields before proceeding
                 const isCalendar = state.projectData?.category === "Calender";
                 const requiredFields = isCalendar
                   ? [
@@ -1702,7 +1689,6 @@ const DesignProjectPreview = () => {
                       "cover_finish_id",
                     ];
 
-                // Check if any required field is empty
                 const missingFields = requiredFields.filter(
                   (field) => !state.form[field]
                 );
@@ -1710,10 +1696,9 @@ const DesignProjectPreview = () => {
                   alert(
                     "Please complete all book configuration options before previewing."
                   );
-                  return; // Stop execution if fields are missing
+                  return;
                 }
 
-                // Check if PDF file is uploaded
                 if (!state.selectedFile) {
                   alert("Please upload your book PDF file first.");
                   return;
@@ -1726,27 +1711,19 @@ const DesignProjectPreview = () => {
                   return;
                 }
 
-                // Save ALL necessary data to localStorage for the preview
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                  const pdfDataUrl = e.target.result; // This is the data URL
+                  const pdfDataUrl = e.target.result;
 
-                  // Save PDF Data URL
                   localStorage.setItem("previewPdfDataUrl", pdfDataUrl);
-
-                  // Save Form Data
                   localStorage.setItem(
                     "previewFormData",
                     JSON.stringify(state.form)
                   );
-
-                  // Save Project Data
                   localStorage.setItem(
                     "previewProjectData",
                     JSON.stringify(state.projectData)
                   );
-
-                  // Save dropdowns needed later to resolve option names at /shop
                   localStorage.setItem(
                     "previewDropdowns",
                     JSON.stringify({
@@ -1758,7 +1735,6 @@ const DesignProjectPreview = () => {
                     })
                   );
 
-                  // Save shopData
                   const quantity = state.form.quantity || 0;
                   const originalTotalCost =
                     state.result?.original_total_cost ??
@@ -1776,13 +1752,11 @@ const DesignProjectPreview = () => {
                     })
                   );
 
-                  // Save the actual File objects for final submission
                   window.tempBookFileForSubmission = state.selectedFile;
                   if (state.coverFile) {
                     window.tempCoverFileForSubmission = state.coverFile;
                   }
 
-                  // Navigate to preview
                   const targetUrl = isEditUrl
                     ? "/book-preview?edit=true"
                     : "/book-preview";

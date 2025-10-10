@@ -381,7 +381,7 @@ const Services = () => {
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 leading-tight">
               <span className="text-gray-900">Ready to Bring Your </span>
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
-                Life to Book
+                Book to Life
               </span>
             </h2>
             <p className="text-xl text-black/90 mb-8 max-w-2xl mx-auto">

@@ -98,18 +98,21 @@ const SPECIAL_SIZE_RULES = {
 
 const OPTIONS_CONFIG = {
   interiorColor: [
+    { name: "Standard Black and White ", img: PremiumColor, dbName: "Premium Color" },
+
     {
-      name: "Standard Black and White",
+      name: "Premiun Black and White",
       img: StandardBlackandWhite,
       dbName: "Standard Black & White",
     },
+    { name: "Standard Color", img: StandardColor, dbName: "Standard Color" },
+
     {
-      name: "Premium Black and White",
+      name: "Premium Color",
       img: PremiumBlackandWhite,
       dbName: "Premium Black & White",
     },
-    { name: "Standard Color", img: StandardColor, dbName: "Standard Color" },
-    { name: "Premium Color", img: PremiumColor, dbName: "Premium Color" },
+    
   ],
   paperType: [
     {

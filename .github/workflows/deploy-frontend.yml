@@ -1,0 +1,102 @@
+name: Deploy Frontend to Production
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests and Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Navigate to frontend directory
+        run: cd fastprint-frontend-main/fastprint-frontend-main
+
+      - name: Install dependencies
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build application
+        working-directory: ./fastprint-frontend-main/fastprint-frontend-main
+        run: npm run build
+
+  deploy:
+    name: Deploy to Server
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          script: |
+            # Navigate to project directory
+            cd ~/Fastprint-Fast/fastprint-frontend-main/fastprint-frontend-main
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Install dependencies
+            npm ci
+            
+            # Build the application
+            npm run build
+            
+            # Restart PM2 process
+            pm2 restart fastprint-frontend
+            
+            # Save PM2 process list
+            pm2 save
+            
+            # Display PM2 status
+            pm2 list
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          script: |
+            # Check if the application is running
+            pm2 show fastprint-frontend
+            
+            # Check logs for any errors
+            pm2 logs fastprint-frontend --lines 50 --nostream
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+          fi

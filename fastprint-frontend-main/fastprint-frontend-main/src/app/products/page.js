@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import pro from "@/assets/images/pro.png";
 import arr from "@/assets/images/arr.png";
 
+
 import img46 from "@/assets/images/img46.png";
 import img47 from "@/assets/images/img47.png";
 import img48 from "@/assets/images/img48.png";
@@ -32,8 +33,8 @@ import img67 from "@/assets/images/img67.png";
 import img68 from "@/assets/images/img68.png";
 import img69 from "@/assets/images/img69.png";
 
-import img70 from "@/assets/images/img70.png";
-import img71 from "@/assets/images/img71.png";
+import img70 from "@/assets/images/gggg.jpg";
+import img71 from "@/assets/images/mmmm.jpg";
 import img72 from "@/assets/images/img72.png";
 
 const Products = () => {

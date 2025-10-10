@@ -94,8 +94,8 @@ const BlogPage = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
           >
             <div className="relative">
-              <img
-                src="https://fastprintguys.com/wp-content/uploads/2025/06/Group-1261153892-1.png"
+              <Image 
+                src={blogbanner}
                 alt="Blog illustration"
                 className="h-auto max-w-full"
               />

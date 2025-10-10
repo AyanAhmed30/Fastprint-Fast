@@ -333,10 +333,10 @@ export default async function BlogDetails({ params }) {
 
           <div className="flex-1 flex items-center justify-end">
             <div className="relative">
-              <img
-                src="https://fastprintguys.com/wp-content/uploads/2025/06/Group-1261153892-1.png"
+              <Image
+                src={blogbanner}
                 alt="Blog illustration"
-                className="w-7xl h-auto max-w-full"
+                className="h-auto max-w-full"
               />
             </div>
           </div>

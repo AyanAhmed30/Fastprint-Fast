@@ -215,7 +215,7 @@ const Products = () => {
               gradient: "from-teal-500 to-teal-600",
               bgGradient: "from-teal-50 to-teal-100",
               icon: "📅",
-              route: "/calculator/calender",
+              route: "/calculator/calendar",
             },
             {
               title: "Comic Book",

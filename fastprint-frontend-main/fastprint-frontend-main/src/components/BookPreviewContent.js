@@ -420,6 +420,11 @@ const BookPreviewContent = () => {
                   Confirm that all chapters and sections are in the right order
                 </li>
                 <li>Review the table of contents for accuracy</li>
+    <p class="text-red-600 text-sm font-semibold">
+  Disclaimer: You are responsible for the book you upload. We are not responsible for any issues that may occur later.
+</p>
+
+
               </ol>
             </div>
 

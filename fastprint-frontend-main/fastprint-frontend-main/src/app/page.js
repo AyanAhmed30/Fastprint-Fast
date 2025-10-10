@@ -86,7 +86,7 @@ const Home = () => {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fast Print Guys
+            Fast Print Guysss
           </h1>
           <h2
             className="text-[40px] leading-[48px] font-bold mb-2 animate-fadeInUpDelayed"

@@ -1711,64 +1711,55 @@ const DesignProjectPreview = () => {
                   return;
                 }
 
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                  const pdfDataUrl = e.target.result;
+                // Store files in window object instead of localStorage to avoid quota issues
+                window.tempBookFileForSubmission = state.selectedFile;
+                if (state.coverFile) {
+                  window.tempCoverFileForSubmission = state.coverFile;
+                }
 
-                  localStorage.setItem("previewPdfDataUrl", pdfDataUrl);
-                  localStorage.setItem(
-                    "previewFormData",
-                    JSON.stringify(state.form)
-                  );
-                  localStorage.setItem(
-                    "previewProjectData",
-                    JSON.stringify(state.projectData)
-                  );
-                  localStorage.setItem(
-                    "previewDropdowns",
-                    JSON.stringify({
-                      bindings: state.bindings || [],
-                      interior_colors: state.dropdowns.interior_colors || [],
-                      paper_types: state.dropdowns.paper_types || [],
-                      cover_finishes: state.dropdowns.cover_finishes || [],
-                      trim_sizes: state.dropdowns.trim_sizes || [],
-                    })
-                  );
+                // Only store non-file data in localStorage
+                localStorage.setItem(
+                  "previewFormData",
+                  JSON.stringify(state.form)
+                );
+                localStorage.setItem(
+                  "previewProjectData",
+                  JSON.stringify(state.projectData)
+                );
+                localStorage.setItem(
+                  "previewDropdowns",
+                  JSON.stringify({
+                    bindings: state.bindings || [],
+                    interior_colors: state.dropdowns.interior_colors || [],
+                    paper_types: state.dropdowns.paper_types || [],
+                    cover_finishes: state.dropdowns.cover_finishes || [],
+                    trim_sizes: state.dropdowns.trim_sizes || [],
+                  })
+                );
 
-                  const quantity = state.form.quantity || 0;
-                  const originalTotalCost =
-                    state.result?.original_total_cost ??
-                    (state.result?.cost_per_book ?? 0) * quantity;
-                  const finalTotalCost =
-                    state.result?.total_cost ?? originalTotalCost;
-                  localStorage.setItem(
-                    "shopData",
-                    JSON.stringify({
-                      originalTotalCost: state.result?.original_total_cost ?? 0,
-                      finalTotalCost: state.result?.total_cost ?? 0,
-                      totalCost: state.result?.total_cost ?? 0,
-                      productQuantity: state.form.quantity,
-                      costPerBook: state.result?.cost_per_book ?? 0,
-                    })
-                  );
+                const quantity = state.form.quantity || 0;
+                const originalTotalCost =
+                  state.result?.original_total_cost ??
+                  (state.result?.cost_per_book ?? 0) * quantity;
+                const finalTotalCost =
+                  state.result?.total_cost ?? originalTotalCost;
+                localStorage.setItem(
+                  "shopData",
+                  JSON.stringify({
+                    originalTotalCost: state.result?.original_total_cost ?? 0,
+                    finalTotalCost: state.result?.total_cost ?? 0,
+                    totalCost: state.result?.total_cost ?? 0,
+                    productQuantity: state.form.quantity,
+                    costPerBook: state.result?.cost_per_book ?? 0,
+                  })
+                );
 
-                  window.tempBookFileForSubmission = state.selectedFile;
-                  if (state.coverFile) {
-                    window.tempCoverFileForSubmission = state.coverFile;
-                  }
+                const targetUrl = isEditUrl
+                  ? "/book-preview?edit=true"
+                  : "/book-preview";
 
-                  const targetUrl = isEditUrl
-                    ? "/book-preview?edit=true"
-                    : "/book-preview";
-
-                  router.push(targetUrl);
-                };
-                reader.onerror = function () {
-                  alert("Failed to prepare PDF for preview.");
-                };
-                reader.readAsDataURL(state.selectedFile);
-              }}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition `}
+                router.push(targetUrl);
+              }}  className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition `}
             >
               Preview Your Book
             </button>

@@ -62,7 +62,7 @@ const BookPreviewContent = () => {
   const searchParams = useSearchParams();
   const isEditPreview = searchParams.get("edit") === "true";
 
-  const [pdfDataUrl, setPdfDataUrl] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [pdfDocument, setPdfDocument] = useState(null);
   const [numPages, setNumPages] = useState(0);
   const [renderedPages, setRenderedPages] = useState([]);
@@ -90,10 +90,10 @@ const BookPreviewContent = () => {
     }
   }, [numPages, isMobile]);
 
+  // ✅ Read PDF file from window object instead of localStorage
   useEffect(() => {
-    const savedPdfDataUrl = localStorage.getItem("previewPdfDataUrl");
-    if (savedPdfDataUrl) {
-      setPdfDataUrl(savedPdfDataUrl);
+    if (typeof window !== "undefined" && window.tempBookFileForSubmission) {
+      setPdfFile(window.tempBookFileForSubmission);
     } else {
       alert("No PDF file found for preview. Please upload a file first.");
       router.push("/design-project");
@@ -101,54 +101,60 @@ const BookPreviewContent = () => {
   }, [router]);
 
   useEffect(() => {
-    if (!pdfDataUrl) return;
+    if (!pdfFile) return;
 
     const loadAndRenderPdf = async () => {
       try {
         const pdfjs = await loadPdfLib();
         if (!pdfjs) throw new Error("PDF.js library not loaded.");
 
-        const base64String = pdfDataUrl.split(",")[1];
-        const binaryString = atob(base64String);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
+        // Read the File object directly using FileReader
+        const fileReader = new FileReader();
+        fileReader.onload = async function () {
+          try {
+            const typedarray = new Uint8Array(this.result);
+            const loadingTask = pdfjs.getDocument({ data: typedarray });
+            const pdfDoc = await loadingTask.promise;
+            setPdfDocument(pdfDoc);
+            setNumPages(pdfDoc.numPages);
 
-        const loadingTask = pdfjs.getDocument({ data: bytes });
-        const pdfDoc = await loadingTask.promise;
-        setPdfDocument(pdfDoc);
-        setNumPages(pdfDoc.numPages);
+            const allPages = [];
+            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+              const page = await pdfDoc.getPage(pageNum);
+              const scale = 1.5;
+              const viewport = page.getViewport({ scale });
 
-        const allPages = [];
-        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-          const page = await pdfDoc.getPage(pageNum);
-          const scale = 1.5;
-          const viewport = page.getViewport({ scale });
+              const canvas = document.createElement("canvas");
+              const context = canvas.getContext("2d");
+              canvas.height = viewport.height;
+              canvas.width = viewport.width;
 
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
+              await page.render({ canvasContext: context, viewport }).promise;
+              allPages.push(canvas.toDataURL("image/png"));
+            }
 
-          await page.render({ canvasContext: context, viewport }).promise;
-          allPages.push(canvas.toDataURL("image/png"));
-        }
+            if (!isMobile && pdfDoc.numPages % 2 !== 0) {
+              allPages.push("cover");
+            }
 
-        if (!isMobile && pdfDoc.numPages % 2 !== 0) {
-          allPages.push("cover");
-        }
-
-        setRenderedPages(allPages);
+            setRenderedPages(allPages);
+          } catch (err) {
+            console.error("PDF rendering error:", err);
+            alert("Failed to render the PDF preview. Please try again.");
+          }
+        };
+        fileReader.onerror = function () {
+          alert("Failed to read PDF file.");
+        };
+        fileReader.readAsArrayBuffer(pdfFile);
       } catch (error) {
-        console.error("Error loading/rendering PDF:", error);
+        console.error("Error loading PDF:", error);
         alert("Failed to load the PDF preview. Please try again.");
       }
     };
 
     loadAndRenderPdf();
-  }, [pdfDataUrl]);
+  }, [pdfFile, isMobile]);
 
   const handleFlip = (e) => {
     const pageIndex = e.data;
@@ -161,7 +167,6 @@ const BookPreviewContent = () => {
     }
   };
 
-  // ✅ NEW: Submit logic moved here from /design-project
   const handleSubmit = async () => {
     const formDataString = localStorage.getItem("previewFormData");
     const projectDataString = localStorage.getItem("previewProjectData");
@@ -185,7 +190,6 @@ const BookPreviewContent = () => {
 
     const isCalendar = projectData.category === "Calender" || projectData.category === "Calendar";
 
-    // Helper to get option name by ID
     const getOptionName = (optionsStr, id) => {
       if (!optionsStr) return "";
       try {
@@ -236,14 +240,12 @@ const BookPreviewContent = () => {
     try {
       let response;
       if (isEditPreview && projectData.projectId) {
-        // ✅ UPDATE existing book
         response = await axios.put(
           `${API_BASE}api/book/books/${projectData.projectId}/update/`,
           formData,
           config
         );
       } else {
-        // ✅ CREATE new book
         response = await axios.post(
           `${API_BASE}api/book/upload-book/`,
           formData,
@@ -267,18 +269,18 @@ const BookPreviewContent = () => {
     }
   };
 
-  if (!pdfDataUrl || !renderedPages[0]) {
+  if (!pdfFile || !renderedPages[0]) {
     return (
       <>
         <NavBar navigate={router.push} />
-         <div className="min-h-screen bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#016AB3]/20 border-t-[#016AB3]" />
+        <div className="min-h-screen bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] flex items-center justify-center">
+          <div className="text-center">
+            <div className="relative">
+              <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#016AB3]/20 border-t-[#016AB3]" />
+            </div>
+            <p className="text-xl font-semibold text-[#016AB3] mt-6">Loading Book...</p>
           </div>
-          <p className="text-xl font-semibold text-[#016AB3] mt-6">Loading Book...</p>
         </div>
-      </div>
       </>
     );
   }
@@ -288,7 +290,6 @@ const BookPreviewContent = () => {
       <NavBar navigate={router.push} />
       <div className="w-full min-h-screen px-4 md:px-6 py-6 md:py-10 bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] font-sans">
         <div className="max-w-4xl mx-auto p-4 md:p-8 lg:p-12 rounded-xl md:rounded-2xl shadow-xl bg-gradient-to-r from-[#ffe4ec] via-[#fdfdfd] to-[#e0f3ff] flex flex-col gap-6 md:gap-8 lg:gap-10">
-          {/* Header */}
           <div className="relative flex justify-center items-center px-2">
             <div
               className="absolute left-0 right-0 h-[2px] sm:h-[3px] lg:h-[4px]"
@@ -309,7 +310,6 @@ const BookPreviewContent = () => {
             </div>
           </div>
 
-          {/* Title */}
           <div className="flex flex-col gap-4">
             <h1 className="text-3xl font-bold text-[#2A428C]">
               Review Your Book
@@ -322,7 +322,6 @@ const BookPreviewContent = () => {
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
-            {/* Flipbook */}
             <div className="flex justify-center items-center mb-8">
               <HTMLFlipBook
                 onFlip={handleFlip}
@@ -368,7 +367,6 @@ const BookPreviewContent = () => {
               </HTMLFlipBook>
             </div>
 
-            {/* Navigation */}
             <div className="flex justify-center items-center gap-6 mb-8">
               <button
                 className="p-3 bg-[#2A428C] text-white rounded-full hover:bg-[#1d326c] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -407,7 +405,6 @@ const BookPreviewContent = () => {
               </button>
             </div>
 
-            {/* Important Info */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-8">
               <h2 className="text-xl font-bold text-[#2A428C] mb-4">
                 Important Information About Your Book
@@ -420,15 +417,12 @@ const BookPreviewContent = () => {
                   Confirm that all chapters and sections are in the right order
                 </li>
                 <li>Review the table of contents for accuracy</li>
-    <p class="text-red-600 text-sm font-semibold">
-  Disclaimer: You are responsible for the book you upload. We are not responsible for any issues that may occur later.
-</p>
-
-
               </ol>
+              <p className="text-red-600 text-sm font-semibold mt-4">
+                Disclaimer: You are responsible for the book you upload. We are not responsible for any issues that may occur later.
+              </p>
             </div>
 
-            {/* ✅ Submit Button */}
             <div className="flex flex-col items-center gap-4 md:gap-6 mt-6 md:mt-10">
               <button
                 onClick={handleSubmit}

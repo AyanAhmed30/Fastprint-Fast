@@ -270,7 +270,7 @@ const ForgetPassword = () => {
           {/* ✅ Global error banner (now shows all errors including validation) */}
           {error && !success && (
             <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
-              <p className="text-red-600 text-sm text-center flex items-center justify-center">
+              <p className="text-red-590 text-sm text-center flex items-center justify-center">
                 <svg
                   className="w-4 h-4 mr-2"
                   fill="currentColor"

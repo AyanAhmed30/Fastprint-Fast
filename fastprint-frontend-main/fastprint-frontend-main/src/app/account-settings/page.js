@@ -10,8 +10,165 @@ import Image from "next/image";
 
 const API_BASE_URL = `${BASE_URL}api/userprofiles`;
 
+// Country and State data
+const COUNTRIES = [
+  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "AU", name: "Australia" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" },
+  { code: "NL", name: "Netherlands" },
+  { code: "BE", name: "Belgium" },
+  { code: "CH", name: "Switzerland" },
+  { code: "AT", name: "Austria" },
+  { code: "SE", name: "Sweden" },
+  { code: "NO", name: "Norway" },
+  { code: "DK", name: "Denmark" },
+  { code: "FI", name: "Finland" },
+  { code: "IE", name: "Ireland" },
+  { code: "PT", name: "Portugal" },
+  { code: "PL", name: "Poland" },
+  { code: "CZ", name: "Czech Republic" },
+  { code: "JP", name: "Japan" },
+  { code: "KR", name: "South Korea" },
+  { code: "CN", name: "China" },
+  { code: "IN", name: "India" },
+  { code: "BR", name: "Brazil" },
+  { code: "MX", name: "Mexico" },
+  { code: "AR", name: "Argentina" },
+  { code: "CO", name: "Colombia" },
+  { code: "ZA", name: "South Africa" },
+  { code: "EG", name: "Egypt" },
+  { code: "MA", name: "Morocco" },
+  { code: "ZW", name: "Zimbabwe" },
+  { code: "PK", name: "Pakistan" },
+];
+
+const US_STATES = [
+  { code: "AL", name: "Alabama" },
+  { code: "AK", name: "Alaska" },
+  { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" },
+  { code: "CA", name: "California" },
+  { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" },
+  { code: "DE", name: "Delaware" },
+  { code: "FL", name: "Florida" },
+  { code: "GA", name: "Georgia" },
+  { code: "HI", name: "Hawaii" },
+  { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" },
+  { code: "IN", name: "Indiana" },
+  { code: "IA", name: "Iowa" },
+  { code: "KS", name: "Kansas" },
+  { code: "KY", name: "Kentucky" },
+  { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" },
+  { code: "MD", name: "Maryland" },
+  { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" },
+  { code: "MN", name: "Minnesota" },
+  { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" },
+  { code: "MT", name: "Montana" },
+  { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" },
+  { code: "NH", name: "New Hampshire" },
+  { code: "NJ", name: "New Jersey" },
+  { code: "NM", name: "New Mexico" },
+  { code: "NY", name: "New York" },
+  { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" },
+  { code: "OH", name: "Ohio" },
+  { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" },
+  { code: "PA", name: "Pennsylvania" },
+  { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" },
+  { code: "SD", name: "South Dakota" },
+  { code: "TN", name: "Tennessee" },
+  { code: "TX", name: "Texas" },
+  { code: "UT", name: "Utah" },
+  { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" },
+  { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" },
+  { code: "WI", name: "Wisconsin" },
+  { code: "WY", name: "Wyoming" },
+  { code: "DC", name: "District of Columbia" },
+];
+
+const CANADIAN_PROVINCES = [
+  { code: "AB", name: "Alberta" },
+  { code: "BC", name: "British Columbia" },
+  { code: "MB", name: "Manitoba" },
+  { code: "NB", name: "New Brunswick" },
+  { code: "NL", name: "Newfoundland and Labrador" },
+  { code: "NS", name: "Nova Scotia" },
+  { code: "ON", name: "Ontario" },
+  { code: "PE", name: "Prince Edward Island" },
+  { code: "QC", name: "Quebec" },
+  { code: "SK", name: "Saskatchewan" },
+  { code: "NT", name: "Northwest Territories" },
+  { code: "NU", name: "Nunavut" },
+  { code: "YT", name: "Yukon" },
+];
+
+const INDIAN_STATES = [
+  { code: "AP", name: "Andhra Pradesh" },
+  { code: "AR", name: "Arunachal Pradesh" },
+  { code: "AS", name: "Assam" },
+  { code: "BR", name: "Bihar" },
+  { code: "CT", name: "Chhattisgarh" },
+  { code: "GA", name: "Goa" },
+  { code: "GJ", name: "Gujarat" },
+  { code: "HR", name: "Haryana" },
+  { code: "HP", name: "Himachal Pradesh" },
+  { code: "JH", name: "Jharkhand" },
+  { code: "KA", name: "Karnataka" },
+  { code: "KL", name: "Kerala" },
+  { code: "MP", name: "Madhya Pradesh" },
+  { code: "MH", name: "Maharashtra" },
+  { code: "MN", name: "Manipur" },
+  { code: "ML", name: "Meghalaya" },
+  { code: "MZ", name: "Mizoram" },
+  { code: "NL", name: "Nagaland" },
+  { code: "OR", name: "Odisha" },
+  { code: "PB", name: "Punjab" },
+  { code: "RJ", name: "Rajasthan" },
+  { code: "SK", name: "Sikkim" },
+  { code: "TN", name: "Tamil Nadu" },
+  { code: "TS", name: "Telangana" },
+  { code: "TR", name: "Tripura" },
+  { code: "UP", name: "Uttar Pradesh" },
+  { code: "UT", name: "Uttarakhand" },
+  { code: "WB", name: "West Bengal" },
+];
+
+const PAKISTANI_REGIONS = [
+  { code: "PB", name: "Punjab" },
+  { code: "SD", name: "Sindh" },
+  { code: "KP", name: "Khyber Pakhtunkhwa" },
+  { code: "BA", name: "Balochistan" },
+  { code: "GB", name: "Gilgit-Baltistan" },
+];
+
+const getStatesByCountry = (countryCode) => {
+  const stateMap = {
+    US: US_STATES,
+    CA: CANADIAN_PROVINCES,
+    IN: INDIAN_STATES,
+    PK: PAKISTANI_REGIONS,
+  };
+  return stateMap[countryCode] || [];
+};
+
 const apiService = {
   getHeaders() {
+    if (typeof window === "undefined") return {};
     const token = localStorage.getItem("auth_token");
     const headers = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Token ${token}`;
@@ -137,6 +294,11 @@ export default function AccountSettings() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
+  const [availableStates, setAvailableStates] = useState([]);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -153,39 +315,46 @@ export default function AccountSettings() {
     account_type: "personal",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [isSaved, setIsSaved] = useState(false);
-
   // Animate on mount
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  // Load state from localStorage
-  const loadStateFromLocalStorage = (email) => {
-    if (typeof window === "undefined" || !email) return "";
+  // Update available states when country changes
+  useEffect(() => {
+    const states = getStatesByCountry(formData.country);
+    setAvailableStates(states);
+    if (states.length > 0 && formData.state) {
+      const stateExists = states.some(s => s.code === formData.state);
+      if (!stateExists) {
+        setFormData(prev => ({ ...prev, state: "" }));
+      }
+    }
+  }, [formData.country]);
+
+  // Save entire form data to localStorage
+  const saveFormDataToLocalStorage = (data) => {
+    if (typeof window === "undefined") return;
     try {
-      const saved = localStorage.getItem(`user_state_${email}`);
-      return saved || "";
+      localStorage.setItem(`user_profile_${data.email}`, JSON.stringify(data));
     } catch (error) {
-      console.error("Error reading from localStorage:", error);
-      return "";
+      console.error("Error saving form data to localStorage:", error);
     }
   };
 
-  // Save state to localStorage
-  const saveStateToLocalStorage = (email, state) => {
-    if (typeof window === "undefined" || !email) return;
+  // Load entire form data from localStorage
+  const loadFormDataFromLocalStorage = (email) => {
+    if (typeof window === "undefined" || !email) return null;
     try {
-      localStorage.setItem(`user_state_${email}`, state);
+      const saved = localStorage.getItem(`user_profile_${email}`);
+      return saved ? JSON.parse(saved) : null;
     } catch (error) {
-      console.error("Error writing to localStorage:", error);
+      console.error("Error loading form data from localStorage:", error);
+      return null;
     }
   };
 
-  // Load user profile - wrapped in useCallback to prevent unnecessary recreations
+  // Load user profile
   const loadUserProfile = useCallback(async () => {
     if (!user?.email) {
       console.log("No user email available yet");
@@ -195,15 +364,16 @@ export default function AccountSettings() {
 
     console.log("Loading profile for:", user.email);
     setLoading(true);
-    
+
     try {
       const profile = await apiService.getProfileByEmail(user.email);
-      const savedState = loadStateFromLocalStorage(user.email);
-      
+      const savedFormData = loadFormDataFromLocalStorage(user.email);
+
       console.log("Profile loaded:", profile);
-      
+      console.log("Saved form data:", savedFormData);
+
       if (profile) {
-        setFormData({
+        const mergedData = {
           id: profile.id,
           first_name: profile.first_name || "",
           last_name: profile.last_name || "",
@@ -213,42 +383,56 @@ export default function AccountSettings() {
           country: profile.country || "",
           city: profile.city || "",
           postal_code: profile.postal_code || "",
-          state: savedState,
+          state: (savedFormData?.state) || "",
           address: profile.address || "",
           account_type: profile.account_type || "personal",
-        });
+        };
+        
+        setFormData(mergedData);
         setIsSaved(true);
         setProfileLoaded(true);
+        saveFormDataToLocalStorage(mergedData);
         console.log("Profile data set successfully");
       } else {
         console.log("No existing profile found, creating new form");
-        setFormData((prev) => ({
-          ...prev,
+        const newFormData = {
+          ...formData,
           email: user.email,
           username: user.username || "",
           first_name: user.first_name || "",
           last_name: user.last_name || "",
-          state: savedState,
-        }));
+          state: (savedFormData?.state) || "",
+          country: (savedFormData?.country) || "",
+          city: (savedFormData?.city) || "",
+          postal_code: (savedFormData?.postal_code) || "",
+          address: (savedFormData?.address) || "",
+        };
+        
+        setFormData(newFormData);
         setIsSaved(false);
         setProfileLoaded(true);
+        saveFormDataToLocalStorage(newFormData);
       }
     } catch (err) {
       console.error("Load profile error:", err);
       setMessage(`Failed to load profile: ${err.message}`);
-      const savedState = loadStateFromLocalStorage(user.email);
-      setFormData((prev) => ({
-        ...prev,
+      const savedFormData = loadFormDataFromLocalStorage(user.email);
+      
+      const fallbackData = {
+        ...formData,
         email: user.email,
-        state: savedState,
-      }));
+        ...(savedFormData || {}),
+      };
+      
+      setFormData(fallbackData);
       setIsSaved(false);
       setProfileLoaded(true);
+      saveFormDataToLocalStorage(fallbackData);
     } finally {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [user?.email, user?.username, user?.first_name, user?.last_name]);
+  }, [user?.email, user?.username, user?.first_name, user?.last_name, formData]);
 
   // Load profile when user is available
   useEffect(() => {
@@ -260,16 +444,16 @@ export default function AccountSettings() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       [name]: value,
-    }));
+    };
     
-    // Save state to localStorage when state field changes
-    if (name === "state") {
-      saveStateToLocalStorage(formData.email, value);
-    }
+    setFormData(updatedFormData);
     
+    // Save all form data to localStorage whenever any field changes
+    saveFormDataToLocalStorage(updatedFormData);
+
     setIsSaved(false);
   };
 
@@ -285,29 +469,27 @@ export default function AccountSettings() {
     setLoading(true);
     setMessage("");
     try {
-      const { id, password, state, ...profileData } = formData;
+      const { id, password, ...profileData } = formData;
       const dataToSend = {
         ...profileData,
         ...(password && password.trim() && { password }),
       };
-      
+
       console.log("Saving profile data:", dataToSend);
       const res = await apiService.saveSettings(dataToSend);
       console.log("Save response:", res);
-      
-      // Save state to localStorage
-      saveStateToLocalStorage(formData.email, state);
-      
+
+      // Save all form data to localStorage after successful save
+      saveFormDataToLocalStorage(formData);
+
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
-      
-      // Clear password field
+
       setFormData((prev) => ({
         ...prev,
         password: "",
       }));
-      
-      // Reload profile to get the updated ID and data
+
       setTimeout(async () => {
         await loadUserProfile();
         setMessage("Profile saved and reloaded successfully!");
@@ -343,10 +525,9 @@ export default function AccountSettings() {
       await apiService.deleteAccount(formData.id);
       setMessage("Account deleted successfully");
 
-      // Clear state from localStorage
       if (typeof window !== "undefined") {
         try {
-          localStorage.removeItem(`user_state_${formData.email}`);
+          localStorage.removeItem(`user_profile_${formData.email}`);
         } catch (error) {
           console.error("Error clearing localStorage:", error);
         }
@@ -376,7 +557,6 @@ export default function AccountSettings() {
     setLoading(false);
   };
 
-  // Show loading state while initial profile is being fetched
   if (initialLoading) {
     return (
       <>
@@ -397,7 +577,6 @@ export default function AccountSettings() {
 
   return (
     <>
-      {/* Animated Header Banner */}
       <div className="w-full h-12 sm:h-14 md:h-16 flex items-center px-4 sm:px-6 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-pulse"></div>
         <h1 className="text-white text-base sm:text-lg md:text-xl font-semibold relative z-10 animate-fade-in">
@@ -408,9 +587,7 @@ export default function AccountSettings() {
         </div>
       </div>
 
-      {/* Main Content with Parallax Background */}
       <div className="w-full min-h-screen py-4 sm:py-6 md:py-8 lg:py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#eef4ff] via-[#f8faff] to-[#fef6fb] relative overflow-hidden">
-        {/* Floating Background Elements */}
         <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-200/20 rounded-full blur-3xl animate-float-delayed"></div>
         <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-200/20 rounded-full blur-2xl animate-pulse"></div>
@@ -420,7 +597,6 @@ export default function AccountSettings() {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
           }`}
         >
-          {/* Enhanced Message Alert */}
           {message && (
             <div
               className={`p-4 rounded-xl text-center font-medium transition-all duration-500 transform animate-slide-down text-sm sm:text-base shadow-lg border-2 ${
@@ -431,28 +607,12 @@ export default function AccountSettings() {
             >
               <div className="flex items-center justify-center gap-2">
                 {message.includes("Error") || message.includes("Failed") ? (
-                  <svg
-                    className="w-5 h-5 animate-bounce"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
+                  <svg className="w-5 h-5 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 ) : (
-                  <svg
-                    className="w-5 h-5 animate-pulse"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
+                  <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
                 {message}
@@ -460,7 +620,6 @@ export default function AccountSettings() {
             </div>
           )}
 
-          {/* Enhanced Loading Indicator */}
           {loading && (
             <div className="text-center text-blue-600 font-medium text-sm sm:text-base py-4">
               <LoadingSpinner />
@@ -468,7 +627,6 @@ export default function AccountSettings() {
             </div>
           )}
 
-          {/* Profile Details Section */}
           <div className="w-full transform transition-all duration-500 hover:scale-[1.01]">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -487,33 +645,30 @@ export default function AccountSettings() {
               ].map(([name, label, type = "text"], index) => {
                 const isEmailField = name === "email";
                 return (
-                <div
-                  key={name}
-                  className={`${
-                    name === "address" ? "sm:col-span-2" : ""
-                  } transform transition-all duration-300`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <FloatingLabelInput
-                    name={name}
-                    label={label}
-                    type={type}
-                    value={formData[name]}
-                    onChange={handleInputChange}
-                    disabled={loading || isEmailField}
-                    placeholder={
-                      name === "password"
-                        ? "Enter new password"
-                        : `Enter your ${label.toLowerCase()}`
-                    }
-                  />
-                </div>
-              );
+                  <div
+                    key={name}
+                    className="transform transition-all duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <FloatingLabelInput
+                      name={name}
+                      label={label}
+                      type={type}
+                      value={formData[name]}
+                      onChange={handleInputChange}
+                      disabled={loading || isEmailField}
+                      placeholder={
+                        name === "password"
+                          ? "Enter new password"
+                          : `Enter your ${label.toLowerCase()}`
+                      }
+                    />
+                  </div>
+                );
               })}
             </div>
           </div>
 
-          {/* Address Information Section */}
           <div className="w-full transform transition-all duration-500 hover:scale-[1.01]">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -525,32 +680,89 @@ export default function AccountSettings() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {[
                 ["country", "Country"],
-                ["city", "City"],
-                ["postal_code", "Postal Code"],
                 ["state", "State"],
+
+                ["city", "City"],
+
+                ["postal_code", "Postal Code"],
                 ["address", "Address"],
               ].map(([name, label], index) => (
                 <div
                   key={name}
-                  className={`${
-                    name === "address" ? "sm:col-span-2" : ""
-                  } transform transition-all duration-300`}
+                  className={`${name === "address" ? "sm:col-span-2" : ""} transform transition-all duration-300`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <FloatingLabelInput
-                    name={name}
-                    label={label}
-                    value={formData[name]}
-                    onChange={handleInputChange}
-                    disabled={loading}
-                    placeholder={`Enter your ${label.toLowerCase()}`}
-                  />
+                  {name === "country" ? (
+                    <div className="relative group">
+                      <select
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-300 text-sm sm:text-base bg-white/70 backdrop-blur-sm
+                          ${
+                            formData[name]
+                              ? "border-blue-400 shadow-lg ring-4 ring-blue-100"
+                              : "border-gray-300 hover:border-gray-400 hover:shadow-md"
+                          }
+                          ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-white"}
+                          focus:outline-none peer
+                        `}
+                      >
+                        <option value="">Select Country</option>
+                        {COUNTRIES.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="absolute left-4 top-0 text-xs font-semibold text-blue-600 bg-white px-2 rounded transform -translate-y-1/2 pointer-events-none select-none">
+                        {label}
+                      </label>
+                    </div>
+                  ) : name === "state" && availableStates.length > 0 ? (
+                    <div className="relative group">
+                      <select
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                        className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-300 text-sm sm:text-base bg-white/70 backdrop-blur-sm
+                          ${
+                            formData[name]
+                              ? "border-blue-400 shadow-lg ring-4 ring-blue-100"
+                              : "border-gray-300 hover:border-gray-400 hover:shadow-md"
+                          }
+                          ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-white"}
+                          focus:outline-none peer
+                        `}
+                      >
+                        <option value="">Select State/Province</option>
+                        {availableStates.map((state) => (
+                          <option key={state.code} value={state.code}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="absolute left-4 top-0 text-xs font-semibold text-blue-600 bg-white px-2 rounded transform -translate-y-1/2 pointer-events-none select-none">
+                        {label}
+                      </label>
+                    </div>
+                  ) : (
+                    <FloatingLabelInput
+                      name={name}
+                      label={label}
+                      value={formData[name]}
+                      onChange={handleInputChange}
+                      disabled={loading}
+                      placeholder={`Enter your ${label.toLowerCase()}`}
+                    />
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Account Type Section */}
           <div className="w-full">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -621,7 +833,6 @@ export default function AccountSettings() {
             </div>
           </div>
 
-          {/* Account Management Section */}
           <div className="w-full">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -653,9 +864,7 @@ export default function AccountSettings() {
                   disabled={loading || !formData.id}
                   onClick={handleDelete}
                   className={`group relative w-full sm:max-w-md text-[#D15D9E] border-2 border-[#D15D9E] text-base sm:text-lg lg:text-xl font-bold capitalize py-3 sm:py-4 px-6 rounded-full shadow-lg hover:bg-gradient-to-r hover:from-[#fce9f1] hover:to-[#fdf2f8] transition-all duration-300 transform hover:scale-105 hover:shadow-xl overflow-hidden ${
-                    loading || !formData.id
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
+                    loading || !formData.id ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
@@ -670,7 +879,6 @@ export default function AccountSettings() {
         </div>
       </div>
 
-      {/* Animations */}
       <style jsx>{`
         @keyframes fade-in {
           from {

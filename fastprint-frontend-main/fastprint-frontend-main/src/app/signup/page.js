@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/assets/images/fastlogo.svg";
 // import signup from "@/assets/images/signup.png";
-const signup = "/loginUI.jpg";
+import signup from "@/assets/images/loginUI.jpg";
 import Image from "next/image";
 
 const Signup = () => {

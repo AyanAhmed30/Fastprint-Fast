@@ -304,7 +304,7 @@ const ResetPassword = () => {
 
           {error && (
             <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
-              <p className="text-red-600 text-sm text-center">{error}</p>
+              <p className="text-red-601 text-sm text-center">{error}</p>
             </div>
           )}
         </div>

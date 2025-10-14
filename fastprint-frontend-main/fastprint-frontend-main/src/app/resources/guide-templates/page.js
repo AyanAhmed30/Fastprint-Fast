@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -8,30 +8,30 @@ import maskgroup from "@/assets/images/guide-mask-group.png";
 import bannerimg from "@/assets/images/banner/guide-banner.png";
 import ourBlogBGImg from "@/assets/images/our-blog-bg-img.png";
 import img1 from "@/assets/images/Group-1261153897.png";
-import img3 from "@/assets/images/ddd.png";
+import img3 from "@/assets/images/Group-1261153896.png";
+import img4 from "@/assets/images/Group-1261153732.jpg";
 import a5Image from "@/assets/images/image-30-1.png";
 import usTradeImage from "@/assets/images/image-31-1.png";
 import usLetterImage from "@/assets/images/image-32-1.png";
-import laptop from "@/assets/images/Group-1261153732.jpg";
 import { FaDownload } from "react-icons/fa";
 import Faq from "@/components/Faq";
 
 // Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
 };
 
 const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
 };
 
 const scaleUp = {
@@ -39,8 +39,8 @@ const scaleUp = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, ease: "easeOut" }
-  }
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
 };
 
 const staggerContainer = {
@@ -48,9 +48,9 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const slideInFromRight = {
@@ -58,8 +58,8 @@ const slideInFromRight = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.7, ease: "easeOut" }
-  }
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
 };
 
 const slideInFromLeft = {
@@ -67,15 +67,58 @@ const slideInFromLeft = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.7, ease: "easeOut" }
-  }
+    transition: { duration: 0.7, ease: "easeOut" },
+  },
 };
 
 const GuideTemplate = () => {
+  const [selectedSize, setSelectedSize] = useState("");
+
+  const handleDownload = (e) => {
+    e.preventDefault();
+    if (!selectedSize) {
+      alert("Please select a book size first.");
+      return;
+    }
+
+    const fileMap = {
+      "pocket-book": "files/fsg-book-template-all-pocket-book.zip",
+      novella: "files/fsg-book-template-all-novella.zip",
+      digest: "files/fsg-book-template-all-digest.zip",
+      a5: "files/FSG-book-template-all-a5.zip",
+      "us-trade": "files/fsg-book-template-all-us-trade.zip",
+      royal: "files/fsg-book-template-all-royal.zip",
+      "comic-book": "files/fsg-book-template-all-comic-book.zip",
+      executive: "files/fsg-book-template-all-executive.zip",
+      "crown-quarto": "files/fsg-book-template-all-crown-quarto.zip",
+      "small-square": "files/fsg-book-template-all-small-square.zip",
+      a4: "files/fsg-book-template-all-a4.zip",
+      square: "files/fsg-book-template-all-square.zip",
+      "us-letter": "files/fsg-book-template-all-us-letter.zip",
+      "small-landscape": "files/fsg-book-template-all-small-landscape.zip",
+      "us-letter-landscape":
+        "files/fsg-book-template-all-us-letter-landscape.zip",
+      "a4-landscape": "files/fsg-book-template-all-a4-landscape.zip",
+    };
+
+    const filepath = fileMap[selectedSize];
+    if (filepath) {
+      const filename = filepath.split("/").pop(); // Extract filename part
+      const link = document.createElement("a");
+      link.href = `/${filepath}`;
+      link.download = filename; // Use only filename here
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.warn("No file mapped for selected size:", selectedSize);
+    }
+  };
+
   return (
     <>
       {/* Banner - This section will animate on load since it's at the top */}
-      <motion.div 
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={fadeIn}
@@ -97,7 +140,7 @@ const GuideTemplate = () => {
             className="flex-1 mb-8 md:mb-0"
             variants={slideInFromLeft}
           >
-            <motion.h1 
+            <motion.h1
               className="text-3xl md:text-5xl font-bold mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -106,7 +149,7 @@ const GuideTemplate = () => {
               <span className="text-yellow-400">Guide</span>
               <span className="text-white ml-2">And Templates</span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-white text-sm md:text-base leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -124,7 +167,7 @@ const GuideTemplate = () => {
             className="flex-1 flex items-center justify-end"
             variants={slideInFromRight}
           >
-            <motion.div 
+            <motion.div
               className="relative"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -140,7 +183,7 @@ const GuideTemplate = () => {
       </motion.div>
 
       {/* Features - Animate on scroll */}
-      <motion.div 
+      <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
@@ -155,18 +198,17 @@ const GuideTemplate = () => {
           priority
         />
 
-        <motion.div 
+        <motion.div
           className="relative z-10 max-w-7xl mx-16 px-4 py-16 space-y-16"
           variants={staggerContainer}
         >
           {/* Feature 1 */}
-          <motion.div 
+          <motion.div
             className="flex flex-col md:flex-row items-center gap-10"
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center  md:text-left  items-center">
-              
-              <motion.h3 
+              <motion.h3
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -175,7 +217,7 @@ const GuideTemplate = () => {
               >
                 Bookmaking <span className="custom-text-gradient">Basics</span>
               </motion.h3>
-              <motion.p 
+              <motion.p
                 className="text-gray-700 mb-6 text-base md:text-lg"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -186,9 +228,8 @@ const GuideTemplate = () => {
                 printing services help turn your ideas into professionally bound
                 books.
               </motion.p>
-       
             </div>
-            <motion.div 
+            <motion.div
               className="md:w-1/2 flex justify-center"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -207,13 +248,12 @@ const GuideTemplate = () => {
           </motion.div>
 
           {/* Feature 2 */}
-          <motion.div 
+          <motion.div
             className="flex flex-col md:flex-row-reverse items-center gap-10"
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center md:text-left">
-             
-              <motion.h3 
+              <motion.h3
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -223,7 +263,7 @@ const GuideTemplate = () => {
                 Formatting Tips For <br />
                 <span className="custom-text-gradient">Print Books</span>
               </motion.h3>
-              <motion.p 
+              <motion.p
                 className="text-gray-700 mb-6 text-base md:text-lg"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -233,9 +273,8 @@ const GuideTemplate = () => {
                 Discover industry formatting standards, layout best practices,
                 and design tips to make your book print-ready.
               </motion.p>
-              
             </div>
-            <motion.div 
+            <motion.div
               className="md:w-1/2 flex justify-center"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -254,13 +293,12 @@ const GuideTemplate = () => {
           </motion.div>
 
           {/* Feature 3 */}
-          <motion.div 
+          <motion.div
             className="flex flex-col md:flex-row items-center gap-10"
             variants={fadeInUp}
           >
             <div className="md:w-1/2 text-center md:text-left">
-             
-              <motion.h3 
+              <motion.h3
                 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -270,7 +308,7 @@ const GuideTemplate = () => {
                 Free New User{" "}
                 <span className="custom-text-gradient">Guide</span>
               </motion.h3>
-              <motion.p 
+              <motion.p
                 className="text-gray-700 mb-6 text-base md:text-lg"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -281,9 +319,8 @@ const GuideTemplate = () => {
                 guide. Learn how to upload, format, and print your first
                 project.
               </motion.p>
-              
             </div>
-            <motion.div 
+            <motion.div
               className="md:w-1/2 flex justify-center"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -303,7 +340,7 @@ const GuideTemplate = () => {
         </motion.div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="max-w-7xl mx-auto px-4 py-16"
         initial="hidden"
         whileInView="visible"
@@ -321,7 +358,7 @@ const GuideTemplate = () => {
           Popular Book <span className="custom-text-gradient"> Formats</span>
         </motion.h2>
 
-        <motion.div 
+        <motion.div
           className="flex flex-wrap justify-center gap-5 py-10"
           variants={staggerContainer}
           initial="hidden"
@@ -329,7 +366,7 @@ const GuideTemplate = () => {
           viewport={{ once: true, amount: 0.2 }}
         >
           {/* A5 Format Card */}
-          <motion.div 
+          <motion.div
             className="group bg-gray-100 rounded-2xl shadow-md w-full max-w-[350px] transition duration-300 cursor-pointer overflow-hidden flex flex-col hover:bg-gradient-to-b from-[#0096CD] to-[#016AB3] transform hover:scale-105 hover:shadow-2xl"
             variants={fadeInUp}
             whileHover={{ y: -10 }}
@@ -338,7 +375,7 @@ const GuideTemplate = () => {
             <div className="p-6 flex flex-col h-full">
               <Image
                 src={a5Image}
-                alt="US Trade Book"
+                alt="A5 Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
               <div className="flex justify-between items-baseline mb-2">
@@ -346,7 +383,7 @@ const GuideTemplate = () => {
                   A5
                 </div>
                 <div className="text-sm text-gray-500 group-hover:text-white">
-                  5.83 X 8.27 In | 148 X 210 Ym
+                  5.83 X 8.27 In | 148 X 210 mm
                 </div>
               </div>
               <div className="h-px bg-gray-200 group-hover:bg-white my-4 transition-all duration-300"></div>
@@ -369,7 +406,7 @@ const GuideTemplate = () => {
           </motion.div>
 
           {/* US Trade Format Card */}
-          <motion.div 
+          <motion.div
             className="group bg-gray-100 rounded-2xl shadow-md w-full max-w-[350px] transition duration-300 cursor-pointer overflow-hidden flex flex-col hover:bg-gradient-to-b from-[#0096CD] to-[#016AB3] transform hover:scale-105 hover:shadow-2xl"
             variants={fadeInUp}
             whileHover={{ y: -10 }}
@@ -377,7 +414,7 @@ const GuideTemplate = () => {
           >
             <div className="p-6 flex flex-col h-full">
               <Image
-                src={usLetterImage}
+                src={usTradeImage}
                 alt="US Trade Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
@@ -386,7 +423,7 @@ const GuideTemplate = () => {
                   US Trade
                 </div>
                 <div className="text-sm text-gray-500 group-hover:text-white">
-                  6 X 9 In | 152 X 229 Ym
+                  6 X 9 In | 152 X 229 mm
                 </div>
               </div>
               <div className="h-px bg-gray-200 group-hover:bg-white my-4 transition-all duration-300"></div>
@@ -408,7 +445,7 @@ const GuideTemplate = () => {
           </motion.div>
 
           {/* US Letter Format Card */}
-          <motion.div 
+          <motion.div
             className="group bg-gray-100 rounded-2xl shadow-md w-full max-w-[350px] transition duration-300 cursor-pointer overflow-hidden flex flex-col hover:bg-gradient-to-b from-[#0096CD] to-[#016AB3] transform hover:scale-105 hover:shadow-2xl"
             variants={fadeInUp}
             whileHover={{ y: -10 }}
@@ -416,8 +453,8 @@ const GuideTemplate = () => {
           >
             <div className="p-6 flex flex-col h-full">
               <Image
-                src={usTradeImage}
-                alt="US Trade Book"
+                src={usLetterImage}
+                alt="US Letter Book"
                 className="w-full h-44 object-cover border-none rounded-2xl mb-5"
               />
               <div className="flex justify-between items-baseline mb-2">
@@ -425,7 +462,7 @@ const GuideTemplate = () => {
                   US Letter
                 </div>
                 <div className="text-sm text-gray-500 group-hover:text-white">
-                  8.5 X 11 In | 216 X 279 Ym
+                  8.5 X 11 In | 216 X 279 mm
                 </div>
               </div>
               <div className="h-px bg-gray-200 group-hover:bg-white my-4 transition-all duration-300"></div>
@@ -446,8 +483,8 @@ const GuideTemplate = () => {
               </div>
             </div>
           </motion.div>
-          
-          <motion.section 
+
+          <motion.section
             className="w-full bg-white pt-16 px-4 md:px-16"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -456,7 +493,7 @@ const GuideTemplate = () => {
           >
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-20 border-y border-dashed border-blue-400 py-12">
               {/* Left Content */}
-              <motion.div 
+              <motion.div
                 className="flex-1 text-center lg:text-left"
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -482,28 +519,69 @@ const GuideTemplate = () => {
 
                 <div className="flex items-center gap-2 mb-6">
                   <select
+                    id="bookSize"
                     className="w-full md:w-[350px] px-4 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    defaultValue=""
+                    value={selectedSize}
+                    onChange={(e) => setSelectedSize(e.target.value)}
                   >
                     <option disabled value="">
                       Choose a PDF document
                     </option>
+                    <option value="pocket-book">
+                      Pocket Book (4.25 x 6.875 in | 108 x 175 mm)
+                    </option>
+                    <option value="novella">
+                      Novella (5 x 8 in | 127 x 203 mm)
+                    </option>
+                    <option value="digest">
+                      Digest (5.5 x 8.5 in | 140 x 216 mm)
+                    </option>
                     <option value="a5">
-                      A5: 5.83 x 8.27 in | 148 x 210 mm
+                      A5 (5.83 x 8.27 in | 148 x 210 mm)
                     </option>
                     <option value="us-trade">
-                      US Trade: 6 x 9 in | 152 x 229 mm
+                      US Trade (6 x 9 in | 152 x 229 mm)
+                    </option>
+                    <option value="royal">
+                      Royal (6.14 x 9.21 in | 156 x 234 mm)
+                    </option>
+                    <option value="comic-book">
+                      Comic Book (6.63 x 10.25 in | 168 x 260 mm)
+                    </option>
+                    <option value="executive">
+                      Executive (7 x 10 in | 178 x 254 mm)
+                    </option>
+                    <option value="crown-quarto">
+                      Crown Quarto (7.44 x 9.68 in | 189 x 246 mm)
+                    </option>
+                    <option value="small-square">
+                      Small Square (7.5 x 7.5 in | 190 x 190 mm)
+                    </option>
+                    <option value="a4">
+                      A4 (8.27 x 11.69 in | 210 x 297 mm)
+                    </option>
+                    <option value="square">
+                      Square (8.5 x 8.5 in | 216 x 216 mm)
                     </option>
                     <option value="us-letter">
-                      US Letter: 8.5 x 11 in | 216 x 279 mm
+                      US Letter (8.5 x 11 in | 216 x 279 mm)
                     </option>
-                    <option value="whitepaper">Research Whitepaper</option>
+                    <option value="small-landscape">
+                      Small Landscape (9 x 7 in | 229 x 178 mm)
+                    </option>
+                    <option value="us-letter-landscape">
+                      US Letter Landscape (11 x 8.5 in | 279 x 216 mm)
+                    </option>
+                    <option value="a4-landscape">
+                      A4 Landscape (11.69 x 8.27 in | 297 x 210 mm)
+                    </option>
                   </select>
 
-                  <motion.button 
-                    className="custom-btn-gradient text-white p-4 px-10  rounded-md transition"
+                  <motion.button
+                    className="custom-btn-gradient text-white p-4 px-10 rounded-md transition"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    onClick={handleDownload}
                   >
                     <FaDownload />
                   </motion.button>
@@ -519,7 +597,7 @@ const GuideTemplate = () => {
               </motion.div>
 
               {/* Right Image */}
-              <motion.div 
+              <motion.div
                 className="flex-1 flex justify-center lg:justify-end"
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -527,7 +605,7 @@ const GuideTemplate = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <Image
-                  src={laptop}
+                  src={img4}
                   alt="Laptop Graphic"
                   className="w-full max-w-[500px] h-auto object-contain"
                 />
@@ -539,7 +617,6 @@ const GuideTemplate = () => {
 
       {/* FAQ */}
       <Faq />
-      
     </>
   );
 };

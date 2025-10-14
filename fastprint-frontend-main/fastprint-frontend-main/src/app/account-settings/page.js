@@ -155,6 +155,7 @@ const PAKISTANI_REGIONS = [
   { code: "BA", name: "Balochistan" },
   { code: "GB", name: "Gilgit-Baltistan" },
 ];
+
 const getStatesByCountry = (countryCode) => {
   const stateMap = {
     US: US_STATES,
@@ -175,11 +176,13 @@ const apiService = {
   },
 
   async getProfileByEmail(email) {
+    console.log("🔍 Fetching profile for email:", email);
     const response = await fetch(`${API_BASE_URL}/profiles/?search=${encodeURIComponent(email)}`, {
       method: "GET",
       headers: this.getHeaders(),
     });
     const data = await response.json();
+    console.log("📦 API Response:", data);
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch profile");
     }
@@ -187,12 +190,14 @@ const apiService = {
   },
 
   async saveSettings(data) {
+    console.log("💾 Saving settings:", data);
     const response = await fetch(`${API_BASE_URL}/save-settings/`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     const resData = await response.json();
+    console.log("✅ Save response:", resData);
     if (!response.ok) throw new Error(resData.message || "Failed to save");
     return resData;
   },
@@ -208,7 +213,6 @@ const apiService = {
   },
 };
 
-// Loading Spinner & FloatingLabelInput components (keep as is)
 const LoadingSpinner = () => (
   <svg
     className="animate-spin h-6 w-6 text-blue-500 inline-block"
@@ -231,7 +235,6 @@ const LoadingSpinner = () => (
     ></path>
   </svg>
 );
-
 
 const FloatingLabelInput = ({
   name,
@@ -287,6 +290,7 @@ const FloatingLabelInput = ({
     </div>
   );
 };
+
 export default function AccountSettings() {
   const { user } = useAuth();
   const router = useRouter();
@@ -313,25 +317,23 @@ export default function AccountSettings() {
     account_type: "personal",
   });
 
-  // Animate on mount
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  // Update states when country changes
   useEffect(() => {
     const states = getStatesByCountry(formData.country);
     setAvailableStates(states);
     if (states.length > 0 && formData.state && !states.some(s => s.code === formData.state)) {
       setFormData(prev => ({ ...prev, state: "" }));
     }
-  }, [formData.country]);
+  }, [formData.country, formData.state]);
 
-  // localStorage helpers (safe for SSR)
   const saveToStorage = (data) => {
     if (typeof window !== "undefined" && data.email) {
       try {
         localStorage.setItem(`user_profile_${data.email}`, JSON.stringify(data));
+        console.log("💾 Saved to localStorage:", data);
       } catch (e) {
         console.warn("Failed to save to localStorage", e);
       }
@@ -342,16 +344,25 @@ export default function AccountSettings() {
     if (typeof window === "undefined" || !email) return null;
     try {
       const item = localStorage.getItem(`user_profile_${email}`);
-      return item ? JSON.parse(item) : null;
+      const parsed = item ? JSON.parse(item) : null;
+      console.log("📂 Loaded from localStorage:", parsed);
+      return parsed;
     } catch (e) {
       console.warn("Failed to load from localStorage", e);
       return null;
     }
   };
 
-  // ✅ MAIN: Load profile from backend — only depends on user.email
   const loadUserProfile = useCallback(async () => {
-    if (!user?.email) {
+    console.log("🔄 loadUserProfile called with user:", user);
+    
+    // Extract email from various possible user object structures
+    const userEmail = user?.email || user?.user?.email || user?.data?.email;
+    
+    console.log("📧 Extracted email:", userEmail);
+
+    if (!userEmail) {
+      console.warn("⚠️ No email found in user object");
       setInitialLoading(false);
       return;
     }
@@ -360,16 +371,16 @@ export default function AccountSettings() {
     setMessage("");
 
     try {
-      // 🔥 Always fetch from backend — source of truth
-      const profile = await apiService.getProfileByEmail(user.email);
+      const profile = await apiService.getProfileByEmail(userEmail);
 
       if (profile) {
+        console.log("✅ Profile found:", profile);
         const backendData = {
           id: profile.id,
           first_name: profile.first_name || "",
           last_name: profile.last_name || "",
           username: profile.username || "",
-          email: profile.email || user.email,
+          email: profile.email || userEmail,
           password: "",
           country: profile.country || "",
           city: profile.city || "",
@@ -380,15 +391,15 @@ export default function AccountSettings() {
         };
         setFormData(backendData);
         setIsSaved(true);
-        saveToStorage(backendData); // sync for offline fallback
+        saveToStorage(backendData);
       } else {
-        // New user: initialize with auth data
+        console.log("ℹ️ No profile found, creating new");
         const newProfile = {
           id: null,
-          first_name: user.first_name || "",
-          last_name: user.last_name || "",
-          username: user.username || "",
-          email: user.email,
+          first_name: user?.first_name || user?.user?.first_name || user?.data?.first_name || "",
+          last_name: user?.last_name || user?.user?.last_name || user?.data?.last_name || "",
+          username: user?.username || user?.user?.username || user?.data?.username || "",
+          email: userEmail,
           password: "",
           country: "",
           city: "",
@@ -402,16 +413,15 @@ export default function AccountSettings() {
         saveToStorage(newProfile);
       }
     } catch (err) {
-      console.error("Profile load failed:", err);
+      console.error("❌ Profile load failed:", err);
       setMessage(`Failed to load profile: ${err.message}`);
 
-      // 🛑 Only fallback to localStorage if API fails
-      const fallback = loadFromStorage(user.email) || {
+      const fallback = loadFromStorage(userEmail) || {
         id: null,
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
-        username: user.username || "",
-        email: user.email,
+        first_name: user?.first_name || user?.user?.first_name || user?.data?.first_name || "",
+        last_name: user?.last_name || user?.user?.last_name || user?.data?.last_name || "",
+        username: user?.username || user?.user?.username || user?.data?.username || "",
+        email: userEmail,
         password: "",
         country: "",
         city: "",
@@ -420,24 +430,23 @@ export default function AccountSettings() {
         address: "",
         account_type: "personal",
       };
-      setFormData({ ...fallback, email: user.email });
+      setFormData({ ...fallback, email: userEmail });
       setIsSaved(false);
     } finally {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [user?.email]); // ✅ Only this dependency
+  }, [user]);
 
-  // ✅ Trigger load whenever user.email becomes available (even after hydration)
   useEffect(() => {
-    if (user?.email !== undefined) {
+    console.log("👤 User state changed:", user);
+    if (user !== undefined && user !== null) {
       loadUserProfile();
     } else if (user === null) {
       setInitialLoading(false);
     }
-  }, [user?.email, loadUserProfile]);
+  }, [user, loadUserProfile]);
 
-  // --- Rest of handlers (unchanged logic) ---
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...formData, [name]: value };
@@ -447,7 +456,9 @@ export default function AccountSettings() {
   };
 
   const handleRadioChange = (e) => {
-    setFormData((prev) => ({ ...prev, account_type: e.target.value }));
+    const updated = { ...formData, account_type: e.target.value };
+    setFormData(updated);
+    saveToStorage(updated);
     setIsSaved(false);
   };
 
@@ -466,7 +477,6 @@ export default function AccountSettings() {
 
       setFormData((prev) => ({ ...prev, password: "" }));
 
-      // Reload fresh data
       setTimeout(async () => {
         await loadUserProfile();
         setMessage("Profile saved and reloaded successfully!");
@@ -498,12 +508,13 @@ export default function AccountSettings() {
         localStorage.removeItem(`user_profile_${formData.email}`);
       }
 
+      const userEmail = user?.email || user?.user?.email || user?.data?.email;
       setFormData({
         id: null,
         first_name: "",
         last_name: "",
         username: "",
-        email: user?.email || "",
+        email: userEmail || "",
         password: "",
         country: "",
         city: "",
@@ -520,7 +531,6 @@ export default function AccountSettings() {
     setLoading(false);
   };
 
-  // --- Render UI (unchanged) ---
   if (initialLoading) {
     return (
       <>
@@ -538,10 +548,7 @@ export default function AccountSettings() {
   }
 
   return (
-    // ... rest of your JSX (keep exactly as before from <div className="w-full min-h-screen...">)
-    // No changes needed in render logic
     <>
-      {/* Your existing header */}
       <div className="w-full h-12 sm:h-14 md:h-16 flex items-center px-4 sm:px-6 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-pulse"></div>
         <h1 className="text-white text-base sm:text-lg md:text-xl font-semibold relative z-10 animate-fade-in">
@@ -552,9 +559,7 @@ export default function AccountSettings() {
         </div>
       </div>
 
-      {/* Your existing form container */}
       <div className="w-full min-h-screen py-4 sm:py-6 md:py-8 lg:py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#eef4ff] via-[#f8faff] to-[#fef6fb] relative overflow-hidden">
-        {/* Background blobs */}
         <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-200/20 rounded-full blur-3xl animate-float-delayed"></div>
         <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-200/20 rounded-full blur-2xl animate-pulse"></div>
@@ -564,7 +569,6 @@ export default function AccountSettings() {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
           }`}
         >
-          {/* Message, Loading, Form Sections — keep exactly as in your original code */}
           {message && (
             <div
               className={`p-4 rounded-xl text-center font-medium transition-all duration-500 transform animate-slide-down text-sm sm:text-base shadow-lg border-2 ${
@@ -595,7 +599,6 @@ export default function AccountSettings() {
             </div>
           )}
 
-          {/* Profile Details */}
           <div className="w-full transform transition-all duration-500 hover:scale-[1.01]">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -609,7 +612,7 @@ export default function AccountSettings() {
                 ["username", "User Name"],
                 ["email", "Email Address"],
                 ["password", "Password", "password"],
-              ].map(([name, label, type = "text"], index) => {
+              ].map(([name, label, type = "text"]) => {
                 const isEmailField = name === "email";
                 return (
                   <div key={name} className="transform transition-all duration-300">
@@ -632,7 +635,6 @@ export default function AccountSettings() {
             </div>
           </div>
 
-          {/* Address Information */}
           <div className="w-full transform transition-all duration-500 hover:scale-[1.01]">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -646,7 +648,7 @@ export default function AccountSettings() {
                 ["city", "City"],
                 ["postal_code", "Postal Code"],
                 ["address", "Address"],
-              ].map(([name, label], index) => (
+              ].map(([name, label]) => (
                 <div
                   key={name}
                   className={`${name === "address" ? "sm:col-span-2" : ""} transform transition-all duration-300`}
@@ -714,7 +716,6 @@ export default function AccountSettings() {
             </div>
           </div>
 
-          {/* Account Type */}
           <div className="w-full">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -736,7 +737,7 @@ export default function AccountSettings() {
                   description: "I publish books for business or resale.",
                   icon: BusinessIcon,
                 },
-              ].map(({ value, label, description, icon }, index) => (
+              ].map(({ value, label, description, icon }) => (
                 <label
                   key={value}
                   className={`w-full border-2 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shadow-lg bg-white/80 backdrop-blur-sm cursor-pointer transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl group ${
@@ -782,7 +783,6 @@ export default function AccountSettings() {
             </div>
           </div>
 
-          {/* Account Management */}
           <div className="w-full">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
@@ -828,15 +828,56 @@ export default function AccountSettings() {
       </div>
 
       <style jsx>{`
-        /* Keep your existing keyframes */
-        @keyframes fade-in { /* ... */ }
-        @keyframes slide-down { /* ... */ }
-        @keyframes float { /* ... */ }
-        @keyframes float-delayed { /* ... */ }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-        .animate-slide-down { animation: slide-down 0.5s ease-out; }
-        .animate-float { animation: float 6s ease-in-out infinite; animation-delay: 0s; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; animation-delay: 2s; }
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+        @keyframes float-delayed {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-30px);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
+        }
+        .animate-slide-down {
+          animation: slide-down 0.5s ease-out;
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+          animation-delay: 0s;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+          animation-delay: 2s;
+        }
       `}</style>
     </>
   );

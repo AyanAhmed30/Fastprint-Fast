@@ -33,6 +33,7 @@ import image43 from "@/assets/images/image4332.png";
 import Image from "next/image";
 import Faq from "@/components/Faq";
 
+
 const Home = () => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState({});
@@ -807,42 +808,8 @@ const Home = () => {
               bgGradient: "from-orange-50 to-orange-100",
               icon: "📱",
             },
-            {
-              title: "Business Card",
-              description:
-                "A business card is a professional tool that presents your contact information and brand identity succinctly. It serves as a memorable",
-              img: c5,
-              gradient: "from-red-500 to-red-600",
-              bgGradient: "from-red-50 to-red-100",
-              icon: "💼",
-            },
-            {
-              title: "Flyer",
-              description:
-                "A flyer is a cost-effective marketing tool designed to grab attention and convey essential information quickly. Ideal for promoting events..",
-              img: c6,
-              gradient: "from-teal-500 to-teal-600",
-              bgGradient: "from-teal-50 to-teal-100",
-              icon: "📄",
-            },
-            {
-              title: "Brochures",
-              description:
-                "Brochures are informative printed materials that present detailed information about a company, product, or service in a visually..",
-              img: c7,
-              gradient: "from-pink-500 to-pink-600",
-              bgGradient: "from-pink-50 to-pink-100",
-              icon: "📋",
-            },
-            {
-              title: "EDDM & DDM Marketing",
-              description:
-                "EDDM and DDM marketing are strategies that allow businesses to reach targeted audiences through physical mail.",
-              img: c8,
-              gradient: "from-indigo-500 to-indigo-600",
-              bgGradient: "from-indigo-50 to-indigo-100",
-              icon: "📮",
-            },
+           
+           
           ].map(
             (
               { title, description, img, gradient, bgGradient, icon },
@@ -946,6 +913,42 @@ const Home = () => {
           </div>
         </div>
       </div>
+       <section className="w-full py-32 bg-white">
+        <div
+          className="max-w-[1600px] mx-auto px-12"
+          data-animate
+          id="partners-section"
+        >
+          <h2 className="text-center text-5xl md:text-6xl font-extrabold mb-12 animate-bounceIn">
+            <span className="text-black">Our </span>
+            <span className="text-blue-600">Partner</span>
+          </h2>
+          <div className="overflow-hidden relative">
+            <div className="flex animate-scroll will-change-transform space-x-24 hover:animation-play-state-paused">
+              {[
+                image43,
+                image39,
+                image40,
+                image41,
+                image43,
+                image42,
+                image39,
+                image40,
+                image41,
+                image42,
+                image43,
+              ].map((logo, idx) => (
+                <Image
+                  key={idx}
+                  src={logo}
+                  alt={`Brand ${idx + 1}`}
+                  className="h-32 w-auto object-contain hover:scale-110 transition-transform duration-300 wiggle"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Portfolio Section */}
       <div className="w-full py-16 px-6 relative overflow-hidden">
@@ -1475,43 +1478,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Partners */}
-      <section className="w-full py-32 bg-white">
-        <div
-          className="max-w-[1600px] mx-auto px-12"
-          data-animate
-          id="partners-section"
-        >
-          <h2 className="text-center text-5xl md:text-6xl font-extrabold mb-12 animate-bounceIn">
-            <span className="text-black">Our </span>
-            <span className="text-blue-600">Partner</span>
-          </h2>
-          <div className="overflow-hidden relative">
-            <div className="flex animate-scroll will-change-transform space-x-24 hover:animation-play-state-paused">
-              {[
-                image43,
-                image39,
-                image40,
-                image41,
-                image43,
-                image42,
-                image39,
-                image40,
-                image41,
-                image42,
-                image43,
-              ].map((logo, idx) => (
-                <Image
-                  key={idx}
-                  src={logo}
-                  alt={`Brand ${idx + 1}`}
-                  className="h-32 w-auto object-contain hover:scale-110 transition-transform duration-300 wiggle"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+         
 
       {/* FAQ */}
       <Faq />

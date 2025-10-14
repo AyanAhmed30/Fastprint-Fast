@@ -166,6 +166,38 @@ const getStatesByCountry = (countryCode) => {
   return stateMap[countryCode] || [];
 };
 
+// 🔥 EXTRACT USER EMAIL - Works with ANY structure
+const extractUserEmail = (user) => {
+  if (!user) return null;
+  
+  // Try all possible paths
+  const paths = [
+    user.email,
+    user.user?.email,
+    user.data?.email,
+    user.userEmail,
+    user.Email,
+    user.emailAddress,
+  ];
+  
+  const email = paths.find(e => e && typeof e === 'string' && e.includes('@'));
+  console.log('🔍 EXTRACTED EMAIL:', email, 'from user:', user);
+  return email;
+};
+
+// 🔥 EXTRACT USER DATA - Works with ANY structure
+const extractUserData = (user) => {
+  if (!user) return { first_name: '', last_name: '', username: '' };
+  
+  const userData = user.user || user.data || user;
+  
+  return {
+    first_name: userData.first_name || userData.firstName || userData.name?.split(' ')[0] || '',
+    last_name: userData.last_name || userData.lastName || userData.name?.split(' ')[1] || '',
+    username: userData.username || userData.userName || userData.user_name || '',
+  };
+};
+
 const apiService = {
   getHeaders() {
     if (typeof window === "undefined") return {};
@@ -176,7 +208,7 @@ const apiService = {
   },
 
   async getProfileByEmail(email) {
-    console.log("🔍 Fetching profile for email:", email);
+    console.log("🔍 API: Fetching profile for:", email);
     const response = await fetch(`${API_BASE_URL}/profiles/?search=${encodeURIComponent(email)}`, {
       method: "GET",
       headers: this.getHeaders(),
@@ -190,7 +222,7 @@ const apiService = {
   },
 
   async saveSettings(data) {
-    console.log("💾 Saving settings:", data);
+    console.log("💾 API: Saving settings:", data);
     const response = await fetch(`${API_BASE_URL}/save-settings/`, {
       method: "POST",
       headers: this.getHeaders(),
@@ -333,7 +365,7 @@ export default function AccountSettings() {
     if (typeof window !== "undefined" && data.email) {
       try {
         localStorage.setItem(`user_profile_${data.email}`, JSON.stringify(data));
-        console.log("💾 Saved to localStorage:", data);
+        console.log("💾 Saved to localStorage");
       } catch (e) {
         console.warn("Failed to save to localStorage", e);
       }
@@ -344,25 +376,19 @@ export default function AccountSettings() {
     if (typeof window === "undefined" || !email) return null;
     try {
       const item = localStorage.getItem(`user_profile_${email}`);
-      const parsed = item ? JSON.parse(item) : null;
-      console.log("📂 Loaded from localStorage:", parsed);
-      return parsed;
+      return item ? JSON.parse(item) : null;
     } catch (e) {
       console.warn("Failed to load from localStorage", e);
       return null;
     }
   };
 
-  const loadUserProfile = useCallback(async () => {
-    console.log("🔄 loadUserProfile called with user:", user);
-    
-    // Extract email from various possible user object structures
-    const userEmail = user?.email || user?.user?.email || user?.data?.email;
-    
-    console.log("📧 Extracted email:", userEmail);
+  // 🔥 MAIN LOAD FUNCTION - NO DEPENDENCIES ON user
+  const loadUserProfile = useCallback(async (userEmail, userData) => {
+    console.log("🔄 Loading profile for:", userEmail, userData);
 
     if (!userEmail) {
-      console.warn("⚠️ No email found in user object");
+      console.warn("⚠️ No email provided");
       setInitialLoading(false);
       return;
     }
@@ -377,9 +403,9 @@ export default function AccountSettings() {
         console.log("✅ Profile found:", profile);
         const backendData = {
           id: profile.id,
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          username: profile.username || "",
+          first_name: profile.first_name || userData.first_name || "",
+          last_name: profile.last_name || userData.last_name || "",
+          username: profile.username || userData.username || "",
           email: profile.email || userEmail,
           password: "",
           country: profile.country || "",
@@ -396,9 +422,9 @@ export default function AccountSettings() {
         console.log("ℹ️ No profile found, creating new");
         const newProfile = {
           id: null,
-          first_name: user?.first_name || user?.user?.first_name || user?.data?.first_name || "",
-          last_name: user?.last_name || user?.user?.last_name || user?.data?.last_name || "",
-          username: user?.username || user?.user?.username || user?.data?.username || "",
+          first_name: userData.first_name || "",
+          last_name: userData.last_name || "",
+          username: userData.username || "",
           email: userEmail,
           password: "",
           country: "",
@@ -418,9 +444,9 @@ export default function AccountSettings() {
 
       const fallback = loadFromStorage(userEmail) || {
         id: null,
-        first_name: user?.first_name || user?.user?.first_name || user?.data?.first_name || "",
-        last_name: user?.last_name || user?.user?.last_name || user?.data?.last_name || "",
-        username: user?.username || user?.user?.username || user?.data?.username || "",
+        first_name: userData.first_name || "",
+        last_name: userData.last_name || "",
+        username: userData.username || "",
         email: userEmail,
         password: "",
         country: "",
@@ -430,19 +456,33 @@ export default function AccountSettings() {
         address: "",
         account_type: "personal",
       };
-      setFormData({ ...fallback, email: userEmail });
+      setFormData(fallback);
       setIsSaved(false);
     } finally {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [user]);
+  }, []);
 
+  // 🔥 EFFECT - Triggers when user changes
   useEffect(() => {
-    console.log("👤 User state changed:", user);
-    if (user !== undefined && user !== null) {
-      loadUserProfile();
-    } else if (user === null) {
+    console.log("👤 User changed:", user);
+    
+    if (!user) {
+      setInitialLoading(false);
+      return;
+    }
+
+    const userEmail = extractUserEmail(user);
+    const userData = extractUserData(user);
+
+    console.log("📧 Email extracted:", userEmail);
+    console.log("👨 User data extracted:", userData);
+
+    if (userEmail) {
+      loadUserProfile(userEmail, userData);
+    } else {
+      console.error("❌ Could not extract email from user object");
       setInitialLoading(false);
     }
   }, [user, loadUserProfile]);
@@ -470,15 +510,19 @@ export default function AccountSettings() {
       const payload = { ...data, ...(password.trim() && { password }) };
 
       const res = await apiService.saveSettings(payload);
-      saveToStorage(formData);
-
+      
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
-
       setFormData((prev) => ({ ...prev, password: "" }));
 
+      // Reload profile after save
+      const userEmail = extractUserEmail(user);
+      const userData = extractUserData(user);
+      
       setTimeout(async () => {
-        await loadUserProfile();
+        if (userEmail) {
+          await loadUserProfile(userEmail, userData);
+        }
         setMessage("Profile saved and reloaded successfully!");
         setTimeout(() => router.push("/"), 1000);
       }, 500);
@@ -508,7 +552,7 @@ export default function AccountSettings() {
         localStorage.removeItem(`user_profile_${formData.email}`);
       }
 
-      const userEmail = user?.email || user?.user?.email || user?.data?.email;
+      const userEmail = extractUserEmail(user);
       setFormData({
         id: null,
         first_name: "",

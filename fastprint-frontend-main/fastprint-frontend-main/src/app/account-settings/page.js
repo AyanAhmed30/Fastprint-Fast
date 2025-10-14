@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Replaces useNavigate
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import PersonalIcon from "@/assets/images/newsletter.png";
 import BusinessIcon from "@/assets/images/newsletter.png";
@@ -19,13 +19,21 @@ const apiService = {
   },
 
   async getProfileByEmail(email) {
-    const response = await fetch(`${API_BASE_URL}/profiles/?search=${email}`, {
-      method: "GET",
-      headers: this.getHeaders(),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "Failed to get profile");
-    return data.length > 0 ? data[0] : null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/profiles/?search=${email}`, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        console.error("Profile fetch failed:", data);
+        throw new Error(data.message || "Failed to get profile");
+      }
+      return data.length > 0 ? data[0] : null;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      throw error;
+    }
   },
 
   async saveSettings(data) {
@@ -128,6 +136,7 @@ export default function AccountSettings() {
   const { user } = useAuth();
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -139,13 +148,14 @@ export default function AccountSettings() {
     country: "",
     city: "",
     postal_code: "",
+    state: "",
     address: "",
     account_type: "personal",
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
 
   // Animate on mount
@@ -153,12 +163,39 @@ export default function AccountSettings() {
     setIsVisible(true);
   }, []);
 
-  const loadUserProfile = async () => {
-    if (!user?.email) return;
+  // Load state from localStorage
+  const loadStateFromLocalStorage = (email) => {
+    if (email) {
+      const saved = localStorage.getItem(`user_state_${email}`);
+      return saved || "";
+    }
+    return "";
+  };
 
+  // Save state to localStorage
+  const saveStateToLocalStorage = (email, state) => {
+    if (email) {
+      localStorage.setItem(`user_state_${email}`, state);
+    }
+  };
+
+  // Load user profile - wrapped in useCallback to prevent unnecessary recreations
+  const loadUserProfile = useCallback(async () => {
+    if (!user?.email) {
+      console.log("No user email available yet");
+      setInitialLoading(false);
+      return;
+    }
+
+    console.log("Loading profile for:", user.email);
     setLoading(true);
+    
     try {
       const profile = await apiService.getProfileByEmail(user.email);
+      const savedState = loadStateFromLocalStorage(user.email);
+      
+      console.log("Profile loaded:", profile);
+      
       if (profile) {
         setFormData({
           id: profile.id,
@@ -170,28 +207,50 @@ export default function AccountSettings() {
           country: profile.country || "",
           city: profile.city || "",
           postal_code: profile.postal_code || "",
+          state: savedState,
           address: profile.address || "",
           account_type: profile.account_type || "personal",
         });
         setIsSaved(true);
+        setProfileLoaded(true);
+        console.log("Profile data set successfully");
       } else {
+        console.log("No existing profile found, creating new form");
         setFormData((prev) => ({
           ...prev,
           email: user.email,
+          username: user.username || "",
+          first_name: user.first_name || "",
+          last_name: user.last_name || "",
+          state: savedState,
         }));
         setIsSaved(false);
+        setProfileLoaded(true);
       }
     } catch (err) {
-      setMessage(`Failed to load profile: ${err.message}`);
       console.error("Load profile error:", err);
+      setMessage(`Failed to load profile: ${err.message}`);
+      const savedState = loadStateFromLocalStorage(user.email);
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email,
+        state: savedState,
+      }));
       setIsSaved(false);
+      setProfileLoaded(true);
+    } finally {
+      setLoading(false);
+      setInitialLoading(false);
     }
-    setLoading(false);
-  };
+  }, [user?.email, user?.username, user?.first_name, user?.last_name]);
 
+  // Load profile when user is available
   useEffect(() => {
-    loadUserProfile();
-  }, [user, refreshTrigger]);
+    if (user?.email && !profileLoaded) {
+      console.log("Triggering profile load");
+      loadUserProfile();
+    }
+  }, [user?.email, profileLoaded, loadUserProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -199,6 +258,12 @@ export default function AccountSettings() {
       ...prev,
       [name]: value,
     }));
+    
+    // Save state to localStorage when state field changes
+    if (name === "state") {
+      saveStateToLocalStorage(formData.email, value);
+    }
+    
     setIsSaved(false);
   };
 
@@ -214,25 +279,39 @@ export default function AccountSettings() {
     setLoading(true);
     setMessage("");
     try {
-      const { id, password, ...profileData } = formData;
+      const { id, password, state, ...profileData } = formData;
       const dataToSend = {
         ...profileData,
         ...(password && password.trim() && { password }),
       };
+      
+      console.log("Saving profile data:", dataToSend);
       const res = await apiService.saveSettings(dataToSend);
+      console.log("Save response:", res);
+      
+      // Save state to localStorage
+      saveStateToLocalStorage(formData.email, state);
+      
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
+      
+      // Clear password field
       setFormData((prev) => ({
         ...prev,
         password: "",
       }));
-      setTimeout(() => {
-        setRefreshTrigger((prev) => prev + 1);
-        router.push("/");
-      }, 1000);
+      
+      // Reload profile to get the updated ID and data
+      setTimeout(async () => {
+        await loadUserProfile();
+        setMessage("Profile saved and reloaded successfully!");
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      }, 500);
     } catch (err) {
-      setMessage(`Error: ${err.message}`);
       console.error("Save error:", err);
+      setMessage(`Error: ${err.message}`);
     }
     setLoading(false);
   };
@@ -258,6 +337,9 @@ export default function AccountSettings() {
       await apiService.deleteAccount(formData.id);
       setMessage("Account deleted successfully");
 
+      // Clear state from localStorage
+      localStorage.removeItem(`user_state_${formData.email}`);
+
       setFormData({
         id: null,
         first_name: "",
@@ -268,9 +350,12 @@ export default function AccountSettings() {
         country: "",
         city: "",
         postal_code: "",
+        state: "",
         address: "",
         account_type: "personal",
       });
+      setProfileLoaded(false);
+      setIsSaved(false);
     } catch (err) {
       setMessage(`Error: ${err.message}`);
       console.error("Delete error:", err);
@@ -278,6 +363,25 @@ export default function AccountSettings() {
 
     setLoading(false);
   };
+
+  // Show loading state while initial profile is being fetched
+  if (initialLoading) {
+    return (
+      <>
+        <div className="w-full h-12 sm:h-14 md:h-16 flex items-center px-4 sm:px-6 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC]">
+          <h1 className="text-white text-base sm:text-lg md:text-xl font-semibold">
+            Account Settings
+          </h1>
+        </div>
+        <div className="w-full min-h-screen py-12 px-4 flex items-center justify-center bg-gradient-to-br from-[#eef4ff] via-[#f8faff] to-[#fef6fb]">
+          <div className="text-center">
+            <LoadingSpinner />
+            <p className="mt-4 text-blue-600 font-medium">Loading your profile...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -408,7 +512,8 @@ export default function AccountSettings() {
                 ["country", "Country"],
                 ["city", "City"],
                 ["postal_code", "Postal Code"],
-                ["address", "Residential Address"],
+                ["state", "State"],
+                ["address", "Address"],
               ].map(([name, label], index) => (
                 <div
                   key={name}
@@ -503,13 +608,7 @@ export default function AccountSettings() {
 
           {/* Account Management Section */}
           <div className="w-full">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
-              <h2 className="text-[#2A428C] font-bold text-xl sm:text-2xl lg:text-3xl">
-                Account Management
-              </h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-[#2A428C]/30 to-transparent"></div>
-            </div>
+           
             <hr className="border-black/20 mb-4 sm:mb-6" />
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
               {!isSaved && (

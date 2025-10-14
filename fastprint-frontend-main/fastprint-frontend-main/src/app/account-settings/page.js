@@ -165,17 +165,23 @@ export default function AccountSettings() {
 
   // Load state from localStorage
   const loadStateFromLocalStorage = (email) => {
-    if (email) {
+    if (typeof window === "undefined" || !email) return "";
+    try {
       const saved = localStorage.getItem(`user_state_${email}`);
       return saved || "";
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+      return "";
     }
-    return "";
   };
 
   // Save state to localStorage
   const saveStateToLocalStorage = (email, state) => {
-    if (email) {
+    if (typeof window === "undefined" || !email) return;
+    try {
       localStorage.setItem(`user_state_${email}`, state);
+    } catch (error) {
+      console.error("Error writing to localStorage:", error);
     }
   };
 
@@ -338,7 +344,13 @@ export default function AccountSettings() {
       setMessage("Account deleted successfully");
 
       // Clear state from localStorage
-      localStorage.removeItem(`user_state_${formData.email}`);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem(`user_state_${formData.email}`);
+        } catch (error) {
+          console.error("Error clearing localStorage:", error);
+        }
+      }
 
       setFormData({
         id: null,
@@ -472,7 +484,9 @@ export default function AccountSettings() {
                 ["username", "User Name"],
                 ["email", "Email Address"],
                 ["password", "Password", "password"],
-              ].map(([name, label, type = "text"], index) => (
+              ].map(([name, label, type = "text"], index) => {
+                const isEmailField = name === "email";
+                return (
                 <div
                   key={name}
                   className={`${
@@ -486,7 +500,7 @@ export default function AccountSettings() {
                     type={type}
                     value={formData[name]}
                     onChange={handleInputChange}
-                    disabled={loading}
+                    disabled={loading || isEmailField}
                     placeholder={
                       name === "password"
                         ? "Enter new password"
@@ -494,7 +508,8 @@ export default function AccountSettings() {
                     }
                   />
                 </div>
-              ))}
+              );
+              })}
             </div>
           </div>
 
@@ -608,7 +623,13 @@ export default function AccountSettings() {
 
           {/* Account Management Section */}
           <div className="w-full">
-           
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
+              <h2 className="text-[#2A428C] font-bold text-xl sm:text-2xl lg:text-3xl">
+                Account Management
+              </h2>
+              <div className="flex-1 h-px bg-gradient-to-r from-[#2A428C]/30 to-transparent"></div>
+            </div>
             <hr className="border-black/20 mb-4 sm:mb-6" />
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
               {!isSaved && (

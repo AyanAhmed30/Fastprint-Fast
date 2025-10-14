@@ -11,6 +11,7 @@ import image38 from "@/assets/images/image38.png";
 import bg1 from "@/assets/images/bg1.png";
 import bg2 from "@/assets/images/bg2.png";
 import bg3 from "@/assets/images/bg3.png";
+import Testimonials from "@/components/Testimonials";
 
 const About = () => {
   const router = useRouter();
@@ -658,80 +659,7 @@ const About = () => {
       </div>
 
       {/* Enhanced Testimonials Section */}
-      <div className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-[1200px] mx-auto">
-          {/* Heading */}
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-6 leading-tight animate-bounceIn">
-            <span className="text-gray-900">What Our </span>
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
-              Client Says
-            </span>
-          </h2>
-
-          {/* Subtext */}
-          <p className="text-center text-gray-700 max-w-2xl mx-auto mb-12 px-2 sm:px-0 animate-fadeInUp stagger-2">
-            Not only should you rely on our word-of-mouth recommendations; here
-            are comments from customers on our printing capabilities:
-          </p>
-
-          {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
-            {/* Card 1 */}
-            <div className="flex flex-col sm:flex-row bg-gray-50 rounded-xl shadow-md overflow-hidden transform transition-all duration-500 hover:shadow-xl hover:-translate-y-2 animate-slideUp card-hover">
-              {/* Image */}
-              <div className="relative w-full sm:w-48 h-56 sm:h-auto group overflow-hidden flex-shrink-0">
-                <Image
-                  src={image37}
-                  alt="Client 1"
-                  className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-500 ease-in-out transform translate-y-full group-hover:translate-Y-0"></div>
-              </div>
-              {/* Text */}
-              <div className="flex flex-col justify-center p-6 flex-grow">
-                <p className="text-gray-700 mb-4 animate-fadeInLeft stagger-2">
-                  Having self-published, I have used several printers. The best
-                  mix of speed, cost, and quality among Fast Print Guys is found
-                  here. My books look great!
-                </p>
-                <p className="font-semibold animate-zoomIn stagger-3">
-                  Michael T.
-                </p>
-                <p className="text-sm text-gray-500 animate-fadeInUp stagger-4">
-                  Author
-                </p>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="flex flex-col sm:flex-row bg-gray-50 rounded-xl shadow-md overflow-hidden transform transition-all duration-500 hover:shadow-xl hover:-translate-y-2 animate-slideUp stagger-2 card-hover">
-              {/* Image */}
-              <div className="relative w-full sm:w-48 h-56 sm:h-auto group overflow-hidden flex-shrink-0">
-                <Image
-                  src={image38}
-                  alt="Client 2"
-                  className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-500 ease-in-out transform translate-y-full group-hover:translate-Y-0"></div>
-              </div>
-              {/* Text */}
-              <div className="flex flex-col justify-center p-6 flex-grow">
-                <p className="text-gray-700 mb-4 animate-fadeInLeft stagger-2">
-                  Fast Print Guys rescued my event! In six hours, I needed 500
-                  flyers, and they produced PERFECT printing on schedule.
-                  Unbelievably excellent service!
-                </p>
-                <p className="font-semibold animate-zoomIn stagger-3">Sarah</p>
-                <p className="text-sm text-gray-500 animate-fadeInUp stagger-4">
-                  Director of Marketing
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+     <Testimonials/>
 
       {/* Call to Action - Enhanced */}
       <section className="scroll-animate py-20 bg-gradient-to-r from-pink-200 via-blue-200 to-blue-400">

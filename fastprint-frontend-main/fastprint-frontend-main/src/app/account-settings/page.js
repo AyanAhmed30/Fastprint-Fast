@@ -355,84 +355,95 @@ export default function AccountSettings() {
   };
 
   // Load user profile
-  const loadUserProfile = useCallback(async () => {
-    if (!user?.email) {
-      console.log("No user email available yet");
-      setInitialLoading(false);
-      return;
-    }
+const loadUserProfile = useCallback(async () => {
+  if (!user?.email) {
+    console.log("No user email available yet");
+    setInitialLoading(false);
+    return;
+  }
 
-    console.log("Loading profile for:", user.email);
-    setLoading(true);
+  console.log("Loading profile for:", user.email);
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const profile = await apiService.getProfileByEmail(user.email);
-      const savedFormData = loadFormDataFromLocalStorage(user.email);
+  try {
+    // Always fetch from backend first — this is the source of truth
+    const profile = await apiService.getProfileByEmail(user.email);
 
-      console.log("Profile loaded:", profile);
-      console.log("Saved form data:", savedFormData);
-
-      if (profile) {
-        const mergedData = {
-          id: profile.id,
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          username: profile.username || "",
-          email: profile.email || "",
-          password: "",
-          country: profile.country || "",
-          city: profile.city || "",
-          postal_code: profile.postal_code || "",
-          state: (savedFormData?.state) || "",
-          address: profile.address || "",
-          account_type: profile.account_type || "personal",
-        };
-        
-        setFormData(mergedData);
-        setIsSaved(true);
-        setProfileLoaded(true);
-        saveFormDataToLocalStorage(mergedData);
-        console.log("Profile data set successfully");
-      } else {
-        console.log("No existing profile found, creating new form");
-        const newFormData = {
-          ...formData,
-          email: user.email,
-          username: user.username || "",
-          first_name: user.first_name || "",
-          last_name: user.last_name || "",
-          state: (savedFormData?.state) || "",
-          country: (savedFormData?.country) || "",
-          city: (savedFormData?.city) || "",
-          postal_code: (savedFormData?.postal_code) || "",
-          address: (savedFormData?.address) || "",
-        };
-        
-        setFormData(newFormData);
-        setIsSaved(false);
-        setProfileLoaded(true);
-        saveFormDataToLocalStorage(newFormData);
-      }
-    } catch (err) {
-      console.error("Load profile error:", err);
-      setMessage(`Failed to load profile: ${err.message}`);
-      const savedFormData = loadFormDataFromLocalStorage(user.email);
-      
-      const fallbackData = {
-        ...formData,
-        email: user.email,
-        ...(savedFormData || {}),
+    if (profile) {
+      // Use backend data as primary
+      const backendData = {
+        id: profile.id,
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        username: profile.username || "",
+        email: profile.email || "",
+        password: "", // never pre-fill password
+        country: profile.country || "",
+        city: profile.city || "",
+        postal_code: profile.postal_code || "",
+        state: profile.state || "", // ← use backend state, not localStorage
+        address: profile.address || "",
+        account_type: profile.account_type || "personal",
       };
-      
-      setFormData(fallbackData);
+      setFormData(backendData);
+      setIsSaved(true);
+      setProfileLoaded(true);
+      // Optional: sync localStorage with backend (for offline fallback)
+      saveFormDataToLocalStorage(backendData);
+      console.log("Profile loaded from backend:", backendData);
+    } else {
+      // No profile exists → initialize blank form with user email
+      const newFormData = {
+        id: null,
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        username: user.username || "",
+        email: user.email,
+        password: "",
+        country: "",
+        city: "",
+        postal_code: "",
+        state: "",
+        address: "",
+        account_type: "personal",
+      };
+      setFormData(newFormData);
       setIsSaved(false);
       setProfileLoaded(true);
-      saveFormDataToLocalStorage(fallbackData);
-    } finally {
-      setLoading(false);
-      setInitialLoading(false);
+      saveFormDataToLocalStorage(newFormData); // save initial blank state
     }
-  }, [user?.email, user?.username, user?.first_name, user?.last_name, formData]);
+  } catch (err) {
+    console.error("Failed to load profile from backend:", err);
+    setMessage(`Failed to load profile: ${err.message}`);
+
+    // Fallback to localStorage ONLY if API fails
+    const savedFromStorage = loadFormDataFromLocalStorage(user.email);
+    const fallbackData = savedFromStorage
+      ? { ...savedFromStorage, email: user.email }
+      : {
+          id: null,
+          first_name: user.first_name || "",
+          last_name: user.last_name || "",
+          username: user.username || "",
+          email: user.email,
+          password: "",
+          country: "",
+          city: "",
+          postal_code: "",
+          state: "",
+          address: "",
+          account_type: "personal",
+        };
+
+    setFormData(fallbackData);
+    setIsSaved(false);
+    setProfileLoaded(true);
+  } finally {
+    setLoading(false);
+    setInitialLoading(false);
+  }
+}, [user?.email, user?.username, user?.first_name, user?.last_name]);
 
   // Load profile when user is available
   useEffect(() => {

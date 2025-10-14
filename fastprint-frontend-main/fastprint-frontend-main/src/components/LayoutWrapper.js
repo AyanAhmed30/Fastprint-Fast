@@ -11,10 +11,16 @@ const LayoutWrapper = ({ children }) => {
   const context = useContext(AuthContext);
   const pathname = usePathname();
 
-  const authRoutes = ["/login", "/signup"];
+  const authRoutes = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+  ];
+
+  const isResetPasswordRoute = pathname?.startsWith("/reset-password/");
 
   // Skip layout for login/signup
-  if (authRoutes.includes(pathname)) {
+  if (authRoutes.includes(pathname) || isResetPasswordRoute) {
     return <>{children}</>;
   }
 

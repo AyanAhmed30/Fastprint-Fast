@@ -105,8 +105,10 @@ class PasswordResetRequestView(APIView):
                 token = PasswordResetTokenGenerator().make_token(user)
                 send_password_reset_email(user, uidb64, token)
             except User.DoesNotExist:
-                # Avoid user enumeration
-                pass
+                return Response(
+                    {"email": ["This email is not registered."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             return Response(
                 {"message": "If that email exists, a reset link has been sent."}, status=status.HTTP_200_OK
             )

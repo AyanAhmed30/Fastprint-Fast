@@ -5,7 +5,8 @@ import { register } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/assets/images/fastlogo.svg";
-import singup from "@/assets/images/signup.png";
+// import signup from "@/assets/images/signup.png";
+import signup from "@/assets/images/loginUI.jpg";
 import Image from "next/image";
 
 const Signup = () => {
@@ -16,6 +17,8 @@ const Signup = () => {
   const [mounted, setMounted] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const [errors, setErrors] = useState({
     email: "",
@@ -160,7 +163,9 @@ const Signup = () => {
       : validatePassword(form.password)
       ? ""
       : passwordErrorList.join("\n");
-    const termsError = !agreedToTerms ? "You must agree to the Terms & Conditions and Privacy Policy." : ""; // ✅ VALIDATE TERMS
+    const termsError = !agreedToTerms
+      ? "You must agree to the Terms & Conditions and Privacy Policy."
+      : ""; // ✅ VALIDATE TERMS
 
     setErrors({
       name: nameError,
@@ -192,44 +197,46 @@ const Signup = () => {
     }
   };
 
-  const renderPasswordErrors = (error) => {
-    if (!error) return null;
-    if (error === "Password is required.") {
-      return <p className="mt-1 text-xs text-black">{error}</p>;
-    } else {
-      const lines = error.split("\n").filter((l) => l.trim() !== "");
-      return (
-        <ul
-          id="password-error"
-          className="mt-1 text-xs text-black list-disc list-inside space-y-0.5"
-        >
-          {lines.map((line, i) => (
-            <li key={i}>{line}</li>
-          ))}
-        </ul>
-      );
-    }
-  };
+  // ✅ Small reusable component for requirement line
+  const PasswordRequirement = ({ label, valid }) => (
+    <li className="flex items-center space-x-2">
+      <span
+        className={`flex items-center justify-center w-4 h-4 rounded-full border text-xs font-bold transition-all duration-300 ${
+          valid
+            ? "bg-green-500 border-green-500 text-white"
+            : "border-gray-400 text-gray-400"
+        }`}
+      >
+        {valid ? "✓" : "•"}
+      </span>
+      <span
+        className={`transition-colors duration-300 ${
+          valid ? "text-green-600" : "text-gray-600"
+        }`}
+      >
+        {label}
+      </span>
+    </li>
+  );
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-white">
       {/* Left Side */}
       <div
-        className={`w-full lg:w-1/2 relative flex items-center justify-center h-56 sm:h-72 md:h-96 lg:h-auto transition-all duration-1000 ease-out ${
+        className={`fixed top-0 left-0 w-full lg:w-1/2 h-full flex items-center justify-center transition-all duration-1000 ease-out z-20 ${
           mounted ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
         }`}
         style={{ backgroundColor: "rgba(4, 22, 67, 1)" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-cyan-900/20 animate-pulse"></div>
         <div className="relative z-20 flex items-center justify-center w-full h-full">
           <Image
-            src={singup}
+            src={signup}
             alt="Studying People Illustration"
-            className="max-w-[180px] sm:max-w-[260px] md:max-w-[320px] lg:max-w-md object-contain animate-pulse-slow"
+            className="max-w-full sm:max-w-full md:max-w-full lg:max-w-full object-cover animate-pulse-slow"
             style={{ animationTimingFunction: "ease-in-out" }}
           />
         </div>
-        <div
+        {/* <div
           className={`absolute top-4 left-4 sm:left-6 z-30 transition-all duration-700 delay-300 ${
             mounted ? "scale-100 opacity-100" : "scale-75 opacity-0"
           }`}
@@ -239,12 +246,12 @@ const Signup = () => {
             alt="Logo"
             className="w-14 sm:w-16 md:w-20 h-auto object-contain hover:scale-110 transition-transform duration-300"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right Side */}
       <div
-        className={`w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 md:px-12 py-8 transition-all duration-1000 ease-out relative ${
+        className={`w-full lg:w-1/2 lg:ml-[50%] flex flex-col justify-center px-4 sm:px-8 md:px-12 pt-20 py-8 transition-all duration-1000 ease-out relative overflow-x-auto overflow-y-auto h-screen ${
           mounted ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
         }`}
         style={{ backgroundColor: "rgba(229, 251, 255, 1)" }}
@@ -375,41 +382,96 @@ const Signup = () => {
               </div>
 
               {/* Password Input */}
-              <div className="relative group">
-                <h2>Password</h2>
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField("password")}
-                  onBlur={handleBlur}
-                  placeholder="Password"
-                  required
-                  disabled={formDisabled}
-                  className={`w-full h-12 rounded-xl border-2 px-4 text-base transition-all duration-300 bg-white/70 backdrop-blur-sm
-                    ${
-                      focusedField === "password" || form.password
-                        ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
-                        : "border-gray-200 hover:border-gray-300"
-                    } 
-                    ${
-                      formDisabled
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:shadow-md"
-                    }
-                    focus:outline-none focus:ring-0`}
-                  aria-invalid={!!errors.password}
-                  aria-describedby="password-error"
-                />
-                <div
-                  className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none
-                    ${
-                      focusedField === "password" ? "opacity-100" : "opacity-0"
-                    }`}
-                ></div>
-                {renderPasswordErrors(errors.password)}
-              </div>
+{/* Password Input with Eye Toggle */}
+<div className="relative group">
+  <h2>Password</h2>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={form.password}
+      onChange={handleChange}
+      onFocus={() => setFocusedField("password")}
+      onBlur={handleBlur}
+      placeholder="Password"
+      required
+      disabled={formDisabled}
+      className={`w-full h-12 rounded-xl border-2 px-4 pr-12 text-base transition-all duration-300 bg-white/70 backdrop-blur-sm
+        ${
+          focusedField === "password" || form.password
+            ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
+            : "border-gray-200 hover:border-gray-300"
+        } 
+        ${formDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"}
+        focus:outline-none focus:ring-0`}
+      aria-invalid={!!errors.password}
+      aria-describedby="password-error"
+    />
+
+    {/* 👁 Eye Icon Button */}
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-800 focus:outline-none"
+      tabIndex={-1}
+    >
+      {showPassword ? (
+        // 👁 Eye Open Icon
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ) : (
+        // 🙈 Eye Slash Icon
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M3 3l18 18M9.88 9.88a3 3 0 104.24 4.24M10.73 5.08A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.58 5.818M6.42 6.42A9.96 9.96 0 002.458 12c1.274 4.057 5.065 7 9.542 7 .845 0 1.668-.104 2.458-.3" />
+        </svg>
+      )}
+    </button>
+  </div>
+
+  {/* Password glow effect */}
+  <div
+    className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none
+      ${focusedField === "password" ? "opacity-100" : "opacity-0"}`}
+  ></div>
+
+  {/* ✅ Real-time password validation box */}
+  {focusedField === "password" && (
+    <div className="mt-3 p-3 rounded-lg bg-white shadow-md border border-gray-200 animate-fadeIn">
+      <p className="text-sm font-medium text-gray-700 mb-2">
+        Password must contain:
+      </p>
+      <ul className="text-sm text-gray-700 space-y-1">
+        <PasswordRequirement
+          label="At least 8 characters"
+          valid={form.password.length >= 8}
+        />
+        <PasswordRequirement
+          label="Lowercase letter (a-z)"
+          valid={/[a-z]/.test(form.password)}
+        />
+        <PasswordRequirement
+          label="Uppercase letter (A-Z)"
+          valid={/[A-Z]/.test(form.password)}
+        />
+        <PasswordRequirement
+          label="Number (0-9)"
+          valid={/\d/.test(form.password)}
+        />
+        <PasswordRequirement
+          label="Special character (!@#$%^&*)"
+          valid={/[^A-Za-z0-9]/.test(form.password)}
+        />
+      </ul>
+    </div>
+  )}
+</div>
 
               {/* ✅ Terms & Conditions Checkbox */}
               <div className="relative group">

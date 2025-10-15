@@ -252,18 +252,47 @@ const Header = () => {
               )}
             </div>
 
-            <FiUser
-              size={18}
-              className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
-              onClick={() => {
-                if (user) {
-                  setProfileOpen(!profileOpen);
-                } else {
-                  router.push("/login");
-                }
-              }}
-              title="Profile"
-            />
+            {user ? (
+              <div className="relative" ref={profileRef}>
+                <FiUser
+                  size={18}
+                  className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  title="Profile"
+                />
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
+                    <div className="py-2">
+                      <button
+                        onClick={() => handleProfileNavigation("/userdashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <MdDashboard size={18} className="text-gray-600" />
+                        <span>User Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => handleProfileNavigation("/account-settings")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <FiSettings size={18} className="text-gray-600" />
+                        <span>Profile Settings</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                className="cursor-pointer"
+                onClick={() => router.push("/login")}
+              >
+                <FiUser
+                  size={18}
+                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                  title="Login"
+                />
+              </div>
+            )}
 
             <button
               onClick={toggleMenu}

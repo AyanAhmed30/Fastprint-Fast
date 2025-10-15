@@ -5,18 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiSettings } from "react-icons/fi";
+import { MdDashboard } from "react-icons/md";
 import { HiOutlineShoppingBag } from "react-icons/hi";
-import useAuth from "../hooks/useAuth"; // ensure this works with Next.js
+import useAuth from "../hooks/useAuth";
 import Image from "next/image";
-import FastPrintLogo from "@/assets/images/fastlogo.svg"; // Or place in /public
+import FastPrintLogo from "@/assets/images/fastlogo.svg";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourceOpen, setResourceOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
   const resourceRef = useRef();
+  const profileRef = useRef();
 
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -39,6 +42,9 @@ const Header = () => {
       if (resourceRef.current && !resourceRef.current.contains(event.target)) {
         setResourceOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -48,6 +54,7 @@ const Header = () => {
   const handleMobileLinkClick = () => {
     setMenuOpen(false);
     setResourceOpen(false);
+    setProfileOpen(false);
   };
 
   const handleLogout = () => {
@@ -56,13 +63,14 @@ const Header = () => {
     setMenuOpen(false);
   };
 
-  const handleProfileClick = () => {
-    router.push(user ? "/userdashboard" : "/login");
+  const handleCartClick = () => {
+    router.push(user ? "/orders" : "/login");
     setMenuOpen(false);
   };
 
-  const handleCartClick = () => {
-    router.push(user ? "/orders" : "/login");
+  const handleProfileNavigation = (path) => {
+    router.push(path);
+    setProfileOpen(false);
     setMenuOpen(false);
   };
 
@@ -176,13 +184,54 @@ const Header = () => {
               )}
             </div>
 
-            {/* Profile */}
-            <FiUser
-              size={20}
-              className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
-              onClick={handleProfileClick}
-              title="Profile"
-            />
+            {/* Profile Dropdown */}
+            {user && (
+              <div
+                className="relative"
+                ref={profileRef}
+              >
+                <FiUser
+                  size={20}
+                  className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
+                  title="Profile"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                />
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
+                    <div className="py-2">
+                      <button
+                        onClick={() => handleProfileNavigation("/userdashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <MdDashboard size={18} className="text-gray-600" />
+                        <span>User Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => handleProfileNavigation("/account-settings")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <FiSettings size={18} className="text-gray-600" />
+                        <span>Profile Settings</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Profile icon when not logged in */}
+            {!user && (
+              <div
+                className="cursor-pointer"
+                onClick={() => router.push("/login")}
+              >
+                <FiUser
+                  size={20}
+                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                  title="Login"
+                />
+              </div>
+            )}
           </div>
 
           {/* Mobile Actions */}
@@ -206,7 +255,13 @@ const Header = () => {
             <FiUser
               size={18}
               className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
-              onClick={handleProfileClick}
+              onClick={() => {
+                if (user) {
+                  setProfileOpen(!profileOpen);
+                } else {
+                  router.push("/login");
+                }
+              }}
               title="Profile"
             />
 
@@ -292,6 +347,47 @@ const Header = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Profile Dropdown for Mobile */}
+              {user && (
+                <div className="border-t border-gray-100 mt-2 pt-2">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center justify-between w-full px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
+                  >
+                    <span>Profile</span>
+                    <IoIosArrowDown
+                      className={`transition-transform duration-200 ${
+                        profileOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <div
+                    className={`transition-all duration-300 ease-in-out ${
+                      profileOpen
+                        ? "max-h-screen opacity-100"
+                        : "max-h-0 opacity-0 overflow-hidden"
+                    }`}
+                  >
+                    <div className="pl-4 space-y-1">
+                      <button
+                        onClick={() => handleProfileNavigation("/userdashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
+                      >
+                        <MdDashboard size={18} />
+                        <span>User Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => handleProfileNavigation("/account-settings")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
+                      >
+                        <FiSettings size={18} />
+                        <span>Profile Settings</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Auth */}
               <div className="border-t border-gray-100 mt-4 pt-4 px-4">

@@ -16,22 +16,22 @@ from datetime import timedelta
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(_file_).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Frontend and Backend URLs
-FRONTEND_BASE_URL = config('FRONTEND_BASE_URL')
-BACKEND_URL = config('BACKEND_URL')
+FRONTEND_BASE_URL = config('FRONTEND_BASE_URL', default='http://localhost:3000')
+BACKEND_URL = config('BACKEND_URL', default='http://localhost:8000')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(jq1-=30e1883cdc2dsur1sv$l_4+ts8om^#j4*ky18r&5$4qo'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-(jq1-=30e1883cdc2dsur1sv$l_4+ts8om^#j4*ky18r&5$4qo')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='').split(',')
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -120,7 +120,7 @@ MIDDLEWARE = [
 
 # CORS Settings for React Frontend
 CORS_ALLOWED_ORIGINS = [
-    config('FRONTEND_BASE_URL'),
+    FRONTEND_BASE_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:5173",
@@ -154,8 +154,8 @@ CORS_ALLOW_METHODS = [
 
 # CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
-    config('FRONTEND_BASE_URL'),
-    config('BACKEND_URL'),
+    FRONTEND_BASE_URL,
+    BACKEND_URL,
 ]
 
 ROOT_URLCONF = 'fastprint_backend.urls'
@@ -186,11 +186,11 @@ WSGI_APPLICATION = 'fastprint_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+        'NAME': config('DB_NAME', default='fastprint_db'),
+        'USER': config('DB_USER', default='root'),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -259,10 +259,10 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = f'FastPrintGuys <{config("EMAIL_HOST_USER")}>'
-SERVER_EMAIL = config('EMAIL_HOST_USER')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = f'FastPrintGuys <{config("EMAIL_HOST_USER", default="noreply@fastprint.com")}>'
+SERVER_EMAIL = config('EMAIL_HOST_USER', default='noreply@fastprint.com')
 
 # Logging Configuration
 LOGGING = {
@@ -323,13 +323,13 @@ LOGGING = {
 }
 
 # Stripe Configuration
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
 
 # PayPal Configuration
-PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
-PAYPAL_CLIENT_SECRET = config('PAYPAL_CLIENT_SECRET')
-PAYPAL_MODE = "sandbox"  # Change to "live" for production
+PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID', default='')
+PAYPAL_CLIENT_SECRET = config('PAYPAL_CLIENT_SECRET', default='')
+PAYPAL_MODE = config('PAYPAL_MODE', default='sandbox')  # Change to "live" for production
 
 # Security Settings (Enable these in production)
 if not DEBUG:
@@ -350,9 +350,9 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # File Upload Settings
-# File Upload Settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
+
 # Cache Configuration (Optional - for production)
 # CACHES = {
 #     'default': {

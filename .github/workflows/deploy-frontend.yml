@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'fastprint-frontend-main/**'
+      - '.github/workflows/deploy-frontend.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'fastprint-frontend-main/**'
   workflow_dispatch:
 
 jobs:
@@ -17,38 +22,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Navigate to frontend directory
-        run: cd fastprint-frontend-main/fastprint-frontend-main
-
+          cache: 'npm'
+          cache-dependency-path: './fastprint-frontend-main/fastprint-frontend-main/package-lock.json'
+      
       - name: Install dependencies
         working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm ci
-
+      
       - name: Run ESLint
         working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm run lint
         continue-on-error: true
-
+      
       - name: Build application
         working-directory: ./fastprint-frontend-main/fastprint-frontend-main
         run: npm run build
+        env:
+          CI: true
 
   deploy:
     name: Deploy to Server
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -70,14 +73,14 @@ jobs:
             npm run build
             
             # Restart PM2 process
-            pm2 restart fastprint-frontend
+            pm2 restart fastprint-frontend || pm2 start npm --name "fastprint-frontend" -- start
             
             # Save PM2 process list
             pm2 save
             
             # Display PM2 status
             pm2 list
-
+      
       - name: Verify Deployment
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -91,12 +94,13 @@ jobs:
             
             # Check logs for any errors
             pm2 logs fastprint-frontend --lines 50 --nostream
-
+      
       - name: Notify deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful!"
+            echo "✅ Frontend deployment successful!"
           else
-            echo "❌ Deployment failed!"
+            echo "❌ Frontend deployment failed!"
+            exit 1
           fi

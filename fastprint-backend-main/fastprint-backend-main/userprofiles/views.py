@@ -5,6 +5,9 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import UserProfile
 from .serializers import UserProfileSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 
 class UserProfileListCreateView(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
@@ -31,6 +34,33 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserProfileSerializer
     authentication_classes = []  # Remove authentication requirement
     permission_classes = []      # Remove permission requirement
+
+
+class UserProfileMeView(APIView):
+    """Return the profile for the currently authenticated user.
+
+    This is a small, authenticated endpoint the frontend can call to
+    reliably fetch per-user profile data without relying on public list/search
+    endpoints that can be cached by CDNs/proxies.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Try to match profile by the authenticated user's email or username
+        user_email = getattr(request.user, 'email', None)
+        user_username = getattr(request.user, 'username', None)
+
+        profile = None
+        if user_email:
+            profile = UserProfile.objects.filter(email=user_email).first()
+        if not profile and user_username:
+            profile = UserProfile.objects.filter(username=user_username).first()
+
+        if not profile:
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

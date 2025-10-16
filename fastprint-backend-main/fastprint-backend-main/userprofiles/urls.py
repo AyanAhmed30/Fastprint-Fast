@@ -6,6 +6,7 @@ urlpatterns = [
     # Standard CRUD endpoints
     path('profiles/', views.UserProfileListCreateView.as_view(), name='profile-list-create'),
     path('profiles/<int:pk>/', views.UserProfileDetailView.as_view(), name='profile-detail'),
+    path('profiles/me/', views.UserProfileMeView.as_view(), name='profile-me'),
     
     # Custom endpoints for your React app
     path('save-settings/', views.save_account_settings, name='save-account-settings'),

@@ -166,58 +166,26 @@ const getStatesByCountry = (countryCode) => {
   return stateMap[countryCode] || [];
 };
 
-const apiService = {
-  getHeaders() {
-    if (typeof window === "undefined") return {};
-    const token = localStorage.getItem("auth_token");
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Token ${token}`;
-    return headers;
-  },
+// Save entire form data to localStorage
+const saveFormDataToLocalStorage = (data) => {
+  if (typeof window === "undefined" || !data?.email) return;
+  try {
+    localStorage.setItem(`user_profile_${data.email}`, JSON.stringify(data));
+  } catch (error) {
+    console.error("Error saving form data to localStorage:", error);
+  }
+};
 
-  async getProfileByEmail(email) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/profiles/?search=${email}`, {
-        method: "GET",
-        headers: this.getHeaders(),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.error("Profile fetch failed:", data);
-        throw new Error(data.message || "Failed to get profile");
-      }
-      return data.length > 0 ? data[0] : null;
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      throw error;
-    }
-  },
-
-  async saveSettings(data) {
-    const response = await fetch(`${API_BASE_URL}/save-settings/`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify(data),
-    });
-    const resData = await response.json();
-    if (!response.ok)
-      throw new Error(resData.message || "Failed to save profile");
-    return resData;
-  },
-
-  async deleteAccount(profileId) {
-    const response = await fetch(
-      `${API_BASE_URL}/delete-account/${profileId}/`,
-      {
-        method: "DELETE",
-        headers: this.getHeaders(),
-      }
-    );
-    const resData = await response.json();
-    if (!response.ok)
-      throw new Error(resData.message || "Failed to delete account");
-    return resData;
-  },
+// Load entire form data from localStorage
+const loadFormDataFromLocalStorage = (email) => {
+  if (typeof window === "undefined" || !email) return null;
+  try {
+    const saved = localStorage.getItem(`user_profile_${email}`);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.error("Error loading form data from localStorage:", error);
+    return null;
+  }
 };
 
 // Loading Spinner Component
@@ -290,71 +258,126 @@ const FloatingLabelInput = ({
 };
 
 export default function AccountSettings() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const [isVisible, setIsVisible] = useState(false);
-  const [profileLoaded, setProfileLoaded] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isSaved, setIsSaved] = useState(false);
-  const [availableStates, setAvailableStates] = useState([]);
+  const { user, token } = useAuth();
+  const apiService = {
+    getHeaders() {
+      if (typeof window === "undefined") return {};
+      // Support multiple token keys (modern apps store accessToken)
+      const token =
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("auth_token") ||
+        null;
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      return headers;
+    },
 
-  const [formData, setFormData] = useState({
-    id: null,
-    first_name: "",
-    last_name: "",
-    username: "",
-    email: "",
-    password: "",
-    country: "",
-    city: "",
-    postal_code: "",
-    state: "",
-    address: "",
-    account_type: "personal",
-  });
-
-  // Animate on mount
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  // Update available states when country changes
-  useEffect(() => {
-    const states = getStatesByCountry(formData.country);
-    setAvailableStates(states);
-    if (states.length > 0 && formData.state) {
-      const stateExists = states.some(s => s.code === formData.state);
-      if (!stateExists) {
-        setFormData(prev => ({ ...prev, state: "" }));
+    async getProfileMe() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/profiles/me/`, {
+          method: "GET",
+          headers: this.getHeaders(),
+        });
+        if (!response.ok) {
+          // Not authenticated or not found
+          return null;
+        }
+        const data = await response.json();
+        return data || null;
+      } catch (error) {
+        console.error("Error fetching profile (me):", error);
+        return null;
       }
-    }
-  }, [formData.country]);
+    },
 
-  // Save entire form data to localStorage
-  const saveFormDataToLocalStorage = (data) => {
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.setItem(`user_profile_${data.email}`, JSON.stringify(data));
-    } catch (error) {
-      console.error("Error saving form data to localStorage:", error);
-    }
-  };
+    async getProfileByEmail(email) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/profiles/?search=${encodeURIComponent(email)}`, {
+          method: "GET",
+          headers: this.getHeaders(),
+          // Avoid stale caches in some production setups
+          cache: "no-store",
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error("Profile fetch failed:", data);
+          return null;
+        }
+        // Expect either an array (list endpoint) or a single object
+        if (Array.isArray(data)) return data.length > 0 ? data[0] : null;
+        return data;
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+    },
 
-  // Load entire form data from localStorage
-  const loadFormDataFromLocalStorage = (email) => {
-    if (typeof window === "undefined" || !email) return null;
-    try {
-      const saved = localStorage.getItem(`user_profile_${email}`);
-      return saved ? JSON.parse(saved) : null;
-    } catch (error) {
-      console.error("Error loading form data from localStorage:", error);
-      return null;
-    }
+    async saveSettings(data) {
+      const response = await fetch(`${API_BASE_URL}/save-settings/`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const resData = await response.json();
+      if (!response.ok)
+        throw new Error(resData.message || "Failed to save profile");
+      return resData;
+    },
+
+    async deleteAccount(profileId) {
+      const response = await fetch(
+        `${API_BASE_URL}/delete-account/${profileId}/`,
+        {
+          method: "DELETE",
+          headers: this.getHeaders(),
+        }
+      );
+      const resData = await response.json();
+      if (!response.ok)
+        throw new Error(resData.message || "Failed to delete account");
+      return resData;
+    },
   };
+  
 
   // Load user profile
+    const router = useRouter();
+
+    // Component state (was missing and caused ReferenceError)
+    const [formData, setFormData] = useState({
+      id: null,
+      first_name: "",
+      last_name: "",
+      username: "",
+      email: user?.email || "",
+      password: "",
+      country: "",
+      state: "",
+      city: "",
+      postal_code: "",
+      address: "",
+      account_type: "personal",
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [isSaved, setIsSaved] = useState(false);
+    const [profileLoaded, setProfileLoaded] = useState(false);
+    const [message, setMessage] = useState("");
+    const [isVisible, setIsVisible] = useState(false);
+    const [availableStates, setAvailableStates] = useState([]);
+
+    // Show entrance animation
+    useEffect(() => {
+      setIsVisible(true);
+    }, []);
+
+    // Update available states when country changes
+    useEffect(() => {
+      setAvailableStates(getStatesByCountry(formData.country));
+    }, [formData.country]);
+
   const loadUserProfile = useCallback(async () => {
     if (!user?.email) {
       console.log("No user email available yet");
@@ -366,7 +389,15 @@ export default function AccountSettings() {
     setLoading(true);
 
     try {
-      const profile = await apiService.getProfileByEmail(user.email);
+      // Try authenticated endpoint first (when logged in and token present)
+      let profile = null;
+      if (token) {
+        profile = await apiService.getProfileMe();
+      }
+      // Fallback to search-by-email if /me/ didn't return a profile
+      if (!profile) {
+        profile = await apiService.getProfileByEmail(user.email);
+      }
       const savedFormData = loadFormDataFromLocalStorage(user.email);
 
       console.log("Profile loaded:", profile);
@@ -383,7 +414,7 @@ export default function AccountSettings() {
           country: profile.country || "",
           city: profile.city || "",
           postal_code: profile.postal_code || "",
-          state: (savedFormData?.state) || "",
+          state: (savedFormData?.state) || profile.state || "",
           address: profile.address || "",
           account_type: profile.account_type || "personal",
         };
@@ -432,7 +463,7 @@ export default function AccountSettings() {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [user?.email, user?.username, user?.first_name, user?.last_name, formData]);
+  }, [user?.email, token]);
 
   // Load profile when user is available
   useEffect(() => {
@@ -479,24 +510,39 @@ export default function AccountSettings() {
       const res = await apiService.saveSettings(dataToSend);
       console.log("Save response:", res);
 
-      // Save all form data to localStorage after successful save
-      saveFormDataToLocalStorage(formData);
+      // Use backend response as canonical saved data when available
+      // API returns { success, message, data }
+      const canonical = (res && (res.data || res)) || dataToSend;
 
+      const canonicalForm = {
+        id: canonical.id || formData.id || null,
+        first_name: canonical.first_name || profileData.first_name || "",
+        last_name: canonical.last_name || profileData.last_name || "",
+        username: canonical.username || profileData.username || "",
+        email: canonical.email || profileData.email || user.email || "",
+        password: "",
+        country: canonical.country || profileData.country || "",
+        city: canonical.city || profileData.city || "",
+        postal_code: canonical.postal_code || profileData.postal_code || "",
+        state: canonical.state || profileData.state || "",
+        address: canonical.address || profileData.address || "",
+        account_type: canonical.account_type || profileData.account_type || "personal",
+      };
+
+      // Persist canonical to localStorage and to state
+      saveFormDataToLocalStorage(canonicalForm);
+      setFormData(canonicalForm);
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
 
-      setFormData((prev) => ({
-        ...prev,
-        password: "",
-      }));
-
+      // Give UI a moment, then reload profile to ensure fresh data
       setTimeout(async () => {
         await loadUserProfile();
         setMessage("Profile saved and reloaded successfully!");
         setTimeout(() => {
           router.push("/");
-        }, 1000);
-      }, 500);
+        }, 800);
+      }, 300);
     } catch (err) {
       console.error("Save error:", err);
       setMessage(`Error: ${err.message}`);

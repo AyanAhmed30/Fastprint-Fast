@@ -117,9 +117,8 @@ const Header = () => {
               <button className="hover:text-blue-600 flex items-center gap-1 transition-colors duration-200">
                 Resources{" "}
                 <IoIosArrowDown
-                  className={`transition-transform duration-200 ${
-                    resourceOpen ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
               {resourceOpen && (
@@ -199,20 +198,23 @@ const Header = () => {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
                     <div className="py-2">
-                      <button
-                        onClick={() => handleProfileNavigation("/userdashboard")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <MdDashboard size={18} className="text-gray-600" />
-                        <span>User Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => handleProfileNavigation("/account-settings")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <FiSettings size={18} className="text-gray-600" />
-                        <span>Profile Settings</span>
-                      </button>
+                      <Link href={'/userdashboard'}>
+                        <button
+                          // onClick={() => handleProfileNavigation("/userdashboard")}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <MdDashboard size={18} className="text-gray-600" />
+                          <span>User Dashboard</span>
+                        </button>
+                      </Link>
+                      <Link href={'/account-settings'}>
+                        <button
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiSettings size={18} className="text-gray-600" />
+                          <span>Profile Settings</span>
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -263,20 +265,23 @@ const Header = () => {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
                     <div className="py-2">
-                      <button
-                        onClick={() => handleProfileNavigation("/userdashboard")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <MdDashboard size={18} className="text-gray-600" />
-                        <span>User Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => handleProfileNavigation("/account-settings")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <FiSettings size={18} className="text-gray-600" />
-                        <span>Profile Settings</span>
-                      </button>
+                      <Link href={'/userdashboard'}>
+                        <button
+                          // onClick={() => handleProfileNavigation("/userdashboard")}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <MdDashboard size={18} className="text-gray-600" />
+                          <span>User Dashboard</span>
+                        </button>
+                      </Link>
+                      <Link href={'/account-settings'}>
+                        <button
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiSettings size={18} className="text-gray-600" />
+                          <span>Profile Settings</span>
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -306,11 +311,10 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`lg:hidden transition-all duration-300 ease-in-out ${
-            menuOpen
-              ? "max-h-screen opacity-100"
-              : "max-h-0 opacity-0 overflow-hidden"
-          }`}
+          className={`lg:hidden transition-all duration-300 ease-in-out ${menuOpen
+            ? "max-h-screen opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
+            }`}
         >
           <nav className="py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-1">
@@ -341,17 +345,15 @@ const Header = () => {
                 >
                   <span>Resources</span>
                   <IoIosArrowDown
-                    className={`transition-transform duration-200 ${
-                      resourceOpen ? "rotate-180" : ""
-                    }`}
+                    className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${
-                    resourceOpen
-                      ? "max-h-screen opacity-100"
-                      : "max-h-0 opacity-0 overflow-hidden"
-                  }`}
+                  className={`transition-all duration-300 ease-in-out ${resourceOpen
+                    ? "max-h-screen opacity-100"
+                    : "max-h-0 opacity-0 overflow-hidden"
+                    }`}
                 >
                   <div className="pl-4 space-y-1">
                     {[
@@ -386,33 +388,33 @@ const Header = () => {
                   >
                     <span>Profile</span>
                     <IoIosArrowDown
-                      className={`transition-transform duration-200 ${
-                        profileOpen ? "rotate-180" : ""
-                      }`}
+                      className={`transition-transform duration-200 ${profileOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   <div
-                    className={`transition-all duration-300 ease-in-out ${
-                      profileOpen
-                        ? "max-h-screen opacity-100"
-                        : "max-h-0 opacity-0 overflow-hidden"
-                    }`}
+                    className={`transition-all duration-300 ease-in-out ${profileOpen
+                      ? "max-h-screen opacity-100"
+                      : "max-h-0 opacity-0 overflow-hidden"
+                      }`}
                   >
                     <div className="pl-4 space-y-1">
-                      <button
-                        onClick={() => handleProfileNavigation("/userdashboard")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
-                      >
-                        <MdDashboard size={18} />
-                        <span>User Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => handleProfileNavigation("/account-settings")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
-                      >
-                        <FiSettings size={18} />
-                        <span>Profile Settings</span>
-                      </button>
+                      <Link href={'/userdashboard'}>
+                        <button
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
+                        >
+                          <MdDashboard size={18} />
+                          <span>User Dashboard</span>
+                        </button>
+                      </Link>
+                      <Link href={'/account-settings'}>
+                        <button
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
+                        >
+                          <FiSettings size={18} />
+                          <span>Profile Settings</span>
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -1138,9 +1138,8 @@ const Shop = () => {
       } else {
         setShippingError(
           error.response?.data?.error?.includes("No DHL or FedEx")
-            ? `No DHL or FedEx services available for this destination. Available couriers: ${
-                error.response.data.available_couriers?.join(", ") || "None"
-              }`
+            ? `No DHL or FedEx services available for this destination. Available couriers: ${error.response.data.available_couriers?.join(", ") || "None"
+            }`
             : "Failed to fetch shipping rate. Please try again."
         );
       }
@@ -1395,11 +1394,10 @@ const Shop = () => {
 
             {/* Calculate Rate */}
             <button
-              className={`${buttonClass} mb-3 ${
-                isLoading
+              className={`${buttonClass} mb-3 ${isLoading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-gradient-to-r from-[#44c6ff] to-[#1786ff] hover:from-[#3bb5ff] hover:to-[#0f75ff]"
-              }`}
+                }`}
               onClick={fetchShippingRate}
               disabled={isLoading}
             >
@@ -1424,7 +1422,7 @@ const Shop = () => {
                         value={index}
                         checked={
                           selectedService?.courier_name ===
-                            service.courier_name &&
+                          service.courier_name &&
                           selectedService?.service_name === service.service_name
                         }
                         onChange={() => handleServiceSelection(service)}
@@ -1467,17 +1465,7 @@ const Shop = () => {
                   <strong>Estimated Delivery:</strong>{" "}
                   {selectedService.delivery_time}
                 </p>
-                <p>
-                  <strong>Account Type:</strong> {accountType}
-                </p>
-                <p>
-                  <strong>Tax Rate:</strong> {taxRate}
-                </p>
-                {taxReason && (
-                  <p>
-                    <strong>Tax Reason:</strong> {taxReason}
-                  </p>
-                )}
+
               </div>
             )}
 
@@ -1600,4 +1588,3 @@ const Shop = () => {
 };
 
 export default Shop;
-  

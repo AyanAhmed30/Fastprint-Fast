@@ -83,11 +83,11 @@ class BookProject(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[
-            ('in_cart', 'In Cart'),
+            ('in_progress', 'In Progress'),
             ('cancelled', 'Cancelled'),
             ('shipped', 'Shipped'),
         ],
-        default='in_cart'
+        default='in_progress'
     )
 
     def __str__(self):

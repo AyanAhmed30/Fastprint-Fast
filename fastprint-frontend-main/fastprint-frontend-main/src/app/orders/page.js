@@ -134,8 +134,8 @@ const Orders = () => {
   // Helper to render status badge
   const renderStatusBadge = (status) => {
     const statusMap = {
-      in_cart: {
-        label: "In Cart",
+      in_progress: {
+        label: "In Progress",
         bgColor: "from-orange-100 to-orange-200",
         textColor: "text-orange-700",
         dotColor: "bg-orange-500",
@@ -154,7 +154,7 @@ const Orders = () => {
       },
     };
 
-    const config = statusMap[status] || statusMap.in_cart;
+    const config = statusMap[status] || statusMap.in_progress;
 
     return (
       <div
@@ -421,7 +421,7 @@ const Orders = () => {
                           </div>
                         </td>
                         <td className="px-6 md:px-8 py-4 md:py-6 text-center">
-                          {renderStatusBadge(project.status || "in_cart")}
+                          {renderStatusBadge(project.status || "in_progress")}
                         </td>
                       </tr>
                     ))
@@ -487,7 +487,7 @@ const Orders = () => {
                         <div className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-[#F0F7FF] to-[#E3F1FF] text-[#016AB3] border border-blue-200/50 shadow-sm">
                           {project.category || "General"}
                         </div>
-                        {renderStatusBadge(project.status || "in_cart")}
+                        {renderStatusBadge(project.status || "in_progress")}
                       </div>
                     </div>
                   ))}

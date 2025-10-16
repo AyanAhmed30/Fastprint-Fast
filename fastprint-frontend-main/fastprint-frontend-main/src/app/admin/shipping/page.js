@@ -94,7 +94,7 @@ const ShippingPage = () => {
                           order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                           'bg-orange-100 text-orange-800'
                         }`}>
-                          {order.status === 'in_cart' ? 'In Cart' : 
+                          {order.status === 'in_progress' ? 'In Progress' : 
                            order.status === 'cancelled' ? 'Cancelled' : 'Shipped'}
                         </span>
                       </td>

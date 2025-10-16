@@ -428,7 +428,7 @@ def update_order_status(request, pk):
         }, status=status.HTTP_404_NOT_FOUND)
 
     new_status = request.data.get('status')
-    valid_statuses = {'in_cart', 'cancelled', 'shipped'}
+    valid_statuses = {'in_progress', 'cancelled', 'shipped'}
     if new_status not in valid_statuses:
         return Response({
             'status': 'error',

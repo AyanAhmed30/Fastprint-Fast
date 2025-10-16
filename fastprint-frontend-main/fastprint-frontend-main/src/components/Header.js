@@ -16,10 +16,12 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourceOpen, setResourceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
   const resourceRef = useRef();
   const profileRef = useRef();
+  const mobileProfileRef = useRef();
 
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -45,6 +47,9 @@ const Header = () => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
       }
+      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
+        setMobileProfileOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -54,13 +59,15 @@ const Header = () => {
   const handleMobileLinkClick = () => {
     setMenuOpen(false);
     setResourceOpen(false);
-    setProfileOpen(false);
+    setMobileProfileOpen(false);
   };
 
   const handleLogout = () => {
     logout();
     router.push("/login");
     setMenuOpen(false);
+    setProfileOpen(false);
+    setMobileProfileOpen(false);
   };
 
   const handleCartClick = () => {
@@ -71,6 +78,7 @@ const Header = () => {
   const handleProfileNavigation = (path) => {
     router.push(path);
     setProfileOpen(false);
+    setMobileProfileOpen(false);
     setMenuOpen(false);
   };
 
@@ -138,8 +146,9 @@ const Header = () => {
                         className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm"
                       >
                         {slug
-                          .replace(/([a-z])([A-Z])/g, "$1 $2")
-                          .replace(/^\w/, (c) => c.toUpperCase())}
+                          .split("-")
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(" ")}
                       </Link>
                     ))}
                   </div>
@@ -185,10 +194,7 @@ const Header = () => {
 
             {/* Profile Dropdown */}
             {user && (
-              <div
-                className="relative"
-                ref={profileRef}
-              >
+              <div className="relative" ref={profileRef}>
                 <FiUser
                   size={20}
                   className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
@@ -198,23 +204,20 @@ const Header = () => {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
                     <div className="py-2">
-                      <Link href={'/userdashboard'}>
-                        <button
-                          // onClick={() => handleProfileNavigation("/userdashboard")}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                        >
-                          <MdDashboard size={18} className="text-gray-600" />
-                          <span>User Dashboard</span>
-                        </button>
-                      </Link>
-                      <Link href={'/account-settings'}>
-                        <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                        >
-                          <FiSettings size={18} className="text-gray-600" />
-                          <span>Profile Settings</span>
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => handleProfileNavigation("/userdashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <MdDashboard size={18} className="text-gray-600" />
+                        <span>User Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => handleProfileNavigation("/account-settings")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <FiSettings size={18} className="text-gray-600" />
+                        <span>Profile Settings</span>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -254,48 +257,35 @@ const Header = () => {
               )}
             </div>
 
-            {user ? (
-              <div className="relative" ref={profileRef}>
+            {/* Mobile Profile Dropdown */}
+            {user && (
+              <div className="relative" ref={mobileProfileRef}>
                 <FiUser
-                  size={18}
+                  size={20}
                   className="text-gray-700 hover:text-blue-600 cursor-pointer transition-colors duration-200"
-                  onClick={() => setProfileOpen(!profileOpen)}
                   title="Profile"
+                  onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
                 />
-                {profileOpen && (
+                {mobileProfileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
                     <div className="py-2">
-                      <Link href={'/userdashboard'}>
-                        <button
-                          // onClick={() => handleProfileNavigation("/userdashboard")}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                        >
-                          <MdDashboard size={18} className="text-gray-600" />
-                          <span>User Dashboard</span>
-                        </button>
-                      </Link>
-                      <Link href={'/account-settings'}>
-                        <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                        >
-                          <FiSettings size={18} className="text-gray-600" />
-                          <span>Profile Settings</span>
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => handleProfileNavigation("/userdashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <MdDashboard size={18} className="text-gray-600" />
+                        <span>User Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => handleProfileNavigation("/account-settings")}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                      >
+                        <FiSettings size={18} className="text-gray-600" />
+                        <span>Profile Settings</span>
+                      </button>
                     </div>
                   </div>
                 )}
-              </div>
-            ) : (
-              <div
-                className="cursor-pointer"
-                onClick={() => router.push("/login")}
-              >
-                <FiUser
-                  size={18}
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
-                  title="Login"
-                />
               </div>
             )}
 
@@ -312,8 +302,8 @@ const Header = () => {
         {/* Mobile Navigation */}
         <div
           className={`lg:hidden transition-all duration-300 ease-in-out ${menuOpen
-            ? "max-h-screen opacity-100"
-            : "max-h-0 opacity-0 overflow-hidden"
+              ? "max-h-screen opacity-100"
+              : "max-h-0 opacity-0 overflow-hidden"
             }`}
         >
           <nav className="py-4 border-t border-gray-100">
@@ -351,8 +341,8 @@ const Header = () => {
                 </button>
                 <div
                   className={`transition-all duration-300 ease-in-out ${resourceOpen
-                    ? "max-h-screen opacity-100"
-                    : "max-h-0 opacity-0 overflow-hidden"
+                      ? "max-h-screen opacity-100"
+                      : "max-h-0 opacity-0 overflow-hidden"
                     }`}
                 >
                   <div className="pl-4 space-y-1">
@@ -371,54 +361,14 @@ const Header = () => {
                         onClick={handleMobileLinkClick}
                       >
                         {slug
-                          .replace(/([a-z])([A-Z])/g, "$1 $2")
-                          .replace(/^\w/, (c) => c.toUpperCase())}
+                          .split("-")
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(" ")}
                       </Link>
                     ))}
                   </div>
                 </div>
               </div>
-
-              {/* Profile Dropdown for Mobile */}
-              {user && (
-                <div className="border-t border-gray-100 mt-2 pt-2">
-                  <button
-                    onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center justify-between w-full px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                  >
-                    <span>Profile</span>
-                    <IoIosArrowDown
-                      className={`transition-transform duration-200 ${profileOpen ? "rotate-180" : ""
-                        }`}
-                    />
-                  </button>
-                  <div
-                    className={`transition-all duration-300 ease-in-out ${profileOpen
-                      ? "max-h-screen opacity-100"
-                      : "max-h-0 opacity-0 overflow-hidden"
-                      }`}
-                  >
-                    <div className="pl-4 space-y-1">
-                      <Link href={'/userdashboard'}>
-                        <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
-                        >
-                          <MdDashboard size={18} />
-                          <span>User Dashboard</span>
-                        </button>
-                      </Link>
-                      <Link href={'/account-settings'}>
-                        <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md text-left"
-                        >
-                          <FiSettings size={18} />
-                          <span>Profile Settings</span>
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Auth */}
               <div className="border-t border-gray-100 mt-4 pt-4 px-4">

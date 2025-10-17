@@ -32,15 +32,16 @@ import {
   calculatePriceCalendar,
 } from "@/calculators/pricing";
 import { BASE_URL } from "@/services/baseUrl";
-import { 
-  saveDesignProjectData, 
-  loadDesignProjectData, 
+import {
+  saveDesignProjectData,
+  loadDesignProjectData,
   clearDesignProjectData,
   saveFileData,
   base64ToFile,
   isValidFileData,
   getDefaultFormState,
-  getDefaultComponentState
+  getDefaultComponentState,
+  restoreFileFromRecord,
 } from "@/utils/designProjectPersistence";
 // PDF.js worker setup
 let pdfjsLib = null;
@@ -923,14 +924,10 @@ const DesignProjectPreview = () => {
     const restoreFiles = async () => {
       const savedData = loadDesignProjectData();
       if (savedData) {
-        // Restore interior file if available
-        if (savedData.interiorFileData && savedData.interiorFileData.base64) {
+        // Restore interior file if available (try IndexedDB first, then base64)
+        if (savedData.interiorFileData) {
           try {
-            const restoredFile = base64ToFile(
-              savedData.interiorFileData.base64,
-              savedData.interiorFileData.name,
-              savedData.interiorFileData.type
-            );
+            const restoredFile = await restoreFileFromRecord(savedData.interiorFileData);
             if (restoredFile) {
               updateState({
                 selectedFile: restoredFile,
@@ -943,14 +940,10 @@ const DesignProjectPreview = () => {
           }
         }
         
-        // Restore cover file if available
-        if (savedData.coverFileData && savedData.coverFileData.base64) {
+        // Restore cover file if available (try IndexedDB first, then base64)
+        if (savedData.coverFileData) {
           try {
-            const restoredCoverFile = base64ToFile(
-              savedData.coverFileData.base64,
-              savedData.coverFileData.name,
-              savedData.coverFileData.type
-            );
+            const restoredCoverFile = await restoreFileFromRecord(savedData.coverFileData);
             if (restoredCoverFile) {
               // Process the cover file to generate the PDF URL
               try {

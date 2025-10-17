@@ -3,6 +3,12 @@
  * Handles saving and loading of form data, file uploads, and selections
  */
 
+import {
+  saveFileToIndexedDB as _saveFileToIndexedDB,
+  getFileFromIndexedDB as _getFileFromIndexedDB,
+  deleteFileFromIndexedDB as _deleteFileFromIndexedDB,
+} from './indexedDbFileStore';
+
 const DESIGN_PROJECT_STORAGE_KEY = 'designProjectData';
 
 /**
@@ -73,30 +79,67 @@ export const clearDesignProjectData = () => {
 export const saveFileData = async (file, type) => {
   if (!file) return null;
   
+  // Try IndexedDB first (more durable and avoids localStorage quota problems)
   try {
-    // Convert file to base64 for storage
-    const base64 = await fileToBase64(file);
-    
+    const key = `designFile_${type}_${Date.now()}`;
+    await _saveFileToIndexedDB(key, file);
     return {
+      idbKey: key,
       name: file.name,
       size: file.size,
       type: file.type,
       lastModified: file.lastModified,
       fileType: type,
-      base64: base64,
-      // Store the base64 content for restoration
     };
-  } catch (error) {
-    console.error('Error converting file to base64:', error);
-    return {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: file.lastModified,
-      fileType: type,
-      // Fallback without base64 if conversion fails
-    };
+  } catch (err) {
+    // Fall back to base64 stored in localStorage if IndexedDB fails
+    try {
+      const base64 = await fileToBase64(file);
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        fileType: type,
+        base64: base64,
+      };
+    } catch (error) {
+      console.error('Error converting file to base64:', error);
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        fileType: type,
+      };
+    }
   }
+};
+
+/**
+ * Restore File object from a saved file record (which may reference IndexedDB or contain base64)
+ * @param {Object} fileRecord
+ * @returns {File|null}
+ */
+export const restoreFileFromRecord = async (fileRecord) => {
+  if (!fileRecord) return null;
+  if (fileRecord.idbKey) {
+    try {
+      const file = await _getFileFromIndexedDB(fileRecord.idbKey);
+      return file;
+    } catch (err) {
+      // attempt fallback to base64 below
+      console.warn('Failed to read file from IndexedDB', err);
+    }
+  }
+  if (fileRecord.base64 && fileRecord.name && fileRecord.type) {
+    try {
+      return base64ToFile(fileRecord.base64, fileRecord.name, fileRecord.type);
+    } catch (err) {
+      console.warn('Failed to restore file from base64', err);
+    }
+  }
+  return null;
 };
 
 /**

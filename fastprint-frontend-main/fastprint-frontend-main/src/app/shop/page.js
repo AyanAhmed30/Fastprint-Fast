@@ -1596,6 +1596,10 @@ const Shop = () => {
                   </span>
                 </div>
                 <div className="flex justify-between font-medium">
+                  <span className="text-gray-600">Quantity</span>
+                  <span className="text-[#2A428C]">{productQuantity ?? 1}</span>
+                </div>
+                <div className="flex justify-between font-medium">
                   <span className="text-gray-600">
                     Shipping{" "}
                     {selectedService && `(${selectedService.courier_name})`}

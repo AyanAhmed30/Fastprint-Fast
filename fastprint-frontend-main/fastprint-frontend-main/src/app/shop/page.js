@@ -4,6 +4,20 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { BASE_URL } from "@/services/baseUrl";
+// Pricing calculators/config used to reconstruct shopData if it's missing in production
+import {
+  BOOK_SIZES,
+  OPTIONS_CONFIG_BOOK,
+  COMIC_TRIM_SIZES,
+  OPTIONS_CONFIG_SIMPLE,
+  CALENDAR_SIZES,
+} from "@/calculators/config";
+import {
+  calculatePriceBook,
+  calculatePriceComic,
+  calculatePriceSimple,
+  calculatePriceCalendar,
+} from "@/calculators/pricing";
 
 const COUNTRIES = [
   { code: "US", name: "United States" },
@@ -787,20 +801,125 @@ const Shop = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem("shopData");
-    if (saved) {
+    const tryParse = (s) => {
       try {
-        const data = JSON.parse(saved);
-        setInitialData({
-          originalTotalCost: data.originalTotalCost ?? 0,
-          finalTotalCost: data.finalTotalCost ?? 0,
-          totalCost: data.totalCost ?? 0,
-          productQuantity: data.productQuantity ?? 1,
-          costPerBook: data.costPerBook ?? 0,
-        });
+        return JSON.parse(s);
       } catch (e) {
-        console.warn("Invalid shopData in localStorage");
+        return null;
       }
+    };
+
+    const applyShopData = (data) => {
+      setInitialData({
+        originalTotalCost: data.originalTotalCost ?? 0,
+        finalTotalCost: data.finalTotalCost ?? 0,
+        totalCost: data.totalCost ?? 0,
+        productQuantity: data.productQuantity ?? 1,
+        costPerBook: data.costPerBook ?? 0,
+      });
+    };
+
+    const reconstructShopData = () => {
+      // Attempt to reconstruct from previewFormData + previewDropdowns
+      const previewFormRaw = localStorage.getItem("previewFormData");
+      const previewProjectRaw = localStorage.getItem("previewProjectData");
+      const dropdownsRaw = localStorage.getItem("previewDropdowns");
+      const previewForm = tryParse(previewFormRaw) || null;
+      const previewProject = tryParse(previewProjectRaw) || null;
+      const dropdowns = tryParse(dropdownsRaw) || {};
+
+      if (!previewForm || !previewProject) return null;
+
+      const category = previewProject.category;
+      const qty = Number(previewForm.quantity) || 1;
+
+      // Helper to map id -> name for dropdown lists
+      const findName = (arr, id) => {
+        if (!arr || !id) return "";
+        const found = arr.find((o) => String(o.id) === String(id));
+        return found?.dbName || found?.name || "";
+      };
+
+      let calc = null;
+      try {
+        if (category === "Print Book" || category === "Photo Book") {
+          const trimName = findName(dropdowns.trim_sizes || [], previewForm.trim_size_id);
+          calc = calculatePriceBook({
+            bookSize: trimName,
+            page_count: Number(previewForm.page_count),
+            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
+            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
+            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
+            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            quantity: qty,
+          });
+        } else if (category === "Comic Book") {
+          calc = calculatePriceComic({
+            trim_size_id: previewForm.trim_size_id,
+            page_count: Number(previewForm.page_count),
+            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
+            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
+            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
+            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            quantity: qty,
+          });
+        } else if (category === "Magazine" || category === "Year Book") {
+          calc = calculatePriceSimple({
+            page_count: Number(previewForm.page_count),
+            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
+            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
+            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
+            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            quantity: qty,
+          });
+        } else if (category === "Calender" || category === "Calendar") {
+          calc = calculatePriceCalendar({
+            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
+            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
+            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
+            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            quantity: qty,
+          });
+        }
+      } catch (err) {
+        console.warn("Reconstruction calc failed:", err);
+        calc = null;
+      }
+
+      if (!calc) return null;
+
+      const reconstructed = {
+        originalTotalCost: calc.totalPrice ?? calc.original_total_cost ?? 0,
+        finalTotalCost: calc.finalPrice ?? calc.total_cost ?? 0,
+        totalCost: calc.finalPrice ?? calc.total_cost ?? calc.totalPrice ?? 0,
+        productQuantity: qty,
+        costPerBook: calc.unitPrice ?? 0,
+      };
+      // persist reconstructed data so subsequent pages see it
+      try {
+        localStorage.setItem("shopData", JSON.stringify(reconstructed));
+      } catch (err) {
+        console.warn("Failed to persist reconstructed shopData", err);
+      }
+
+      return reconstructed;
+    };
+
+    // Use saved shopData if valid
+    const parsed = tryParse(saved);
+    if (parsed && (parsed.finalTotalCost || parsed.totalCost || parsed.originalTotalCost)) {
+      applyShopData(parsed);
+      return;
     }
+
+    // Attempt to reconstruct from preview data
+    const reconstructed = reconstructShopData();
+    if (reconstructed) {
+      applyShopData(reconstructed);
+      return;
+    }
+
+    // Nothing found; keep defaults
   }, []);
 
   // Destructure initial data

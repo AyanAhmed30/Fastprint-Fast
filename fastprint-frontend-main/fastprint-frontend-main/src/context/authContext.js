@@ -30,6 +30,32 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener('storage', syncAuth);
   }, []);
 
+  // Listen specifically for explicit logout-event key to force logout across tabs
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (!e) return;
+      if (e.key === 'logout-event') {
+        setUser(null);
+        setToken(null);
+        // Also cleanup known keys
+        try {
+          localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('token');
+        } catch (err) {
+          // ignore
+        }
+        // In this tab, navigate to login
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const signup = async (formData) => {
     return authService.register(formData);
   };
@@ -46,8 +72,27 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
+    // Clear all known token/user keys to be thorough
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('token');
+
+    // dispatch a storage event to notify other tabs/windows
+    try {
+      window.localStorage.setItem('logout-event', Date.now().toString());
+      // small cleanup
+      setTimeout(() => {
+        window.localStorage.removeItem('logout-event');
+      }, 500);
+    } catch (e) {
+      // ignore
+    }
+
+    // Redirect to login page to avoid showing protected content
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   };
 
   return (

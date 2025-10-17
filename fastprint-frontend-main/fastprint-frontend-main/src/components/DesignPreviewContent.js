@@ -32,6 +32,16 @@ import {
   calculatePriceCalendar,
 } from "@/calculators/pricing";
 import { BASE_URL } from "@/services/baseUrl";
+import { 
+  saveDesignProjectData, 
+  loadDesignProjectData, 
+  clearDesignProjectData,
+  saveFileData,
+  base64ToFile,
+  isValidFileData,
+  getDefaultFormState,
+  getDefaultComponentState
+} from "@/utils/designProjectPersistence";
 // PDF.js worker setup
 let pdfjsLib = null;
 const loadPdfLib = async () => {
@@ -54,10 +64,10 @@ import SaddleImg from "@/assets/images/saddlee.jpg";
 import CaseWrap from "@/assets/images/paperbackk.jpg";
 import LinenWrap from "@/assets/images/linenn.jpg";
 import WireOBoundImg from "@/assets/images/wireo.jpg";
-import StandardBlackandWhite from "@/assets/images/pp1.jpg";
-import PremiumBlackandWhite from "@/assets/images/pp2.jpg";
+import StandardBlackandWhite from "@/assets/images/pp4.jpg";
+import PremiumBlackandWhite from "@/assets/images/pp1.jpg";
 import StandardColor from "@/assets/images/pp3.jpg";
-import PremiumColor from "@/assets/images/pp4.jpg";
+import PremiumColor from "@/assets/images/pp2.jpg";
 import Creamuncoated from "@/assets/images/qa1.png";
 import Whiteuncoated from "@/assets/images/qa2.png";
 import Whitecoated from "@/assets/images/qa3.png";
@@ -415,39 +425,66 @@ const DesignProjectPreview = () => {
   const searchParams = useSearchParams();
   const coverFileInputRef = useRef(null);
   const isEditUrl = searchParams.get("edit") === "true";
-  // State consolidation
-  const [state, setState] = useState({
-    fileError: "",
-    selectedFile: null,
-    uploadStatus: "idle",
-    uploadProgress: 0,
-    usedExpertCover: false,
-    coverFile: null,
-    coverFileError: "", // ← add this too if not present
-    coverPdfUrl: null, // ← NEW
-    projectData: null,
-    dropdowns: {},
-    bindings: [],
-    initialBindings: [],
-    initialBindingsLoaded: false,
-    loading: false,
-    availableBindings: [],
-    result: null,
-    calculating: false,
-    form: {
-      trim_size_id: "",
-      page_count: "",
-      binding_id: "",
-      interior_color_id: "",
-      paper_type_id: "",
-      cover_finish_id: "",
-      quantity: 1,
-    },
+  // State consolidation - initialize with saved data or defaults
+  const [state, setState] = useState(() => {
+    const savedData = loadDesignProjectData();
+    if (savedData) {
+      return {
+        ...getDefaultComponentState(),
+        ...savedData,
+        // Keep file-related states from saved data, they will be restored by useEffect
+        selectedFile: null, // Will be restored by useEffect
+        coverFile: null, // Will be restored by useEffect
+        uploadStatus: "idle", // Will be updated by useEffect
+        uploadProgress: 0,
+        fileError: "",
+        coverFileError: "",
+        coverPdfUrl: null, // Will be restored by useEffect
+      };
+    }
+    return getDefaultComponentState();
   });
-  const updateState = (updates) =>
-    setState((prev) => ({ ...prev, ...updates }));
-  const updateForm = (updates) =>
-    setState((prev) => ({ ...prev, form: { ...prev.form, ...updates } }));
+  const updateState = (updates) => {
+    setState((prev) => {
+      const newState = { ...prev, ...updates };
+      // Save to localStorage whenever state changes
+      const dataToSave = {
+        ...newState,
+        // Don't save actual File objects, but keep other file-related states
+        selectedFile: null, // File objects can't be serialized
+        coverFile: null, // File objects can't be serialized
+        // Keep other file-related states for persistence
+        uploadStatus: newState.uploadStatus,
+        uploadProgress: newState.uploadProgress,
+        fileError: newState.fileError,
+        coverFileError: newState.coverFileError,
+        coverPdfUrl: newState.coverPdfUrl,
+      };
+      saveDesignProjectData(dataToSave);
+      return newState;
+    });
+  };
+  
+  const updateForm = (updates) => {
+    setState((prev) => {
+      const newState = { ...prev, form: { ...prev.form, ...updates } };
+      // Save to localStorage whenever form changes
+      const dataToSave = {
+        ...newState,
+        // Don't save actual File objects, but keep other file-related states
+        selectedFile: null, // File objects can't be serialized
+        coverFile: null, // File objects can't be serialized
+        // Keep other file-related states for persistence
+        uploadStatus: newState.uploadStatus,
+        uploadProgress: newState.uploadProgress,
+        fileError: newState.fileError,
+        coverFileError: newState.coverFileError,
+        coverPdfUrl: newState.coverPdfUrl,
+      };
+      saveDesignProjectData(dataToSave);
+      return newState;
+    });
+  };
   // State for project data and ID
   const [hasProjectId, setHasProjectId] = useState(false);
   // Get projectData from localStorage - client-side only
@@ -880,6 +917,88 @@ const DesignProjectPreview = () => {
   useEffect(() => {
     loadPdfLib();
   }, []);
+
+  // Restore file information from saved data
+  useEffect(() => {
+    const restoreFiles = async () => {
+      const savedData = loadDesignProjectData();
+      if (savedData) {
+        // Restore interior file if available
+        if (savedData.interiorFileData && savedData.interiorFileData.base64) {
+          try {
+            const restoredFile = base64ToFile(
+              savedData.interiorFileData.base64,
+              savedData.interiorFileData.name,
+              savedData.interiorFileData.type
+            );
+            if (restoredFile) {
+              updateState({
+                selectedFile: restoredFile,
+                uploadStatus: "success",
+                fileError: "",
+              });
+            }
+          } catch (error) {
+            console.error('Error restoring interior file:', error);
+          }
+        }
+        
+        // Restore cover file if available
+        if (savedData.coverFileData && savedData.coverFileData.base64) {
+          try {
+            const restoredCoverFile = base64ToFile(
+              savedData.coverFileData.base64,
+              savedData.coverFileData.name,
+              savedData.coverFileData.type
+            );
+            if (restoredCoverFile) {
+              // Process the cover file to generate the PDF URL
+              try {
+                const pdfjs = await loadPdfLib();
+                if (pdfjs) {
+                  const arrayBuffer = await restoredCoverFile.arrayBuffer();
+                  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+                  const pageCount = pdf.numPages;
+                  
+                  if (pageCount === 1) {
+                    const page = await pdf.getPage(1);
+                    const scale = 2;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({
+                      canvasContext: context,
+                      viewport: viewport,
+                    }).promise;
+                    
+                    const pdfImageUrl = canvas.toDataURL("image/png");
+                    updateState({
+                      coverFile: restoredCoverFile,
+                      coverPdfUrl: pdfImageUrl,
+                      coverFileError: "",
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error('Error processing restored cover file:', error);
+                updateState({
+                  coverFile: restoredCoverFile,
+                  coverFileError: "",
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error restoring cover file:', error);
+          }
+        }
+      }
+    };
+    
+    restoreFiles();
+  }, []);
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     updateState({
@@ -938,6 +1057,20 @@ const DesignProjectPreview = () => {
             ...(matchedId && { trim_size_id: matchedId }),
           });
           updateState({ selectedFile: file, uploadStatus: "success" });
+          
+          // Save file data for persistence
+          try {
+            const fileData = await saveFileData(file, 'interior');
+            if (fileData) {
+              const currentData = loadDesignProjectData() || {};
+              saveDesignProjectData({
+                ...currentData,
+                interiorFileData: fileData,
+              });
+            }
+          } catch (error) {
+            console.error('Error saving interior file data:', error);
+          }
         } catch (err) {
           console.error("PDF parsing error:", err);
           updateState({
@@ -1006,6 +1139,20 @@ const DesignProjectPreview = () => {
         coverPdfUrl: pdfImageUrl,
         coverFileError: "",
       });
+      
+      // Save cover file data for persistence
+      try {
+        const coverFileData = await saveFileData(file, 'cover');
+        if (coverFileData) {
+          const currentData = loadDesignProjectData() || {};
+          saveDesignProjectData({
+            ...currentData,
+            coverFileData: coverFileData,
+          });
+        }
+      } catch (error) {
+        console.error('Error saving cover file data:', error);
+      }
     } catch (err) {
       console.error("Cover PDF processing error:", err);
       updateState({
@@ -1128,6 +1275,8 @@ const DesignProjectPreview = () => {
             costPerBook: state.result?.cost_per_book ?? 0,
           })
         );
+        // Clear saved design project data after successful submission
+        clearDesignProjectData();
         router.push("/shop");
       } else {
         alert(
@@ -1218,6 +1367,8 @@ const DesignProjectPreview = () => {
             costPerBook: state.result?.cost_per_book ?? 0,
           })
         );
+        // Clear saved design project data after successful update
+        clearDesignProjectData();
         alert("Project updated successfully!");
         router.push("/shop");
       } else {

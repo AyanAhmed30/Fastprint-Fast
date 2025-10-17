@@ -253,6 +253,27 @@ const BookPreviewContent = () => {
         );
       }
 
+      // NEW: Ensure price/qty are pushed to "shopData" before redirect
+      try {
+        // Get pricing/qty from previous calculation step
+        const shopDataRaw = localStorage.getItem("shopData");
+        let shopData = (shopDataRaw && JSON.parse(shopDataRaw)) || {};
+        // Fallback: also try to derive from previewFormData if available
+        const formDataObj = JSON.parse(formDataString || '{}');
+        if (!shopData.productQuantity && formDataObj.quantity) {
+          shopData.productQuantity = formDataObj.quantity;
+        }
+        // Defensive: set to zero if missing
+        shopData.originalTotalCost = shopData.originalTotalCost || 0;
+        shopData.finalTotalCost = shopData.finalTotalCost || 0;
+        shopData.totalCost = shopData.totalCost || 0;
+        shopData.productQuantity = shopData.productQuantity || 1;
+        shopData.costPerBook = shopData.costPerBook || 0;
+        localStorage.setItem("shopData", JSON.stringify(shopData));
+      } catch (err) {
+        // Safe to ignore: don't block printing
+      }
+
       if (response.data?.status === "success") {
         alert(isEditPreview ? "Project updated successfully!" : "Project submitted successfully!");
         router.push("/shop");
@@ -331,11 +352,11 @@ const BookPreviewContent = () => {
                 minWidth={250}
                 maxWidth={1000}
                 minHeight={300}
-                maxHeight={1400}
+                maxHeight={1500}
                 maxShadowOpacity={0.5}
                 showCover={false}
                 mobileScrollSupport={true}
-                className="shadow-2xl rounded-xl"
+                className="shadow-2xl rounded-none"
                 ref={(book) => (bookRef.current = book)}
                 flippingTime={600}
                 useMouseEvents={true}
@@ -345,7 +366,7 @@ const BookPreviewContent = () => {
                 {renderedPages.map((page, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-center rounded-lg border ${
+                    className={`flex items-center justify-center border ${
                       page === "cover" ? "bg-black" : "bg-white p-2"
                     }`}
                   >

@@ -1228,49 +1228,7 @@ const Shop = () => {
             </h2>
             <hr className="mb-4 md:mb-6 border-[#2A428C]" />
 
-            {/* Account Type Selection */}
-            <div className="mb-4 md:mb-6 p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="text-base md:text-lg font-semibold text-[#2A428C] mb-2 md:mb-3">
-                Account Type
-              </h3>
-              <div className="flex flex-col md:flex-row gap-3 md:gap-6">
-                {["individual", "enterprise"].map((type) => (
-                  <label key={type} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="account_type"
-                      value={type}
-                      checked={form.account_type === type}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                    />
-                    <span className="text-sm md:text-base font-medium">
-                      {type === "enterprise"
-                        ? "Enterprise/Business"
-                        : "Individual"}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Resale Certificate */}
-            {form.account_type === "enterprise" && (
-              <div className="mb-4 md:mb-6 p-3 md:p-4 bg-green-50 rounded-lg border border-green-200">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="has_resale_cert"
-                    checked={form.has_resale_cert}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm md:text-base font-medium text-green-800">
-                    I have a valid resale certificate (tax exempt)
-                  </span>
-                </label>
-              </div>
-            )}
+           
 
             {/* Form Fields */}
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -1479,8 +1437,8 @@ const Shop = () => {
           </div>
 
           {/* Right Section - Cart Summary */}
-          <div className="w-full lg:w-[40%]">
-            <div className="w-full bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
+          <div className="w-full lg:w-[40%] ">
+            <div className="sticky top-30 z-10 bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
               <div className="flex justify-between mb-4">
                 <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">
                   Cart Summary
@@ -1557,18 +1515,7 @@ const Shop = () => {
                 </div>
               </div>
 
-              {/* Account Type Badge */}
-              {accountType && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3 md:mb-4">
-                  <p className="text-xs text-blue-800 text-center">
-                    <strong>Account:</strong>{" "}
-                    {accountType.charAt(0).toUpperCase() + accountType.slice(1)}
-                    {form.account_type === "enterprise" &&
-                      form.has_resale_cert &&
-                      " (Tax Exempt)"}
-                  </p>
-                </div>
-              )}
+          
 
               {/* Shipping Status */}
               {shippingRate !== null && selectedService && (

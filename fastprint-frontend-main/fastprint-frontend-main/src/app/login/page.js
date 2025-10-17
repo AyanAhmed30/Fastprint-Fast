@@ -7,6 +7,7 @@ import Link from "next/link";
 import Logo from "@/assets/images/fastlogo.svg";
 import singup from "@/assets/images/signup.png";
 import Image from "next/image";
+import { hasCompletedAccountSettings } from "@/utils/profileUtils";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -79,8 +80,17 @@ const Login = () => {
 
     try {
       const user = await login(form);
-      if (user?.is_admin) router.push("/admin");
-      else router.push("/account-settings");
+      if (user?.is_admin) {
+        router.push("/admin");
+      } else {
+        // Check if user has completed account settings
+        const hasCompleted = await hasCompletedAccountSettings(user.email, localStorage.getItem('accessToken'));
+        if (hasCompleted) {
+          router.push("/");
+        } else {
+          router.push("/account-settings");
+        }
+      }
     } catch {
       setError(
         "Invalid email or password. Please try with correct credentials"

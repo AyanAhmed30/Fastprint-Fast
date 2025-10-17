@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 import AdminHeader from "./AdminHeader";
+import ProtectedRoute from "./ProtectedRoute";
 
 const LayoutWrapper = ({ children }) => {
   const context = useContext(AuthContext);
@@ -47,7 +48,48 @@ const LayoutWrapper = ({ children }) => {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main>
+        {/* Client-side protect certain routes */}
+        {(() => {
+          const userOnlyPaths = [
+            '/account-settings',
+            '/book-preview',
+            '/cancel',
+            '/cover-expert',
+            '/design-project',
+            '/orders',
+            '/payment',
+            '/shop',
+            '/start-project',
+            '/success',
+            '/userdashboard'
+          ];
+
+          // simple startsWith check to cover nested paths
+          const isUserPath = userOnlyPaths.some(p => pathname?.startsWith(p));
+
+          if (isUserPath) {
+            return (
+              <ProtectedRoute allowedRoles={[ 'user', 'admin' ]}>
+                {children}
+              </ProtectedRoute>
+            );
+          }
+
+          // Admin-only path protection
+          const adminPaths = ['/admin'];
+          const isAdminPath = adminPaths.some(p => pathname?.startsWith(p));
+          if (isAdminPath) {
+            return (
+              <ProtectedRoute allowedRoles={[ 'admin' ]}>
+                {children}
+              </ProtectedRoute>
+            );
+          }
+
+          return children;
+        })()}
+      </main>
       <Footer />
     </>
   );

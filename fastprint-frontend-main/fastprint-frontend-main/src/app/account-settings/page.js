@@ -7,6 +7,7 @@ import PersonalIcon from "@/assets/images/newsletter.png";
 import BusinessIcon from "@/assets/images/newsletter.png";
 import { BASE_URL } from "@/services/baseUrl";
 import Image from "next/image";
+import { hasCompletedAccountSettings } from "@/utils/profileUtils";
 
 const API_BASE_URL = `${BASE_URL}api/userprofiles`;
 
@@ -352,6 +353,7 @@ export default function AccountSettings() {
       username: "",
       email: user?.email || "",
       password: "",
+      phone_number: "",
       country: "",
       state: "",
       city: "",
@@ -412,6 +414,7 @@ export default function AccountSettings() {
           email: profile.email || "",
           password: "",
           country: profile.country || "",
+          phone_number: profile.phone_number || "",
           city: profile.city || "",
           postal_code: profile.postal_code || "",
           state: (savedFormData?.state) || profile.state || "",
@@ -437,6 +440,7 @@ export default function AccountSettings() {
           city: (savedFormData?.city) || "",
           postal_code: (savedFormData?.postal_code) || "",
           address: (savedFormData?.address) || "",
+          phone_number: (savedFormData?.phone_number) || "",
         };
         
         setFormData(newFormData);
@@ -464,6 +468,9 @@ export default function AccountSettings() {
       setInitialLoading(false);
     }
   }, [user?.email, token]);
+
+  // Note: Removed automatic redirect to allow users to access their profile settings
+  // when they explicitly navigate to this page (e.g., from header dropdown)
 
   // Load profile when user is available
   useEffect(() => {
@@ -522,6 +529,7 @@ export default function AccountSettings() {
         email: canonical.email || profileData.email || user.email || "",
         password: "",
         country: canonical.country || profileData.country || "",
+        phone_number: canonical.phone_number || profileData.phone_number || "",
         city: canonical.city || profileData.city || "",
         postal_code: canonical.postal_code || profileData.postal_code || "",
         state: canonical.state || profileData.state || "",
@@ -687,7 +695,6 @@ export default function AccountSettings() {
                 ["last_name", "Last Name"],
                 ["username", "User Name"],
                 ["email", "Email Address"],
-                ["password", "Password", "password"],
               ].map(([name, label, type = "text"], index) => {
                 const isEmailField = name === "email";
                 return (
@@ -703,15 +710,36 @@ export default function AccountSettings() {
                       value={formData[name]}
                       onChange={handleInputChange}
                       disabled={loading || isEmailField}
-                      placeholder={
-                        name === "password"
-                          ? "Enter new password"
-                          : `Enter your ${label.toLowerCase()}`
-                      }
+                      placeholder={`Enter your ${label.toLowerCase()}`}
                     />
                   </div>
                 );
               })}
+
+              {/* Password and Phone Number in the same row */}
+              <div className="transform transition-all duration-300">
+                <FloatingLabelInput
+                  name="password"
+                  label="Password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              <div className="transform transition-all duration-300">
+                <FloatingLabelInput
+                  name="phone_number"
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone_number}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  placeholder="Enter your phone number"
+                />
+              </div>
             </div>
           </div>
 

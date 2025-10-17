@@ -13,9 +13,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'email',
             'password',
             'country',
+            'state',
             'city',
             'postal_code',
             'address',
+            'phone_number',
             'account_type',
             'created_at',
             'updated_at'

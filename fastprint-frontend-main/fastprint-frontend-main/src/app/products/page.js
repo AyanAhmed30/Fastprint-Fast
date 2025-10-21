@@ -46,7 +46,7 @@ const Products = () => {
     <>
 
       {/* Hero Section */}
-     <section className="relative w-full py-14 bg-gradient-to-br from-[#070c16] via-[#06090e] to-[#171e27] overflow-hidden">
+     <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden">
   {/* Background Image */}
   <div
     className="absolute inset-0 bg-cover bg-center opacity-20 z-0"

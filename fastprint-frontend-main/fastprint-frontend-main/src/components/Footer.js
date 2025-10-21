@@ -2,34 +2,47 @@
 
 import {
   FaHome,
-  FaBoxOpen,     // Products
+  FaBoxOpen,
   FaBlog,
   FaPhoneAlt,
   FaMapMarkerAlt,
-  FaTwitter,
   FaInstagram,
   FaFacebookF,
   FaLinkedinIn,
   FaPaperPlane,
   FaYoutube,
-  FaInfoCircle,   // About Us
-  FaBriefcase,    // Portfolio
-  FaConciergeBell // Services
+  FaInfoCircle,
+  FaBriefcase,
+  FaConciergeBell,
+  FaUserTie, // Careers
+  FaUsers, // Community
+  FaHeadset, // Help / Support
 } from "react-icons/fa";
-import { FaTiktok } from "react-icons/fa6";
+import { FaTiktok, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
+import { useState } from "react";
 
 const Footer = () => {
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
   return (
-    <footer
-      className="w-full bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] text-white"
-    >
+    <footer className="w-full bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] text-white">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row md:justify-between gap-10 md:gap-0">
         {/* Left Section */}
         <div className="flex flex-col gap-6 md:w-1/2">
-          {/* Top Icons */}
+          {/* Top Navigation - Updated Order */}
           <div className="flex flex-wrap gap-6 text-base font-medium">
+            <div>
+              <Link
+                href="/about"
+                className="flex items-center gap-2 cursor-pointer hover:underline"
+              >
+                <FaInfoCircle />
+                <span>About</span>
+              </Link>
+            </div>
             <div>
               <Link
                 href="/"
@@ -48,17 +61,15 @@ const Footer = () => {
                 <span>Products</span>
               </Link>
             </div>
-
             <div>
               <Link
-                href="/about"
+                href="/services"
                 className="flex items-center gap-2 cursor-pointer hover:underline"
               >
-                <FaInfoCircle />
-                <span>About</span>
+                <FaConciergeBell />
+                <span>Services</span>
               </Link>
             </div>
-            
             <div>
               <Link
                 href="/portfolio"
@@ -70,38 +81,155 @@ const Footer = () => {
             </div>
             <div>
               <Link
-                href="/services"
+                href="/careers"
                 className="flex items-center gap-2 cursor-pointer hover:underline"
               >
-                <FaConciergeBell />
-                <span>Services</span>
+                <FaUserTie />
+                <span>Careers</span>
               </Link>
+            </div>
+            <div>
+              <Link
+                href="/resources/blogs"
+                className="flex items-center gap-2 cursor-pointer hover:underline"
+              >
+                <FaBlog />
+                <span>Blog</span>
+              </Link>
+            </div>
+
+            {/* Community Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setCommunityOpen(true)}
+              onMouseLeave={() => setCommunityOpen(false)}
+            >
+              <button
+                className="flex items-center gap-2 cursor-pointer hover:underline focus:outline-none"
+                aria-haspopup="true"
+                aria-expanded={communityOpen}
+              >
+                <FaUsers />
+                <span>Community</span>
+              </button>
+              {communityOpen && (
+                <div className="absolute left-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-10">
+                  <a
+                    href="https://www.youtube.com/@FastPrintGuys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Videos
+                  </a>
+                  <Link
+                    href="/resources/blogs"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Blogs
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Help Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setHelpOpen(true)}
+              onMouseLeave={() => setHelpOpen(false)}
+            >
+              <button
+                className="flex items-center gap-2 cursor-pointer hover:underline focus:outline-none"
+                aria-haspopup="true"
+                aria-expanded={helpOpen}
+              >
+                <FaHeadset />
+                <span>Help</span>
+              </button>
+              {helpOpen && (
+                <div className="absolute left-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-10">
+                  <Link
+                    href="/resources/contact-resources"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Contact Support
+                  </Link>
+                  <Link
+                    href="/resources/contact-resources"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Raise a Ticket
+                  </Link>
+                  <Link
+                    href="/resources/hire-professional"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Hire a Professional
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Social Icons */}
           <div className="flex gap-6 text-2xl mt-2">
-            <a href="https://x.com/Fast_Print_Guys" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
-              <FaTwitter className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://x.com/Fast_Print_Guys"
+              aria-label="X (Twitter)"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaXTwitter />
             </a>
-            <a href="https://www.instagram.com/fastprintguys/" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-              <FaInstagram className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://www.instagram.com/fastprintguys/"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaInstagram />
             </a>
-            <a href="https://www.facebook.com/fastprintguys/" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-              <FaFacebookF className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://www.facebook.com/fastprintguys/"
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaFacebookF />
             </a>
-            <a href="https://www.linkedin.com/company/fast-print-guys" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
-              <FaLinkedinIn className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://www.linkedin.com/company/fast-print-guys"
+              aria-label="LinkedIn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaLinkedinIn />
             </a>
-            <a href="https://www.youtube.com/@FastPrintGuys" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
-              <FaYoutube className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://www.youtube.com/@FastPrintGuys"
+              aria-label="YouTube"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaYoutube />
             </a>
-            <a href="https://www.tiktok.com/@fastprintguys?lang=en" aria-label="TikTok" target="_blank" rel="noopener noreferrer">
-              <FaTiktok className="cursor-pointer hover:text-yellow-400 transition" />
+            <a
+              href="https://www.tiktok.com/@fastprintguys?lang=en"
+              aria-label="TikTok"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-yellow-400 transition"
+            >
+              <FaTiktok />
             </a>
           </div>
 
-          {/* Phone */}
+          {/* Phone & Location */}
           <div className="flex items-center gap-3 mt-4">
             <FaPhoneAlt />
             <a href="tel:+14692777489" className="hover:underline">
@@ -109,16 +237,11 @@ const Footer = () => {
             </a>
           </div>
 
-          {/* Location */}
+          {/* Email */}
           <div className="flex items-center gap-3">
-            <FaMapMarkerAlt />
-            <a
-              href="https://www.google.com/maps/dir//2828+W+Parker+Rd+Suite+B103,+Plano,+TX+75075"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-            >
-              2828 W Parker Rd Suite B103, Plano, TX 75075, United States
+            <FaPaperPlane />
+            <a href="mailto:info@fastprintguys.com" className="hover:underline">
+              info@fastprintguys.com
             </a>
           </div>
         </div>
@@ -126,13 +249,16 @@ const Footer = () => {
         {/* Right Section */}
         <div className="flex flex-col gap-4 md:w-1/2">
           <p className="text-base leading-relaxed max-w-md">
-            Subscribe now for exclusive offers and fast, top-quality
-            printing services delivered to your door!
+            Subscribe now for exclusive offers and fast, top-quality printing
+            services delivered to your door!
           </p>
 
           <h4 className="text-lg font-semibold mt-4">Subscribe</h4>
 
-          <form className="flex flex-col sm:flex-row items-center gap-4 mt-2" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="flex flex-col sm:flex-row items-center gap-4 mt-2"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <input
               type="email"
               placeholder="Enter your email"
@@ -151,17 +277,26 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Yellow Line */}
+      {/* Yellow Divider */}
       <div className="w-full border-t-4 border-yellow-400 mt-2" />
 
       {/* Bottom Row */}
       <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 text-white text-sm max-w-7xl mx-auto gap-4 md:gap-0">
-        <span>© 2025 Fast Print Guys, All Rights Reserved.</span>
+        <span>
+          © 2025 Fast Print Guys, Texas Global Traders & Distributors, Inc. All
+          rights reserved.
+        </span>
         <div className="flex gap-6">
-          <Link href="/privacy-policy" className="cursor-pointer hover:underline">
+          <Link
+            href="/privacy-policy"
+            className="cursor-pointer hover:underline"
+          >
             Privacy Policy
           </Link>
-          <Link href="/terms-and-conditions" className="cursor-pointer hover:underline">
+          <Link
+            href="/terms-and-conditions"
+            className="cursor-pointer hover:underline"
+          >
             Terms & Conditions
           </Link>
         </div>

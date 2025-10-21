@@ -7,7 +7,8 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import { BASE_URL } from "@/services/baseUrl";
 import Logo from "@/assets/images/fastlogo.svg";
-import singup from "@/assets/images/signup.png";
+import signup from "@/assets/images/loginUI.jpg";
+import Link from "next/link";
 
 // ✅ Password requirement line component
 const PasswordRequirement = ({ label, valid }) => (
@@ -62,8 +63,7 @@ const ResetPassword = () => {
     if (!hasUppercase) return "Password must contain an uppercase letter.";
     if (!hasLowercase) return "Password must contain a lowercase letter.";
     if (!hasNumber) return "Password must contain a number.";
-    if (!hasSpecialChar)
-      return "Password must contain a special character.";
+    if (!hasSpecialChar) return "Password must contain a special character.";
 
     return "";
   };
@@ -107,9 +107,12 @@ const ResetPassword = () => {
     }
 
     try {
-      await axios.post(`${BASE_URL}api/users/reset-password/${uidb64}/${token}/`, {
-        password: form.password,
-      });
+      await axios.post(
+        `${BASE_URL}api/users/reset-password/${uidb64}/${token}/`,
+        {
+          password: form.password,
+        }
+      );
 
       setSuccess(true);
       setTimeout(() => router.push("/login"), 3000);
@@ -118,7 +121,9 @@ const ResetPassword = () => {
       if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
-        setError("Failed to reset password. The link may be invalid or expired.");
+        setError(
+          "Failed to reset password. The link may be invalid or expired."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -135,31 +140,28 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">
-      {/* Left Side */}
+      {/* Left Side - Image */}
       <div
-        className={`w-full lg:w-1/2 relative flex items-center justify-center h-56 sm:h-72 md:h-96 lg:h-auto transition-all duration-1000 ease-out ${
-          mounted ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`w-full lg:w-1/2 flex items-center justify-center bg-[#041643] transition-opacity duration-1000 ${
+          mounted ? "opacity-100" : "opacity-0"
         }`}
-        style={{ backgroundColor: "rgba(4, 22, 67, 1)" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-cyan-900/20 animate-pulse"></div>
-        <div className="relative z-20 flex items-center justify-center w-full h-full">
+        <div className="relative w-full h-full">
+          <Link href={"/"}>
+            <Image
+              src={Logo}
+              alt="Fast Print Guys Logo"
+              width={100}
+              height={100}
+              className="z-50 absolute top-5 left-5"
+            />
+          </Link>
           <Image
-            src={singup}
-            alt="Studying People Illustration"
-            className="max-w-[180px] sm:max-w-[260px] md:max-w-[320px] lg:max-w-md object-contain animate-pulse-slow"
-            style={{ animationTimingFunction: "ease-in-out" }}
-          />
-        </div>
-        <div
-          className={`absolute top-4 left-4 sm:left-6 z-30 transition-all duration-700 delay-300 ${
-            mounted ? "scale-100 opacity-100" : "scale-75 opacity-0"
-          }`}
-        >
-          <Image
-            src={Logo}
-            alt="Logo"
-            className="w-14 sm:w-16 md:w-20 h-auto object-contain hover:scale-110 transition-transform duration-300"
+            src={signup}
+            alt="Signup Illustration"
+            fill
+            className="object-cover object-center"
+            priority
           />
         </div>
       </div>
@@ -184,7 +186,11 @@ const ResetPassword = () => {
               <p className="text-gray-500 mt-2">Redirecting to login...</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-6" noValidate>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col space-y-6"
+              noValidate
+            >
               {/* New Password (no validation box) */}
               <div className="relative group">
                 <h2>New Password</h2>
@@ -203,7 +209,11 @@ const ResetPassword = () => {
                           ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
                           : "border-gray-200 hover:border-gray-300"
                       }
-                      ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"}
+                      ${
+                        isLoading
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:shadow-md"
+                      }
                       focus:outline-none focus:ring-0`}
                   />
                   <span
@@ -229,18 +239,27 @@ const ResetPassword = () => {
                     disabled={isLoading}
                     className={`w-full h-12 rounded-xl border-2 px-4 pr-10 text-base transition-all duration-300 bg-white/70 backdrop-blur-sm
                       ${
-                        focusedField === "confirmPassword" || form.confirmPassword
+                        focusedField === "confirmPassword" ||
+                        form.confirmPassword
                           ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
                           : "border-gray-200 hover:border-gray-300"
                       }
-                      ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"}
+                      ${
+                        isLoading
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:shadow-md"
+                      }
                       focus:outline-none focus:ring-0`}
                   />
                   <span
                     className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 hover:text-gray-700"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
                   </span>
                 </div>
 
@@ -303,8 +322,8 @@ const ResetPassword = () => {
           )}
 
           {error && (
-            <div className="mt-6 p-3 bg-red-49 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
-              <p className="text-red-601 text-sm text-center">{error}</p>
+            <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
+              <p className="text-red-600 text-sm text-center">{error}</p>
             </div>
           )}
         </div>

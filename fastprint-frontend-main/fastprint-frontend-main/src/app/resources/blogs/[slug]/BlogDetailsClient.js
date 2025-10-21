@@ -78,11 +78,6 @@ export default async function BlogDetails({ params }) {
 
         <div className="relative px-6 py-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
           <div className="flex-1 mb-8 md:mb-0">
-            <Link href="/resources/blogs" passHref>
-              <span className="text-white hover:text-yellow-400 cursor-pointer mb-4 inline-block transition-transform hover:-translate-x-1">
-                &larr; Back to Blogs
-              </span>
-            </Link>
             <h1 className="text-3xl md:text-5xl font-bold mb-6 text-white">
               {blog.title}
             </h1>
@@ -135,21 +130,6 @@ export default async function BlogDetails({ params }) {
               dangerouslySetInnerHTML={{ __html: blog.content }}
             />
 
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <Link href="/resources/blogs" passHref>
-                <div className="text-blue-600 font-medium text-sm gap-2 items-center cursor-pointer hover:text-blue-800 inline-flex transition-transform hover:-translate-x-1">
-                  <span className="transform rotate-180 animate-pulse">
-                    <Image
-                      src={readMoreArrow}
-                      alt="Back to Blogs"
-                      width={16}
-                      height={16}
-                    />
-                  </span>
-                  Back to Blogs
-                </div>
-              </Link>
-            </div>
           </div>
         </div>
       </div>

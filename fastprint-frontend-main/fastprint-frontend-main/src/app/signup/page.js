@@ -5,8 +5,9 @@ import { register } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/assets/images/fastlogo.svg";
-// import signup from "@/assets/images/signup.png";
 import signup from "@/assets/images/loginUI.jpg";
+
+// import signup from "@/assets/images/signup.png";
 import Image from "next/image";
 
 const Signup = () => {
@@ -18,7 +19,6 @@ const Signup = () => {
   const [focusedField, setFocusedField] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
 
   const [errors, setErrors] = useState({
     email: "",
@@ -220,48 +220,45 @@ const Signup = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-white">
-      {/* Left Side */}
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white">
+      {/* Left Side - Image */}
       <div
-        className={`fixed top-0 left-0 w-full lg:w-1/2 h-full flex items-center justify-center transition-all duration-1000 ease-out z-20 ${
-          mounted ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`w-full lg:w-1/2 flex items-center justify-center bg-[#041643] transition-opacity duration-1000 ${
+          mounted ? "opacity-100" : "opacity-0"
         }`}
-        style={{ backgroundColor: "rgba(4, 22, 67, 1)" }}
       >
-        <div className="relative z-20 flex items-center justify-center w-full h-full">
+        <div className="relative w-full h-full">
+          <Link href={"/"}>
+            <Image
+              src={Logo}
+              alt="Fast Print Guys Logo"
+              width={100}
+              height={100}
+              className="z-50 absolute top-5 blur-none left-5"
+            />
+          </Link>
           <Image
             src={signup}
-            alt="Studying People Illustration"
-            className="max-w-full sm:max-w-full md:max-w-full lg:max-w-full object-cover animate-pulse-slow"
-            style={{ animationTimingFunction: "ease-in-out" }}
+            alt="Signup Illustration"
+            fill
+            className="object-cover object-center"
+            priority
           />
         </div>
-        {/* <div
-          className={`absolute top-4 left-4 sm:left-6 z-30 transition-all duration-700 delay-300 ${
-            mounted ? "scale-100 opacity-100" : "scale-75 opacity-0"
-          }`}
-        >
-          <Image
-            src={Logo}
-            alt="Logo"
-            className="w-14 sm:w-16 md:w-20 h-auto object-contain hover:scale-110 transition-transform duration-300"
-          />
-        </div> */}
       </div>
 
-      {/* Right Side */}
+      {/* Right Side - Form */}
       <div
-        className={`w-full lg:w-1/2 lg:ml-[50%] flex flex-col justify-center px-4 sm:px-8 md:px-12 pt-20 py-8 transition-all duration-1000 ease-out relative overflow-x-auto overflow-y-auto h-screen ${
-          mounted ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+        className={`w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-6 md:px-8 py-12 bg-[#e5fbff] transition-opacity duration-1000 ${
+          mounted ? "opacity-100" : "opacity-0"
         }`}
-        style={{ backgroundColor: "rgba(229, 251, 255, 1)" }}
       >
         <div className="absolute inset-0 opacity-5 pointer-events-none">
           <div className="absolute top-0 right-0 w-40 h-40 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-blue-500 rounded-full filter blur-3xl animate-pulse"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-40 sm:h-40 md:w-64 md:h-64 bg-cyan-500 rounded-full filter blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        <div className="relative z-10 w-full">
+        <div className="relative z-10 w-full max-w-md mx-auto">
           <div
             className={`flex flex-col items-center mb-8 transition-all duration-800 delay-300 ${
               mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
@@ -290,8 +287,8 @@ const Signup = () => {
           </div>
 
           <div
-            className={`max-w-xs sm:max-w-sm md:max-w-md mx-auto w-full transition-all duration-800 delay-500 ${
-              mounted ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            className={`transition-all duration-800 delay-500 ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
             }`}
           >
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 mb-8 text-center">
@@ -305,7 +302,9 @@ const Signup = () => {
             >
               {/* Name Input */}
               <div className="relative group">
-                <h2>Username</h2>
+                <h2 className="text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </h2>
                 <input
                   type="text"
                   name="name"
@@ -336,7 +335,7 @@ const Signup = () => {
                     ${focusedField === "name" ? "opacity-100" : "opacity-0"}`}
                 ></div>
                 {errors.name && (
-                  <p id="name-error" className="mt-1 text-xs text-black">
+                  <p id="name-error" className="mt-1 text-xs text-red-600">
                     {errors.name}
                   </p>
                 )}
@@ -344,7 +343,9 @@ const Signup = () => {
 
               {/* Email Input */}
               <div className="relative group">
-                <h2>Email</h2>
+                <h2 className="text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </h2>
                 <input
                   type="email"
                   name="email"
@@ -375,105 +376,125 @@ const Signup = () => {
                     ${focusedField === "email" ? "opacity-100" : "opacity-0"}`}
                 ></div>
                 {errors.email && (
-                  <p id="email-error" className="mt-1 text-xs text-black">
+                  <p id="email-error" className="mt-1 text-xs text-red-600">
                     {errors.email}
                   </p>
                 )}
               </div>
 
               {/* Password Input */}
-{/* Password Input with Eye Toggle */}
-<div className="relative group">
-  <h2>Password</h2>
-  <div className="relative">
-    <input
-      type={showPassword ? "text" : "password"}
-      name="password"
-      value={form.password}
-      onChange={handleChange}
-      onFocus={() => setFocusedField("password")}
-      onBlur={handleBlur}
-      placeholder="Password"
-      required
-      disabled={formDisabled}
-      className={`w-full h-12 rounded-xl border-2 px-4 pr-12 text-base transition-all duration-300 bg-white/70 backdrop-blur-sm
-        ${
-          focusedField === "password" || form.password
-            ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
-            : "border-gray-200 hover:border-gray-300"
-        } 
-        ${formDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"}
-        focus:outline-none focus:ring-0`}
-      aria-invalid={!!errors.password}
-      aria-describedby="password-error"
-    />
+              <div className="relative group">
+                <h2 className="text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </h2>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField("password")}
+                    onBlur={handleBlur}
+                    placeholder="Password"
+                    required
+                    disabled={formDisabled}
+                    className={`w-full h-12 rounded-xl border-2 px-4 pr-12 text-base transition-all duration-300 bg-white/70 backdrop-blur-sm
+                      ${
+                        focusedField === "password" || form.password
+                          ? "border-blue-400 shadow-lg shadow-blue-100 scale-[1.02]"
+                          : "border-gray-200 hover:border-gray-300"
+                      } 
+                      ${
+                        formDisabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:shadow-md"
+                      }
+                      focus:outline-none focus:ring-0`}
+                    aria-invalid={!!errors.password}
+                    aria-describedby="password-error"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-800 focus:outline-none"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 3l18 18M9.88 9.88a3 3 0 104.24 4.24M10.73 5.08A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.58 5.818M6.42 6.42A9.96 9.96 0 002.458 12c1.274 4.057 5.065 7 9.542 7 .845 0 1.668-.104 2.458-.3"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <div
+                  className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none
+                    ${
+                      focusedField === "password" ? "opacity-100" : "opacity-0"
+                    }`}
+                ></div>
+                {focusedField === "password" && (
+                  <div className="mt-3 p-3 rounded-lg bg-white shadow-md border border-gray-200">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Password must contain:
+                    </p>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <PasswordRequirement
+                        label="At least 8 characters"
+                        valid={form.password.length >= 8}
+                      />
+                      <PasswordRequirement
+                        label="Lowercase letter (a-z)"
+                        valid={/[a-z]/.test(form.password)}
+                      />
+                      <PasswordRequirement
+                        label="Uppercase letter (A-Z)"
+                        valid={/[A-Z]/.test(form.password)}
+                      />
+                      <PasswordRequirement
+                        label="Number (0-9)"
+                        valid={/\d/.test(form.password)}
+                      />
+                      <PasswordRequirement
+                        label="Special character (!@#$%^&*)"
+                        valid={/[^A-Za-z0-9]/.test(form.password)}
+                      />
+                    </ul>
+                  </div>
+                )}
+              </div>
 
-    {/* 👁 Eye Icon Button */}
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-800 focus:outline-none"
-      tabIndex={-1}
-    >
-      {showPassword ? (
-        // 👁 Eye Open Icon
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round"
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          <path strokeLinecap="round" strokeLinejoin="round"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ) : (
-        // 🙈 Eye Slash Icon
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round"
-            d="M3 3l18 18M9.88 9.88a3 3 0 104.24 4.24M10.73 5.08A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.58 5.818M6.42 6.42A9.96 9.96 0 002.458 12c1.274 4.057 5.065 7 9.542 7 .845 0 1.668-.104 2.458-.3" />
-        </svg>
-      )}
-    </button>
-  </div>
-
-  {/* Password glow effect */}
-  <div
-    className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none
-      ${focusedField === "password" ? "opacity-100" : "opacity-0"}`}
-  ></div>
-
-  {/* ✅ Real-time password validation box */}
-  {focusedField === "password" && (
-    <div className="mt-3 p-3 rounded-lg bg-white shadow-md border border-gray-200 animate-fadeIn">
-      <p className="text-sm font-medium text-gray-700 mb-2">
-        Password must contain:
-      </p>
-      <ul className="text-sm text-gray-700 space-y-1">
-        <PasswordRequirement
-          label="At least 8 characters"
-          valid={form.password.length >= 8}
-        />
-        <PasswordRequirement
-          label="Lowercase letter (a-z)"
-          valid={/[a-z]/.test(form.password)}
-        />
-        <PasswordRequirement
-          label="Uppercase letter (A-Z)"
-          valid={/[A-Z]/.test(form.password)}
-        />
-        <PasswordRequirement
-          label="Number (0-9)"
-          valid={/\d/.test(form.password)}
-        />
-        <PasswordRequirement
-          label="Special character (!@#$%^&*)"
-          valid={/[^A-Za-z0-9]/.test(form.password)}
-        />
-      </ul>
-    </div>
-  )}
-</div>
-
-              {/* ✅ Terms & Conditions Checkbox */}
+              {/* Terms & Conditions */}
               <div className="relative group">
                 <label className="flex items-start space-x-3 cursor-pointer">
                   <input
@@ -487,6 +508,7 @@ const Signup = () => {
                   <span className="text-sm text-gray-700 leading-tight">
                     I have read and agree to the{" "}
                     <Link
+                      target="_blank"
                       href="/terms-and-conditions"
                       className="text-blue-600 hover:underline font-medium"
                     >
@@ -494,6 +516,7 @@ const Signup = () => {
                     </Link>{" "}
                     and{" "}
                     <Link
+                      target="_blank"
                       href="/privacy-policy"
                       className="text-blue-600 hover:underline font-medium"
                     >
@@ -554,13 +577,13 @@ const Signup = () => {
               </button>
             </form>
 
-            {/* Message Display */}
+            {/* Message */}
             {message && (
               <div
-                className={`mt-6 p-3 border rounded-lg transition-all duration-300 ${
+                className={`mt-6 p-3 border rounded-lg ${
                   isSuccess
-                    ? "bg-green-50 border-green-200 animate-bounce-gentle"
-                    : "bg-red-50 border-red-200 animate-shake"
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
                 }`}
               >
                 <p
@@ -603,7 +626,7 @@ const Signup = () => {
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-semibold hover:underline transition-all duration-300 hover:scale-105 inline-block"
+                className="font-semibold hover:underline"
                 style={{ color: "rgba(1, 106, 179, 1)" }}
               >
                 Login

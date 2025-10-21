@@ -8,6 +8,10 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FiUser, FiSettings } from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
 import { HiOutlineShoppingBag } from "react-icons/hi";
+import { FiPhone } from "react-icons/fi";
+
+import { AiOutlineShoppingCart } from "react-icons/ai";
+
 import useAuth from "../hooks/useAuth";
 import Image from "next/image";
 import FastPrintLogo from "@/assets/images/fastlogo.svg";
@@ -176,21 +180,22 @@ const Header = () => {
             )}
 
             {/* Cart */}
-            <div
-              className="relative cursor-pointer"
-              onClick={handleCartClick}
-              title="Cart"
-            >
-              <HiOutlineShoppingBag
-                size={20}
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
-              />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full w-4 h-4 min-w-[16px]">
-                  {cartCount}
-                </span>
-              )}
-            </div>
+           <div
+  className="relative cursor-pointer"
+  onClick={handleCartClick}
+  title="Cart"
+>
+  <AiOutlineShoppingCart
+    size={25}
+    className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
+  />
+  {cartCount > 0 && (
+    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full w-4 h-4 min-w-[16px]">
+      {cartCount}
+    </span>
+  )}
+</div>
+
 
             {/* Profile Dropdown */}
             {user && (
@@ -202,22 +207,43 @@ const Header = () => {
                   onClick={() => setProfileOpen(!profileOpen)}
                 />
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
-                    <div className="py-2">
-                      <button
-                        onClick={() => handleProfileNavigation("/userdashboard")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <MdDashboard size={18} className="text-gray-600" />
-                        <span>User Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => handleProfileNavigation("/account-settings")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <FiSettings size={18} className="text-gray-600" />
-                        <span>Profile Settings</span>
-                      </button>
+                  <div className="absolute right-0 mt-2 bg-white shadow-xl rounded-xl z-20 min-w-[220px] border border-gray-100 ring-1 ring-black ring-opacity-5">
+                    <div className="py-3">
+                      {/* Top heading + email for logged-in users */}
+                      <div className="px-4 py-4 border-b border-gray-100">
+<div className="text-base font-bold text-gray-800">Fast Print Guys</div>
+                        <div className="text-sm text-gray-500 mt-1 truncate">{user?.email}</div>
+                      </div>
+                      <div className="flex flex-col py-2">
+                        <button
+                          onClick={() => handleProfileNavigation("/userdashboard")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <MdDashboard size={20} className="text-gray-600" />
+                          <span className="leading-5">User Dashboard</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/account-settings")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiSettings size={20} className="text-gray-600" />
+                          <span className="leading-5">Account Settings</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/orders")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <HiOutlineShoppingBag size={20} className="text-gray-600" />
+                          <span className="leading-5">Order History</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/resources/contact-resources")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiPhone size={20} className="text-gray-600" />
+                          <span className="leading-5">Contact Support</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -229,11 +255,14 @@ const Header = () => {
               <div
                 className="cursor-pointer"
                 onClick={() => router.push("/login")}
+                
               >
+                
                 <FiUser
                   size={20}
                   className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
                   title="Login"
+                  
                 />
               </div>
             )}
@@ -267,22 +296,43 @@ const Header = () => {
                   onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
                 />
                 {mobileProfileOpen && (
-                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-48 border border-gray-100">
-                    <div className="py-2">
-                      <button
-                        onClick={() => handleProfileNavigation("/userdashboard")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <MdDashboard size={18} className="text-gray-600" />
-                        <span>User Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => handleProfileNavigation("/account-settings")}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
-                      >
-                        <FiSettings size={18} className="text-gray-600" />
-                        <span>Profile Settings</span>
-                      </button>
+                  <div className="absolute right-0 mt-2 bg-white shadow-xl rounded-xl z-20 min-w-[220px] border border-gray-100 ring-1 ring-black ring-opacity-5">
+                    <div className="py-3">
+                      {/* Top heading + email for logged-in users (mobile) */}
+                      <div className="px-4 py-4 border-b border-gray-100">
+                        <div className="text-sm font-semibold text-gray-800">Fast Print Guys</div>
+                        <div className="text-sm text-gray-500 mt-1 truncate">{user?.email}</div>
+                      </div>
+                      <div className="flex flex-col py-2">
+                        <button
+                          onClick={() => handleProfileNavigation("/userdashboard")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <MdDashboard size={20} className="text-gray-600" />
+                          <span className="leading-5">User Dashboard</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/account-settings")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiSettings size={20} className="text-gray-600" />
+                          <span className="leading-5">Account Settings</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/orders")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <HiOutlineShoppingBag size={20} className="text-gray-600" />
+                          <span className="leading-5">Order History</span>
+                        </button>
+                        <button
+                          onClick={() => handleProfileNavigation("/resources/contact-resources")}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-sm text-left text-gray-700"
+                        >
+                          <FiPhone size={20} className="text-gray-600" />
+                          <span className="leading-5">Contact Support</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

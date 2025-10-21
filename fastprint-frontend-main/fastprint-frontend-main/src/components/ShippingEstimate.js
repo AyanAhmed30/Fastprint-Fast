@@ -1094,11 +1094,11 @@ const ShippingEstimate = ({ bookSpecs = null, pricingResult = null }) => {
           {selectedOption && (
             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-blue-800 font-medium text-sm md:text-base">
-                Shipping Rate: <span className="font-bold">${selectedOption.rate}</span>
+                Shipping and Handling: <span className="font-bold">${selectedOption.rate}</span>
               </p>
               {pricingResult && (
                 <p className="text-blue-800 font-bold text-base md:text-lg mt-2">
-                  Total Price:{" "}
+                  Subtotal (Excluding taxes and applicable fees):{" "}
                   <span className="text-green-700">
                     $
                     {(

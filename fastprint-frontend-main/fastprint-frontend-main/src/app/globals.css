@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @layer components {
@@ -69,24 +70,25 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 .custom_text_blue {
-  background-color: var(
-    --Style,
-    linear-gradient(90deg, #016ab3 16.41%, #0096cd 60.03%, #00aedc 87.93%)
-  );
+  background-color: var(--Style,
+      linear-gradient(90deg, #016ab3 16.41%, #0096cd 60.03%, #00aedc 87.93%));
 }
 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -112,54 +114,64 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 60vh;
+  /* Background image ki height kam kar di */
   z-index: 0;
   opacity: 1;
-  background: url("https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1200")
-    center/cover no-repeat;
+  background: url("../assets/images/HomeBanner.png") center/cover no-repeat;
   pointer-events: none;
   filter: none;
 }
+
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 60vh;
+  /* Overlay bhi same height */
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
   pointer-events: none;
 }
+
 .hero-pattern,
 .particle {
   display: none;
 }
 
 @keyframes textBounce {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-15px);
   }
 }
+
 @keyframes textFadeInUp {
   0% {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes pulseScale {
+
   0%,
   100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -169,11 +181,13 @@
   animation: textBounce 3s ease-in-out infinite;
   animation-delay: 0.5s;
 }
+
 .animate-fadeInUpDelayed {
   animation: textFadeInUp 1s ease forwards;
   animation-delay: 1s;
   opacity: 0;
 }
+
 .animate-pulseScaleDelayed {
   animation: pulseScale 4s ease-in-out infinite;
   animation-delay: 2s;
@@ -184,35 +198,42 @@
   from {
     width: 0;
   }
+
   to {
     width: 200px;
   }
 }
+
 @keyframes fadeInLeft {
   from {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
+
 @keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes bounceIn {
   from {
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -222,13 +243,16 @@
 .animate-fadeInLeft {
   animation: fadeInLeft 0.8s ease-out forwards;
 }
+
 .animate-slideUp {
   animation: slideUp 0.8s ease-out forwards;
   opacity: 0;
 }
+
 .animate-bounceIn {
   animation: bounceIn 0.6s ease-out forwards;
 }
+
 .animate-expandWidth {
   animation: expandWidth 2s ease-out 0.5s forwards;
 }
@@ -238,10 +262,12 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
@@ -252,69 +278,86 @@
     opacity: 0;
     transform: translateY(30px) scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes bounceIn {
   from {
     opacity: 0;
     transform: scale(0.3);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   70% {
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
+
 @keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(60px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
+
 @keyframes rotate {
   from {
     transform: rotate(0);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 @keyframes pulse {
+
   0%,
   100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.02);
   }
@@ -326,16 +369,19 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -351,13 +397,16 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
 }
+
 .animate-scroll {
   animation: scroll 20s linear infinite;
 }
+
 .animate-scroll:hover {
   animation-play-state: paused;
 }

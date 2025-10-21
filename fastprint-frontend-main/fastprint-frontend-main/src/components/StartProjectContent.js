@@ -2,8 +2,6 @@
 // app/start-project/page.jsx
 import { useRouter, useSearchParams } from "next/navigation"; // Next.js v13+ hook for programmatic navigation
 import { useState, useEffect } from "react";
-import { clearDesignProjectData } from "@/utils/designProjectPersistence";
-import { deleteFileFromIndexedDB } from "@/utils/indexedDbFileStore";
 
 // Images
 import Image1 from "@/assets/images/startproject1.png";
@@ -123,58 +121,6 @@ const StartProjectContent = () => {
       category: selectedCategory,
     };
 
-    // If creating a new project (not editing), clear previous persisted data so fields are fresh
-    if (!isEdit) {
-      try {
-        // Try to remove any design project data and associated indexedDB blobs
-        const existingDesign = localStorage.getItem('designProjectData');
-        if (existingDesign) {
-          try {
-            const parsed = JSON.parse(existingDesign);
-            // interiorFileData and coverFileData may contain idbKey
-            const interior = parsed.interiorFileData;
-            const cover = parsed.coverFileData;
-            if (interior && interior.idbKey) {
-              deleteFileFromIndexedDB(interior.idbKey).catch(() => {});
-            }
-            if (cover && cover.idbKey) {
-              deleteFileFromIndexedDB(cover.idbKey).catch(() => {});
-            }
-          } catch (e) {
-            // ignore parse errors
-          }
-        }
-      } catch (e) {
-        // ignore failures
-      }
-
-      // Clear localStorage keys used across the flow
-      [
-        'projectData',
-        'previewFormData',
-        'previewProjectData',
-        'previewDropdowns',
-        'shopData',
-        'paymentData',
-        'pendingOrderData',
-        'designProjectData',
-      ].forEach((k) => {
-        try { localStorage.removeItem(k); } catch (e) {}
-      });
-
-      // Clear in-memory temporary files
-      try {
-        if (typeof window !== 'undefined') {
-          delete window.tempBookFileForSubmission;
-          delete window.tempCoverFileForSubmission;
-        }
-      } catch (e) {}
-
-      // Clear design project helper storage
-      try { clearDesignProjectData(); } catch (e) {}
-    }
-
-    // Persist the new projectData
     localStorage.setItem("projectData", JSON.stringify(projectData));
     const targetUrl = isEdit ? "/design-project?edit=true" : "/design-project";
 

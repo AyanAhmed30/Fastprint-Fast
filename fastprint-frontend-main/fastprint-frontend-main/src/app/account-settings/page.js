@@ -841,7 +841,7 @@ export default function AccountSettings() {
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
               <h2 className="text-[#2A428C] font-bold text-xl sm:text-2xl lg:text-3xl">
-                Account Type
+                Account Category
               </h2>
               <div className="flex-1 h-px bg-gradient-to-r from-[#2A428C]/30 to-transparent"></div>
             </div>
@@ -909,11 +909,7 @@ export default function AccountSettings() {
 
           <div className="w-full">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-1 h-8 bg-gradient-to-b from-[#016AB3] to-[#00AEDC] rounded-full animate-pulse"></div>
-              <h2 className="text-[#2A428C] font-bold text-xl sm:text-2xl lg:text-3xl">
-                Account Management
-              </h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-[#2A428C]/30 to-transparent"></div>
+            
             </div>
             <hr className="border-black/20 mb-4 sm:mb-6" />
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">

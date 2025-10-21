@@ -33,7 +33,51 @@ import image43 from "@/assets/images/image4332.png";
 import Image from "next/image";
 import Faq from "@/components/Faq";
 import Testimonials from "@/components/Testimonials";
+import Link from "next/link";
 
+import img1 from "@/assets/images/blog-card-1.jpg";
+import img2 from "@/assets/images/blog-card-2.jpg";
+import img3 from "@/assets/images/blog-card-3.jpg";
+import readMoreArrow from "@/assets/images/read-more-arrow.png";
+import { motion } from "framer-motion"; 
+
+
+// Blog data
+const blogs = [
+  {
+    id: 1,
+    title: "Benefits of Book Writing Services",
+    excerpt:
+      "Inner Blogs Advantages of Book Writing Services Many who aspire to writing their book find it an unachievable goal in today's fast-paced society, particularly given the high workload associated with book production and publishing. Writing can be intimidating no matter",
+    image: img1,
+    slug: "benefits-of-book-writing-services",
+    content: "Full blog content would go here...",
+    date: "June 15, 2024",
+    author: "Admin",
+  },
+  {
+    id: 2,
+    title: "Benefits of Book Publishing Services",
+    excerpt:
+      "Inner Blogs The Advantages of Book Publishing Services: Why Authors Need Professional Assistance Publishing a book can be an arduous journey, from initial concept to its arrival at an online retailer and beyond. One way to streamline this process is",
+    image: img2,
+    slug: "benefits-of-book-publishing-services",
+    content: "Full blog content would go here...",
+    date: "June 10, 2024",
+    author: "Admin",
+  },
+  {
+    id: 3,
+    title: "Benefits of EDDM and DMM Services",
+    excerpt:
+      "Inner Blogs In today's digital era, many businesses have transitioned their marketing activities online. Our guide to EDDM and DMM services: How to Maximize Direct Mail Marketing is here to provide guidance in using direct mail marketing to its fullest",
+    image: img3,
+    slug: "benefits-of-eddm-and-dmm-services",
+    content: "Full blog content would go here...",
+    date: "June 5, 2024",
+    author: "Admin",
+  },
+];
 
 const Home = () => {
   const router = useRouter();
@@ -69,18 +113,17 @@ const Home = () => {
     <>
       {/* Hero Section */}
       <div
-        className="relative w-full h-[80vh] overflow-hidden"
+        className="relative w-full h-auto overflow-hidden"
         style={{ backgroundColor: "transparent" }}
       >
         <div className="book-bg"></div>
         <div className="overlay"></div>
 
-        <div className="relative z-10 flex flex-col justify-start items-center text-center px-4 h-[60vh] pt-12">
+        <div className="relative z-10 flex flex-col justify-start items-center text-center px-4 h-[60vh] pt-3 sm:pt-12">
           <h1
-            className="animate-textBounce text-glow mb-1"
+            className="animate-textBounce sm:text-7xl pb-0 sm:pb-1 text-3xl text-glow mb-1 leading-tight"
             style={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: "clamp(3.5rem, 10vw, 6rem)",
+              fontFamily: "'Playpen Sans', cursive",
               fontWeight: 900,
               background: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
               backgroundClip: "text",
@@ -90,6 +133,7 @@ const Home = () => {
           >
             Fast Print Guys
           </h1>
+
           <h2
             className="text-[40px] leading-[48px] font-bold mb-2 animate-fadeInUpDelayed"
             style={{
@@ -120,19 +164,20 @@ const Home = () => {
             uncompromising quality. No hidden fees, no delays – just exceptional
             results delivered on time, every time.
           </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-pulseScaleDelayed">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 animate-pulseScaleDelayed">
+            {/* Primary Button - Smaller */}
             <button
               onClick={handleQuoteClick}
-              className="relative px-6 py-3 text-white rounded-full text-base font-semibold border border-transparent transition-all duration-500 cursor-pointer hover-lift overflow-hidden group"
+              className="relative px-4 py-2 text-white rounded-full text-sm font-semibold border border-transparent transition-all duration-500 cursor-pointer hover-lift overflow-hidden group"
               style={{
                 background: "linear-gradient(135deg, #f59e0b, #f97316)",
                 fontFamily: "'Inter', sans-serif",
               }}
             >
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center gap-1.5">
                 <svg
-                  width="18"
-                  height="18"
+                  width="14"
+                  height="14"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -144,37 +189,42 @@ const Home = () => {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
-            <div
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-center md:text-left wiggle pulse"
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                fontFamily: "'Inter', sans-serif",
-                color: "#fbbf24",
-                fontWeight: 600,
-              }}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+
+            {/* Secondary Button - Smaller */}
+            <Link href="/signup">
+              <div
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-center md:text-left wiggle pulse"
+                style={{
+                  background: "rgba(255, 255, 255, 0.1)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  fontFamily: "'Inter', sans-serif",
+                  color: "#fbbf24",
+                  fontWeight: 600,
+                  fontSize: "0.875rem", // text-sm
+                }}
               >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              10% Off First Order - Start Today!
-            </div>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                Create your free account
+              </div>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Services Section */}
-      <div className="w-full min-h-screen flex justify-center items-center px-0 py-10 bg-transparent -mt-12 rounded-t-lg">
+      <div className="w-full h-auto flex justify-center items-center px-0 py-10 bg-transparent -mt-12 rounded-t-lg">
         <div
-          className="w-full min-h-screen rounded-none backdrop-blur-[200px] bg-gradient-to-br from-blue-100 via-pink-100 to-blue-100 flex flex-col sm:px-8 py-12 relative overflow-hidden"
+          className="w-full h-auto  rounded-none backdrop-blur-[200px] bg-gradient-to-br from-blue-100 via-pink-100 to-blue-100 flex flex-col sm:px-8 py-12 relative overflow-hidden"
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           id="services-section"
         >
@@ -222,7 +272,7 @@ const Home = () => {
               <h2 className="font-extrabold mb-4 text-gray-900 animate-fadeInLeft text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight sm:leading-snug md:leading-tight lg:leading-snug">
                 <span className="inline-block hover:scale-110 transition-transform duration-300">
                   Our
-                </span>
+                </span>{""}
                 <span className="hover:scale-110 transition-transform duration-300 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent animate-pulse block sm:inline-block mt-0 sm:mt-0">
                   Services
                 </span>
@@ -267,10 +317,11 @@ const Home = () => {
           </div>
 
           <div className="w-full flex justify-center px-6 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-[1440px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full">
               {[
                 {
                   title: "Book Printing",
+                  slug: "book-printing",
                   description:
                     "Personalized book printing for memoirs, novels, cookbooks, workbooks, children's books, and more. Choose from hardcover, paperback, coil bound, or saddle stitch.",
                   icon: (
@@ -294,6 +345,7 @@ const Home = () => {
                 },
                 {
                   title: "Book Writing & Formatting",
+                  slug: "book-writing-formatting",
                   description:
                     "Clear structure, engaging content, and proper formatting for readability with consistent fonts, margins, headers, and spacing.",
                   icon: (
@@ -316,9 +368,10 @@ const Home = () => {
                   hoverGradient: "from-emerald-600 to-emerald-700",
                 },
                 {
-                  title: "Book Cover Design",
-                  description:
-                    "Compelling covers with striking images, vibrant colors, and balanced typography that fit your genre perfectly.",
+                    title: "Book Cover Design",
+                    slug: "book-cover-design",
+                    description:
+                      "Compelling covers with striking images, vibrant colors, and balanced typography that fit your genre perfectly.",
                   icon: (
                     <svg
                       className="w-12 h-12"
@@ -340,6 +393,7 @@ const Home = () => {
                 },
                 {
                   title: "Book Publishing Services",
+                  slug: "book-publishing-services",
                   description:
                     "Guidance for both traditional and self-publishing, ensuring your manuscript is polished, formatted, and reader-ready.",
                   icon: (
@@ -365,6 +419,7 @@ const Home = () => {
                 (
                   {
                     title,
+                    slug,
                     description,
                     icon,
                     gradient,
@@ -415,6 +470,15 @@ const Home = () => {
                       <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                         {description}
                       </p>
+                      {/* Learn More CTA */}
+                      <div className="mt-6">
+                        <button
+                          onClick={() => router.push(slug ? `/services/${slug}` : "/services")}
+                          className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r ${gradient} hover:scale-105 transition-transform duration-200`}
+                        >
+                          Learn More
+                        </button>
+                      </div>
                     </div>
                     <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-blue-200/50 transition-all duration-500"></div>
                     <div
@@ -774,8 +838,9 @@ const Home = () => {
         <div className="max-w-[1440px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
           {[
             {
-              title: "Print Book",
-              description:
+                  title: "Print Book",
+                  slug: "print-book",
+                  description:
                 "Personalized book printing for memoirs, novels, cookbooks, workbooks, children's books, and much more is our specialty.",
               img: c1,
               gradient: "from-blue-500 to-blue-600",
@@ -784,6 +849,7 @@ const Home = () => {
             },
             {
               title: "YearBook",
+              slug: "yearbook",
               description:
                 "A children's book captivates young readers with imaginative stories and vibrant illustrations. It aims to entertain while imparting...",
               img: c2,
@@ -809,8 +875,8 @@ const Home = () => {
               bgGradient: "from-orange-50 to-orange-100",
               icon: "📱",
             },
-           
-           
+
+
           ].map(
             (
               { title, description, img, gradient, bgGradient, icon },
@@ -818,9 +884,8 @@ const Home = () => {
             ) => (
               <div
                 key={title}
-                className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${
-                  index + 1
-                } backdrop-blur-sm`}
+                className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${index + 1
+                  } backdrop-blur-sm`}
               >
                 <div
                   className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${bgGradient} rounded-full opacity-20 transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`}
@@ -869,9 +934,9 @@ const Home = () => {
                   <p className="text-gray-600 text-sm leading-relaxed flex-grow animate-fadeInUp stagger-3 group-hover:text-gray-700 transition-colors duration-300">
                     {description}
                   </p>
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-4 pt-4 border-t border-gray-100">
                     <button
-                      onClick={() => router.push("/products")}
+                      onClick={() => router.push(slug ? `/services/${slug}` : "/products")}
                       className={`w-full py-3 bg-gradient-to-r ${gradient} text-white font-medium rounded-xl opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-300 hover:scale-105`}
                     >
                       Learn More
@@ -914,7 +979,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-       <section className="w-full py-32 bg-white">
+      <section className="w-full py-32 bg-white">
         <div
           className="max-w-[1600px] mx-auto px-12"
           data-animate
@@ -1300,132 +1365,62 @@ const Home = () => {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Benefits of Book Writing Services",
-                desc: "Inner Blogs Advantages of Book Writing Services Many who aspire to writing their book find it an unachievable goal in…",
-                img: image34,
-                category: "Writing",
-                date: "June 16, 2025",
-                read: "5 min read",
-                color: "blue",
-              },
-              {
-                title: "Benefits of Book Publishing Services",
-                desc: "Inner Blogs The Advantages of Book Publishing Services: Why Authors Need Professional Assistance Publishing a book can be an arduous…",
-                img: image35,
-                category: "Publishing",
-                date: "June 16, 2025",
-                read: "7 min read",
-                color: "purple",
-              },
-              {
-                title: "Benefits of EDDM and DMM Services",
-                desc: "Inner Blogs In today's digital era, many businesses have transitioned their marketing activities online. Our guide to EDDM and DMM…",
-                img: image36,
-                category: "Marketing",
-                date: "June 13, 2025",
-                read: "6 min read",
-                color: "cyan",
-              },
-            ].map((blog, i) => (
-              <div
-                key={i}
-                className="group relative bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 card-hover opacity-0 animate-[slideUp_0.8s_ease-out_0.8s_forwards] border border-white/50"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-${blog.color}-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative overflow-hidden">
-                  <Image
-                    src={blog.img}
-                    alt={blog.title}
-                    className="w-full h-64 object-cover transform transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span
-                    className={`absolute top-4 left-4 bg-${blog.color}-500/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-medium`}
-                  >
-                    {blog.category}
-                  </span>
-                  <span className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-slate-700 text-sm px-3 py-1 rounded-full shadow-lg">
-                    {blog.date}
-                  </span>
-                </div>
-                <div className="relative p-6 flex flex-col h-full">
-                  <div className="flex items-center gap-2 mb-3 text-xs text-slate-500">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {blog.read}
-                  </div>
-                  <h3
-                    className={`text-slate-800 text-xl font-bold mb-3 group-hover:text-${blog.color}-600 transition-colors duration-300 leading-tight`}
-                  >
-                    {blog.title}
-                  </h3>
-                  <p className="text-slate-600 flex-grow mb-4 leading-relaxed">
-                    {blog.desc}
-                  </p>
-                  <button
-                    className={`group/btn relative self-start px-6 py-3 bg-gradient-to-r from-${
-                      blog.color
-                    }-600 to-${
-                      blog.color === "cyan"
-                        ? "blue"
-                        : blog.color === "purple"
-                        ? "pink"
-                        : "cyan"
-                    }-500 text-white font-medium text-sm rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 overflow-hidden`}
-                  >
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-r from-${
-                        blog.color
-                      }-700 to-${
-                        blog.color === "cyan"
-                          ? "blue"
-                          : blog.color === "purple"
-                          ? "pink"
-                          : "cyan"
-                      }-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300`}
-                    ></div>
-                    <span className="relative flex items-center gap-2">
-                      Read More
-                      <svg
-                        className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                     {blogs.map((blog, index) => (
+                       <motion.div
+                         key={blog.id}
+                         className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                         initial={{ opacity: 0, y: 30 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: true }}
+                         transition={{ duration: 0.4, delay: index * 0.15 }}
+                       >
+                         <Link href={`/resources/blogs/${blog.slug}`} passHref>
+                           <div className="block group cursor-pointer">
+                             <div className="relative h-48 rounded-xl m-3 overflow-hidden">
+                               <Image
+                                 src={blog.image}
+                                 alt={blog.title}
+                                 fill
+                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                 style={{ objectFit: "cover" }}
+                                 priority
+                               />
+                             </div>
+                           </div>
+                         </Link>
+         
+                         <div className="p-5">
+                           <Link href={`/resources/blogs/${blog.slug}`} passHref>
+                             <div className="block group cursor-pointer">
+                               <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 hover:text-blue-600">
+                                 {blog.title}
+                               </h3>
+                             </div>
+                           </Link>
+                           <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-5">
+                             {blog.excerpt}
+                           </p>
+         
+                           <Link href={`/resources/blogs/${blog.slug}`} passHref>
+                             <div className="text-blue-600 font-medium text-sm flex gap-2 items-center cursor-pointer hover:text-blue-800">
+                               Read More
+                               <span className="inline-block bottom-0">
+                                 <Image src={readMoreArrow} alt="Read More" />
+                               </span>
+                             </div>
+                           </Link>
+                         </div>
+                       </motion.div>
+                     ))}
+                   </div>
         </div>
       </div>
 
       {/* Testimonials */}
-    <Testimonials/>
+      <Testimonials />
 
-         
+
 
       {/* FAQ */}
       <Faq />

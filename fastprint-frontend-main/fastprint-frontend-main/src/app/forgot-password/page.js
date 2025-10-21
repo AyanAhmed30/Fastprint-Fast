@@ -5,7 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/assets/images/fastlogo.svg";
-import singup from "@/assets/images/signup.png";
+import signup from "@/assets/images/loginUI.jpg";
 import Image from "next/image";
 import { BASE_URL } from "@/services/baseUrl";
 
@@ -97,31 +97,28 @@ const ForgetPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">
-      {/* Left Side */}
+      {/* Left Side - Image */}
       <div
-        className={`w-full lg:w-1/2 relative flex items-center justify-center h-56 sm:h-72 md:h-96 lg:h-auto transition-all duration-1000 ease-out ${
-          mounted ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`w-full lg:w-1/2 flex items-center justify-center bg-[#041643] transition-opacity duration-1000 ${
+          mounted ? "opacity-100" : "opacity-0"
         }`}
-        style={{ backgroundColor: "rgba(4, 22, 67, 1)" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-cyan-900/20 animate-pulse"></div>
-        <div className="relative z-20 flex items-center justify-center w-full h-full">
+        <div className="relative w-full h-full">
+          <Link href={"/"}>
+            <Image
+              src={Logo}
+              alt="Fast Print Guys Logo"
+              width={100}
+              height={100}
+              className="z-50 absolute top-5 left-5"
+            />
+          </Link>
           <Image
-            src={singup}
-            alt="Studying People Illustration"
-            className="max-w-[180px] sm:max-w-[260px] md:max-w-[320px] lg:max-w-md object-contain animate-pulse-slow"
-            style={{ animationTimingFunction: "ease-in-out" }}
-          />
-        </div>
-        <div
-          className={`absolute top-4 left-4 sm:left-6 z-30 transition-all duration-700 delay-300 ${
-            mounted ? "scale-100 opacity-100" : "scale-75 opacity-0"
-          }`}
-        >
-          <Image
-            src={Logo}
-            alt="Logo"
-            className="w-14 sm:w-16 md:w-20 h-auto object-contain hover:scale-110 transition-transform duration-300"
+            src={signup}
+            alt="Signup Illustration"
+            fill
+            className="object-cover object-center"
+            priority
           />
         </div>
       </div>
@@ -270,7 +267,7 @@ const ForgetPassword = () => {
           {/* ✅ Global error banner (now shows all errors including validation) */}
           {error && !success && (
             <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
-              <p className="text-red-590 text-sm text-center flex items-center justify-center">
+              <p className="text-red-600 text-sm text-center flex items-center justify-center">
                 <svg
                   className="w-4 h-4 mr-2"
                   fill="currentColor"

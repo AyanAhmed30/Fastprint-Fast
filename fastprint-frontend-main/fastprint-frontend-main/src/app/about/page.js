@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import BackgroundImage from "@/assets/images/AboutUSBanner.png"; // ✅ Add this
 
 import abt from "@/assets/images/abt.svg";
 import image45 from "@/assets/images/image45.png";
@@ -156,81 +157,68 @@ const About = () => {
     <>
 
       {/* Hero Section - Enhanced */}
-      <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          ></div>
-          <div
-            className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          ></div>
-        </div>
+    <section className="relative w-full py-14 bg-gradient-to-br from-[#070c16] via-[#06090e] to-[#171e27] overflow-hidden">
+  {/* Background Image */}
+  <div
+    className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+    style={{
+      backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
+    }}
+  ></div>
 
-        {/* Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
+  {/* Animated Background Elements (Blur Circles) - Keep them */}
+  <div className="absolute inset-0 z-10">
+    <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+    <div
+      className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+      style={{ animationDelay: "1s" }}
+    ></div>
+    <div
+      className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+      style={{ animationDelay: "2s" }}
+    ></div>
+  </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-10">
-          {/* Left Content */}
-          <div className="flex-1 text-white space-y-8">
-            <div className="scroll-animate slide-in-left">
-              <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
-                Trusted Since 2012
-              </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                About{" "}
-                <span className="gradient-text bg-gradient-to-r from-orange-400 to-pink-500">
-                  Fast Print Guys
-                </span>
-              </h1>
-              <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                We're not just a printing company—we're your creative partners.
-                With over a decade of experience, we transform ideas into
-                stunning printed materials that make lasting impressions.
-              </p>
-            </div>
+  {/* Content */}
+  <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+    {/* Left Content */}
+    <div className="flex-1 text-white space-y-8">
+      <div className="scroll-animate slide-in-left">
+        <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
+          Trusted Since 2012
+        </span>
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          About{" "}
+          <span className="text-white">
+            Fast Print Guys
+          </span>
+        </h1>
+        <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+          We're not just a printing company—we're your creative partners.
+          With over a decade of experience, we transform ideas into
+          stunning printed materials that make lasting impressions.
+        </p>
+      </div>
 
-            <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
-              <button
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
-                onClick={() => router.push("/services")}
-              >
-                Explore Services
-              </button>
-              <button
-                className="px-8 py-4 glass-effect text-white font-semibold rounded-full hover-lift transition-all duration-300"
-                onClick={() => router.push("/portfolio")}
-              >
-                View Portfolio
-              </button>
-            </div>
-          </div>
+      <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+        <button
+          className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+          onClick={() => router.push("/services")}
+        >
+          Explore Services
+        </button>
+        <button
+          className="px-8 py-4 glass-effect text-white font-semibold rounded-full hover-lift transition-all duration-300"
+          onClick={() => router.push("/portfolio")}
+        >
+          View Portfolio
+        </button>
+      </div>
+    </div>
 
-          {/* Right Image */}
-          <div className="flex-1 scroll-animate slide-in-right">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl blur opacity-30 float"></div>
-              <Image
-                src={abt}
-                alt="About Fast Print Guys"
-                className="relative w-full max-w-lg h-auto object-cover rounded-2xl shadow-2xl hover-lift"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+
+  </div>
+</section>
 
       {/* Stats Section - New */}
       <section className="scroll-animate stats-section py-20 bg-white">
@@ -314,15 +302,13 @@ const About = () => {
       </section>
 
       {/* Enhanced Services Section */}
-      <div className="w-full min-h-screen flex justify-center items-center px-0 py-10 bg-transparent -mt-12 rounded-t-lg">
+      <div className="w-full h-auto flex justify-center items-center px-0 py-10 bg-transparent -mt-12 rounded-t-lg">
         <div
-          className="w-full min-h-screen rounded-none backdrop-blur-[200px] bg-gradient-to-br from-blue-100 via-pink-100 to-blue-100 flex flex-col px-8 py-12 relative overflow-hidden"
+          className="w-full h-auto  rounded-none backdrop-blur-[200px] bg-gradient-to-br from-blue-100 via-pink-100 to-blue-100 flex flex-col sm:px-8 py-12 relative overflow-hidden"
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           id="services-section"
         >
-          {/* Animated Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Floating particles */}
             <div
               className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-pulse"
               style={{ animationDelay: "0s", animationDuration: "3s" }}
@@ -343,8 +329,6 @@ const About = () => {
               className="absolute bottom-60 left-20 w-4 h-4 bg-pink-300/25 rounded-full animate-pulse"
               style={{ animationDelay: "0.5s", animationDuration: "4s" }}
             ></div>
-
-            {/* Geometric shapes */}
             <div
               className="absolute top-20 left-10 w-20 h-20 bg-blue-200/20 rounded-full animate-bounce"
               style={{ animationDelay: "1s", animationDuration: "6s" }}
@@ -363,18 +347,16 @@ const About = () => {
             ></div>
           </div>
 
-          {/* Top Row - Heading & Button */}
-          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between mb-12 pl-12 md:pl-0 relative z-10">
+          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between mb-12 pl-12 md:pl-0 px-8 relative z-10">
             <div className="relative">
-              <h2 className="text-5xl font-extrabold mb-4 text-gray-900 animate-fadeInLeft">
+              <h2 className="font-extrabold mb-4 text-gray-900 animate-fadeInLeft text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight sm:leading-snug md:leading-tight lg:leading-snug">
                 <span className="inline-block hover:scale-110 transition-transform duration-300">
                   Our
-                </span>
-                <span className="ml-3 text-blue-600 inline-block hover:scale-110 transition-transform duration-300 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent animate-pulse">
+                </span>{""}
+                <span className="hover:scale-110 transition-transform duration-300 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent animate-pulse block sm:inline-block mt-0 sm:mt-0">
                   Services
                 </span>
               </h2>
-              {/* Animated underline */}
               <div
                 className="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 animate-expandWidth"
                 style={{ animation: "expandWidth 2s ease-out 0.5s forwards" }}
@@ -388,7 +370,7 @@ const About = () => {
               </p>
             </div>
             <button
-              onClick={() => router.push("/portfolio")}
+              onClick={() => router.push("/services")}
               className="group mt-6 md:mt-0 flex justify-center items-center px-8 py-4 rounded-full text-white font-medium text-base shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-bounceIn relative overflow-hidden"
               style={{
                 background:
@@ -396,7 +378,6 @@ const About = () => {
                 animationDelay: "0.6s",
               }}
             >
-              {/* Button shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <svg
                 className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
@@ -415,12 +396,12 @@ const About = () => {
             </button>
           </div>
 
-          {/* Service Cards Grid */}
           <div className="w-full flex justify-center px-6 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-[1440px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full">
               {[
                 {
                   title: "Book Printing",
+                  slug: "book-printing",
                   description:
                     "Personalized book printing for memoirs, novels, cookbooks, workbooks, children's books, and more. Choose from hardcover, paperback, coil bound, or saddle stitch.",
                   icon: (
@@ -444,6 +425,7 @@ const About = () => {
                 },
                 {
                   title: "Book Writing & Formatting",
+                  slug: "book-writing-formatting",
                   description:
                     "Clear structure, engaging content, and proper formatting for readability with consistent fonts, margins, headers, and spacing.",
                   icon: (
@@ -466,9 +448,10 @@ const About = () => {
                   hoverGradient: "from-emerald-600 to-emerald-700",
                 },
                 {
-                  title: "Book Cover Design",
-                  description:
-                    "Compelling covers with striking images, vibrant colors, and balanced typography that fit your genre perfectly.",
+                    title: "Book Cover Design",
+                    slug: "book-cover-design",
+                    description:
+                      "Compelling covers with striking images, vibrant colors, and balanced typography that fit your genre perfectly.",
                   icon: (
                     <svg
                       className="w-12 h-12"
@@ -490,6 +473,7 @@ const About = () => {
                 },
                 {
                   title: "Book Publishing Services",
+                  slug: "book-publishing-services",
                   description:
                     "Guidance for both traditional and self-publishing, ensuring your manuscript is polished, formatted, and reader-ready.",
                   icon: (
@@ -515,6 +499,7 @@ const About = () => {
                 (
                   {
                     title,
+                    slug,
                     description,
                     icon,
                     gradient,
@@ -528,15 +513,12 @@ const About = () => {
                     className={`group relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8 flex flex-col justify-between text-left transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:rotate-1 animate-slideUp overflow-hidden`}
                     style={{ animationDelay: `${index * 0.15}s` }}
                   >
-                    {/* Animated Background Patterns */}
                     <div
                       className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${bgGradient} rounded-full opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-150 group-hover:opacity-20 transition-all duration-700`}
                     ></div>
                     <div
                       className={`absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${bgGradient} rounded-full opacity-10 transform -translate-x-6 translate-y-6 group-hover:scale-125 transition-all duration-700`}
                     ></div>
-
-                    {/* Floating particles on hover */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div
                         className={`absolute top-4 right-4 w-1 h-1 bg-gradient-to-r ${gradient} rounded-full animate-ping`}
@@ -551,21 +533,16 @@ const About = () => {
                         style={{ animationDelay: "1s" }}
                       ></div>
                     </div>
-
-                    {/* Icon Container */}
                     <div
                       className={`relative z-10 w-20 h-20 bg-gradient-to-br ${gradient} group-hover:bg-gradient-to-br group-hover:${hoverGradient} rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}
                     >
                       <div className="group-hover:scale-110 transition-transform duration-300">
                         {icon}
                       </div>
-                      {/* Icon glow effect */}
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500`}
                       ></div>
                     </div>
-
-                    {/* Content */}
                     <div className="relative z-10">
                       <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300 group-hover:scale-105 transform origin-left">
                         {title}
@@ -573,18 +550,21 @@ const About = () => {
                       <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                         {description}
                       </p>
+                      {/* Learn More CTA */}
+                      <div className="mt-6">
+                        <button
+                          onClick={() => router.push(slug ? `/services/${slug}` : "/services")}
+                          className={`mt-4 inline-flex items-center px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r ${gradient} hover:scale-105 transition-transform duration-200`}
+                        >
+                          Learn More
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Interactive Elements */}
                     <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-blue-200/50 transition-all duration-500"></div>
                     <div
                       className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-b-3xl`}
                     ></div>
-
-                    {/* Hover overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
-
-                    {/* Click ripple effect container */}
                     <div className="absolute inset-0 rounded-3xl overflow-hidden">
                       <div className="absolute inset-0 bg-white/20 transform scale-0 group-active:scale-100 transition-transform duration-150 rounded-full"></div>
                     </div>
@@ -593,68 +573,6 @@ const About = () => {
               )}
             </div>
           </div>
-
-          {/* Additional CSS Keyframes would need to be added to your CSS file */}
-          <style jsx>{`
-            @keyframes expandWidth {
-              from {
-                width: 0;
-              }
-              to {
-                width: 200px;
-              }
-            }
-
-            @keyframes fadeInLeft {
-              from {
-                opacity: 0;
-                transform: translateX(-30px);
-              }
-              to {
-                opacity: 1;
-                transform: translateX(0);
-              }
-            }
-
-            @keyframes slideUp {
-              from {
-                opacity: 0;
-                transform: translateY(30px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-
-            @keyframes bounceIn {
-              from {
-                opacity: 0;
-                transform: scale(0.8);
-              }
-              to {
-                opacity: 1;
-                transform: scale(1);
-              }
-            }
-
-            .animate-fadeInLeft {
-              animation: fadeInLeft 0.8s ease-out forwards;
-            }
-
-            .animate-slideUp {
-              animation: slideUp 0.8s ease-out forwards;
-              opacity: 0;
-            }
-
-            .animate-bounceIn {
-              animation: bounceIn 0.6s ease-out forwards;
-            }
-
-            .animate-expandWidth {
-              animation: expandWidth 2s ease-out 0.5s forwards;
-            }
-          `}</style>
         </div>
       </div>
 

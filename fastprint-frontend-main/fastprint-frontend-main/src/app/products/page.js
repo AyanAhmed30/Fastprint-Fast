@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 
 import pro from "@/assets/images/pro.png";
 import arr from "@/assets/images/arr.png";
+import YourBackgroundImage from "@/assets/images/ProductBanner.png"; // ✅ Import your image
+
 
 
 import img46 from "@/assets/images/img46.png";
@@ -44,67 +46,63 @@ const Products = () => {
     <>
 
       {/* Hero Section */}
-      <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
+     <section className="relative w-full py-14 bg-gradient-to-br from-[#070c16] via-[#06090e] to-[#171e27] overflow-hidden">
+  {/* Background Image */}
+  <div
+    className="absolute inset-0 bg-cover bg-center opacity-20 z-0"
+    style={{
+      backgroundImage: `url(${YourBackgroundImage.src})`,
+    }}
+  ></div>
 
-        {/* Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px"
-          }}
-        ></div>
+  {/* Animated Background Elements (Blur Circles) */}
+  <div className="absolute inset-0 z-10">
+    <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+    <div
+      className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+      style={{ animationDelay: "1s" }}
+    ></div>
+    <div
+      className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+      style={{ animationDelay: "2s" }}
+    ></div>
+  </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-10">
-          {/* Left Content */}
-          <div className="flex-1 text-white space-y-8">
-            <div className="scroll-animate slide-in-left">
-              <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
-                Quality You Can Count On
-              </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Our {' '}
-                <span className="">
-                  Premium Products
-                </span>
-              </h1>
-              <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Explore our diverse range of printing products crafted with precision and care. From custom prints to large-scale orders, we deliver excellence every time.
-              </p>
-            </div>
+  {/* Content */}
+  <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+    {/* Left Content */}
+    <div className="flex-1 text-white space-y-8">
+      <div className="scroll-animate slide-in-left">
+        <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
+          Quality You Can Count On
+        </span>
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          Our{" "}
+          <span className="text-white">
+            Premium Products
+          </span>
+        </h1>
+        <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+          Explore our diverse range of printing products crafted with precision and care. From custom prints to large-scale orders, we deliver excellence every time.
+        </p>
+      </div>
 
-            <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
-              <button
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
-                onClick={() => router.push("/portfolio")}
-              >
-                View Our Portfolio
-              </button>
-            </div>
-          </div>
+      <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+        <button
+          className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+          onClick={() => router.push("/portfolio")}
+        >
+          View Our Portfolio
+        </button>
+      </div>
+    </div>
 
-          {/* Right Image */}
-          <div className="flex-1 scroll-animate slide-in-right">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl blur opacity-30 float"></div>
-              <img
-                src={pro.src} // Using .src because it's a Next.js imported image
-                alt="Premium Printing Products"
-                className="relative w-full max-w-lg h-auto object-cover rounded-2xl shadow-2xl hover-lift"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+    {/* Right Image (if you add one later, keep this space) */}
+    {/* <div className="flex-1 scroll-animate slide-in-right">
+      <Image ... />
+    </div> */}
+  </div>
+</section>
 
       {/* Book Types Section */}
       <section

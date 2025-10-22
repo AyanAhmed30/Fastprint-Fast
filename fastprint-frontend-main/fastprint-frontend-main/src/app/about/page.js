@@ -194,7 +194,7 @@ const About = () => {
             Fast Print Guys
           </span>
         </h1>
-        <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+        <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
           We're not just a printing company—we're your creative partners.
           With over a decade of experience, we transform ideas into
           stunning printed materials that make lasting impressions.

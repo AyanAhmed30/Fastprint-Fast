@@ -82,7 +82,7 @@ const Products = () => {
             Premium Products
           </span>
         </h1>
-        <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+        <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
           Explore our diverse range of printing products crafted with precision and care. From custom prints to large-scale orders, we deliver excellence every time.
         </p>
       </div>

@@ -18,14 +18,14 @@ import CoilBoundImg from "@/assets/images/coill.jpg";
 import SaddleImg from "@/assets/images/saddlee.jpg";
 import CaseWrap from "@/assets/images/paperbackk.jpg";
 import LinenWrap from "@/assets/images/linenn.jpg";
-import StandardBlackAndWhite from "@/assets/images/int1.png";
-import PremiumBlackAndWhite from "@/assets/images/in2.png";
-import StandardColor from "@/assets/images/in3.png";
-import PremiumColor from "@/assets/images/int4.png";
-import CreamUncoated from "@/assets/images/pp1.jpg";
-import WhiteUncoated from "@/assets/images/pp2.jpg";
-import WhiteCoated from "@/assets/images/pp3.jpg";
-import WhiteCoated2 from "@/assets/images/pp4.jpg";
+import StandardBlackAndWhite from "@/assets/images/pp4.jpg";
+import PremiumBlackAndWhite from "@/assets/images/pp1.jpg";
+import StandardColor from "@/assets/images/pp3.jpg";
+import PremiumColor from "@/assets/images/pp2.jpg";
+import CreamUncoated from "@/assets/images/qa1.png";
+import WhiteUncoated from "@/assets/images/qa2.png";
+import WhiteCoated from "@/assets/images/qa3.png";
+import WhiteCoated2 from "@/assets/images/qa4.png";
 import Glossy from "@/assets/images/gggg.jpg";
 import Matty from "@/assets/images/mmmm.jpg";
 import RightImage from "@/assets/images/right.png";
@@ -100,9 +100,9 @@ const OPTIONS_CONFIG = {
       price: 0.01,
     },
     {
-      name: "70# White-Uncoated",
+      name: "100# White-Coated",
       img: WhiteCoated2,
-      dbName: "70# White-Uncoated",
+      dbName: "100# White-Coated",
       price: 0.02,
     },
     {
@@ -320,8 +320,7 @@ const SummaryRow = ({ pairs }) => {
         <p className="font-semibold text-gray-600">{leftPair[0]}</p>
         <p className="text-black">{leftPair[1]}</p>
       </div>
-
-      {/* Right-aligned item */}
+    {/* Right-aligned item */}
       <div className="text-right">
         <p className="font-semibold text-gray-600">{rightPair[0]}</p>
         <p className="text-black">{rightPair[1]}</p>

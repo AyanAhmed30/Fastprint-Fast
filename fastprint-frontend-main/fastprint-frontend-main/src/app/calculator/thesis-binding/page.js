@@ -185,7 +185,7 @@ const OptionCard = ({
   selectedStampingId = "",
 }) => {
   const isSelected = fieldValue === item.id;
-  
+
   // For stamping options: keep all options accessible
   let isAccessible = accessible;
   if (isStamping) {
@@ -197,9 +197,8 @@ const OptionCard = ({
 
   return (
     <label
-      className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${
-        !isAccessible ? "cursor-not-allowed" : ""
-      }`}
+      className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${!isAccessible ? "cursor-not-allowed" : ""
+        }`}
       style={{ opacity }}
     >
       <div className="relative w-full">
@@ -229,9 +228,8 @@ const OptionCard = ({
           </div>
         ) : (
           <div
-            className={`w-12 h-12 rounded border-2 mb-2 mx-auto mt-3 ${
-              item.bg || "bg-gray-200"
-            }`}
+            className={`w-12 h-12 rounded border-2 mb-2 mx-auto mt-3 ${item.bg || "bg-gray-200"
+              }`}
           ></div>
         )}
       </div>
@@ -299,6 +297,7 @@ const ThesisPricingCalculator = () => {
     interior_color_id: "",
     paper_type_id: "",
   });
+  const [enteredQuantity, setEnteredQuantity] = useState(1);
 
   const [result, setResult] = useState(null);
 
@@ -315,9 +314,23 @@ const ThesisPricingCalculator = () => {
     "paper_type_id",
   ];
 
+  const isPageCountValid = (count) => {
+    const num = Number(count);
+    return !isNaN(num) && num >= 1 && num <= 800;
+  };
+
   const isStepAccessible = (step) => {
     const stepIndex = fieldOrder.indexOf(step);
-    if (stepIndex === 0) return true;
+    if (stepIndex === 0) return true; // bookSize always accessible
+
+    // Special case: for any step AFTER pageCount, require valid pageCount
+    if (stepIndex >= fieldOrder.indexOf("pageCount")) {
+      if (!isPageCountValid(form.pageCount)) {
+        return false;
+      }
+    }
+
+    // Otherwise, check that the immediate previous field is filled
     const prevStep = fieldOrder[stepIndex - 1];
     return form[prevStep] !== "";
   };
@@ -356,10 +369,15 @@ const ThesisPricingCalculator = () => {
     const { name, value, type } = e.target;
     let val = value;
 
-    if (type === "number") {
-      val = value === "" ? "" : Number(value);
-      if (name === "pageCount" && val > 800) {
-        val = 800;
+    if (type === "number" && name === "pageCount") {
+      if (value === "") {
+        val = "";
+      } else {
+        let num = Number(value);
+        if (isNaN(num)) num = "";
+        else if (num < 1) num = 1;
+        else if (num > 800) num = 800;
+        val = num;
       }
     }
 
@@ -373,12 +391,72 @@ const ThesisPricingCalculator = () => {
       }
       return newForm;
     });
-    setResult(null);
+    setResult(null); // Reset result on any form change
   };
 
   // Get currently selected stamping ID (from either field)
   const selectedStampingId = form.foil_stamping_id || form.screen_stamping_id;
+  const handleCalculatePrice = () => {
+    // Validate that all required fields are filled
+    const requiredFields = [
+      "bookSize",
+      "pageCount",
+      "binding_id",
+      "spine_id",
+      "exterior_color_id",
+      "interior_color_id",
+      "paper_type_id",
+    ];
 
+    const nonStampingFilled = requiredFields.every(field => form[field] !== "");
+    const hasStamping = form.foil_stamping_id || form.screen_stamping_id;
+
+    if (!nonStampingFilled || !hasStamping || !enteredQuantity || enteredQuantity <= 0) {
+      alert("Please fill all required fields and enter a valid quantity.");
+      return;
+    }
+
+    // Perform calculation manually (copy logic from useMemo)
+    const findOption = (type, id) =>
+      OPTIONS[type]?.find((opt) => opt.id === id) || {};
+
+    const binding = findOption("binding", form.binding_id);
+    const spine = findOption("spine", form.spine_id);
+    const exteriorColor = findOption("exteriorColor", form.exterior_color_id);
+    const foilStamping = findOption("foilStamping", form.foil_stamping_id);
+    const screenStamping = findOption("screenStamping", form.screen_stamping_id);
+    const cornerProtector = findOption("cornerProtector", form.corner_protector_id);
+    const interiorColor = findOption("interiorColor", form.interior_color_id);
+    const paperType = findOption("paperType", form.paper_type_id);
+
+    const basePrice = [
+      binding,
+      spine,
+      exteriorColor,
+      foilStamping,
+      screenStamping,
+      cornerProtector,
+    ].reduce((sum, opt) => sum + (opt.price || 0), 0);
+
+    const pageBasedCost =
+      ((interiorColor.pricePerPage || 0) + (paperType.pricePerPage || 0)) *
+      parseInt(form.pageCount || 0);
+
+    const costPerBook = basePrice + pageBasedCost;
+    const totalCost = costPerBook * enteredQuantity;
+
+    const discount = DISCOUNT_TIERS.find((tier) => enteredQuantity >= tier.min);
+    const discountAmount = discount ? totalCost * (discount.percent / 100) : 0;
+    const finalAmount = totalCost - discountAmount;
+
+    setResult({
+      costPerBook: costPerBook.toFixed(2),
+      totalCost: totalCost.toFixed(2),
+      discountPercent: discount?.percent || 0,
+      discountAmount: discountAmount.toFixed(2),
+      finalAmount: finalAmount.toFixed(2),
+    });
+  };
   const calculatePrice = useMemo(() => {
     const requiredFields = [
       "bookSize",
@@ -388,7 +466,7 @@ const ThesisPricingCalculator = () => {
       "exterior_color_id",
       "foil_stamping_id",
       "screen_stamping_id",
-      "corner_protector_id",
+
       "interior_color_id",
       "paper_type_id",
     ];
@@ -491,9 +569,9 @@ const ThesisPricingCalculator = () => {
                   onChange={handleChange}
                   type="number"
                   placeholder="Enter Page Count"
-                  min="3"
+                  min="1"
                   max="800"
-                  disabled={!isStepAccessible("pageCount")}
+                  disabled={!form.bookSize} // ✅ Only disable if bookSize not selected
                 />
               </div>
             </div>
@@ -647,15 +725,20 @@ const ThesisPricingCalculator = () => {
                 <p className="text-xs text-white opacity-90 mb-1">Quantity</p>
                 <Input
                   name="quantity"
-                  value={form.quantity}
-                  onChange={handleChange}
+                  value={enteredQuantity}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? "" : Number(e.target.value);
+                    if (val === "" || (val >= 1 && val <= 10000)) { // optional: add max limit
+                      setEnteredQuantity(val === "" ? 1 : val);
+                    }
+                  }}
                   type="number"
                   placeholder="Enter Quantity"
                   min="1"
                 />
               </div>
               <div className="w-full sm:w-1/2 flex items-end">
-                <button className="w-full h-12 bg-[#F8C20A] hover:bg-yellow-500 text-black font-semibold rounded-md transition-colors">
+                <button onClick={handleCalculatePrice} className="w-full h-12 bg-[#F8C20A] hover:bg-yellow-500 text-black font-semibold rounded-md transition-colors">
                   Calculate Price
                 </button>
               </div>
@@ -718,7 +801,10 @@ const ThesisPricingCalculator = () => {
             )}
           </div>
 
-          <ShippingEstimate bookSpecs={form} pricingResult={result} />
+          <ShippingEstimate
+            bookSpecs={{ ...form, quantity: enteredQuantity }}
+            pricingResult={result}
+          />
         </div>
 
         {/* Summary Section */}
@@ -772,22 +858,25 @@ const ThesisPricingCalculator = () => {
                 ],
                 [
                   "Quantity",
-                  form.quantity.toString(),
+                  enteredQuantity.toString(),
                   "Total Pages",
-                  (form.pageCount * form.quantity).toString() || "-",
-                ],
+                  (form.pageCount * enteredQuantity).toString() || "-",
+                ]
               ].map(([label1, value1, label2, value2], i) => (
                 <React.Fragment key={i}>
                   <div className="flex justify-between items-start mb-1 text-sm">
+                    {/* LEFT COLUMN */}
                     <div className="text-left">
                       <p className="font-semibold text-gray-600">{label1}</p>
                       <p className="text-black">{value1}</p>
                     </div>
+                    {/* RIGHT COLUMN */}
                     <div className="text-right">
                       <p className="font-semibold text-gray-600">{label2}</p>
                       <p className="text-black">{value2}</p>
                     </div>
                   </div>
+                  {/* Divider after each row except last */}
                   <div className="w-full h-px bg-gray-200 my-2"></div>
                 </React.Fragment>
               ))}
@@ -795,7 +884,7 @@ const ThesisPricingCalculator = () => {
 
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
-                <GuideTemplateRedirect/>
+                <GuideTemplateRedirect />
                 <RedirectButton />
               </div>
             </div>

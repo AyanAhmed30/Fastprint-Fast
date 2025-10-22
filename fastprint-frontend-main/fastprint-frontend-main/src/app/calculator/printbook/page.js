@@ -100,19 +100,19 @@ const SPECIAL_SIZE_RULES = {
 
 const OPTIONS_CONFIG = {
   interiorColor: [
-    { name: "Standard Black and White ", img: PremiumColor, dbName: "Premium Color" },
+    { name: "Standard Black and White ", img: PremiumColor, dbName: "Standard Black & White" },
 
     {
       name: "Premiun Black and White",
       img: StandardBlackandWhite,
-      dbName: "Standard Black & White",
+      dbName: "Premium Black & White",
     },
     { name: "Standard Color", img: StandardColor, dbName: "Standard Color" },
 
     {
       name: "Premium Color",
       img: PremiumBlackandWhite,
-      dbName: "Premium Black & White",
+      dbName: "Premium Color",
     },
     
   ],
@@ -671,16 +671,24 @@ const OptionSection = ({
   </>
 );
 
-const SummaryRow = ({ pairs }) => (
-  <div className="flex justify-between mb-2 text-sm">
-    {pairs.map(([label, value], j) => (
-      <div key={j}>
-        <p className="font-semibold text-gray-600">{label}</p>
-        <p className="text-black">{value}</p>
+const SummaryRow = ({ pairs }) => {
+  const [leftPair, rightPair] = pairs;
+
+  return (
+    <div className="flex justify-between items-center mb-2 text-sm">
+      {/* Left-aligned item */}
+      <div>
+        <p className="font-semibold text-gray-600">{leftPair[0]}</p>
+        <p className="text-black">{leftPair[1]}</p>
       </div>
-    ))}
-  </div>
-);
+    {/* Right-aligned item */}
+      <div className="text-right">
+        <p className="font-semibold text-gray-600">{rightPair[0]}</p>
+        <p className="text-black">{rightPair[1]}</p>
+      </div>
+    </div>
+  );
+};
 
 const PrintBookCalculator = () => {
   const [form, setForm] = useState({
@@ -792,6 +800,7 @@ const PrintBookCalculator = () => {
     }));
     setResult(null);
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -864,7 +873,7 @@ const PrintBookCalculator = () => {
                 <div className="h-5 mb-1">
                   <p className="text-xs text-white opacity-90">
                     {form.bookSize
-                      ? "MIN-MAX: 2 - 800"
+                      ? "MIN-MAX: 3 - 800"
                       : "Select book size first"}
                   </p>
                 </div>
@@ -874,7 +883,7 @@ const PrintBookCalculator = () => {
                   onChange={handleChange}
                   type="number"
                   placeholder="Enter Page Count"
-                  min="2"
+                  min="3"
                   max="800"
                   className="h-12 bg-white text-black rounded-md"
                   disabled={!stepAccessibility.pageCount}

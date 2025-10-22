@@ -10,7 +10,7 @@ import ShippingEstimate from '@/components/ShippingEstimate';
 
 // Image imports
 import WireOImg from '@/assets/images/wireo.jpg';
-import PremiumColorImg from '@/assets/images/int4.png';
+import PremiumColorImg from '@/assets/images/pp2.jpg';
 import WhiteCoatedImg from '@/assets/images/qa4.png';
 import GlossImg from '@/assets/images/gggg.jpg';
 import MatteImg from '@/assets/images/mmmm.jpg';
@@ -219,8 +219,7 @@ const SummaryRow = ({ pairs }) => {
         <p className="font-semibold text-gray-600">{leftPair[0]}</p>
         <p className="text-black">{leftPair[1]}</p>
       </div>
-
-      {/* Right-aligned item */}
+    {/* Right-aligned item */}
       <div className="text-right">
         <p className="font-semibold text-gray-600">{rightPair[0]}</p>
         <p className="text-black">{rightPair[1]}</p>
@@ -501,7 +500,6 @@ const CalendarCalculator = () => {
               [['Calendar Size', form.calendarSize || '-'], ['Page Count', `${CONSTANT_PAGE_COUNT} (Fixed)`]],
               [['Binding Type', form.binding_id || '-'], ['Interior Color', form.interior_color_id || '-']],
               [['Paper Type', form.paper_type_id || '-'], ['Cover Finish', form.cover_finish_id || '-']],
-              [['Quantity', form.quantity || '-'], ['Status', form.calendarSize && form.binding_id && form.interior_color_id && form.paper_type_id && form.cover_finish_id ? 'Ready to Calculate' : 'Fill Required Fields']]
             ].map((row, i) => (
               <React.Fragment key={i}>
                 <SummaryRow pairs={row} />

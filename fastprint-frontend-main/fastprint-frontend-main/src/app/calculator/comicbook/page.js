@@ -9,14 +9,14 @@ import CoilBoundImg from "@/assets/images/coill.jpg";
 import SaddleImg from "@/assets/images/saddlee.jpg";
 import CaseWrap from "@/assets/images/paperbackk.jpg";
 import LinenWrap from "@/assets/images/linenn.jpg";
-import StandardBlackandWhite from "@/assets/images/int1.png";
+import StandardBlackandWhite from "@/assets/images/pp1.jpg";
 import PremiumBlackandWhite from "@/assets/images/in2.png";
 import StandardColor from "@/assets/images/in3.png";
-import PremiumColor from "@/assets/images/int4.png";
-import Creamuncoated from "@/assets/images/pp1.jpg";
-import Whiteuncoated from "@/assets/images/pp2.jpg";
-import Whitecoated from "@/assets/images/pp3.jpg";
-import Whitecoatedd from "@/assets/images/pp4.jpg";
+import PremiumColor from "@/assets/images/pp2.jpg";
+import Creamuncoated from "@/assets/images/qa1.png";
+import Whiteuncoated from "@/assets/images/qa2.png";
+import Whitecoated from "@/assets/images/qa3.png";
+import Whitecoatedd from "@/assets/images/qa4.png";
 import Glossy from "@/assets/images/gggg.jpg";
 import Matty from "@/assets/images/mmmm.jpg";
 import RightImage from "@/assets/images/right.png";
@@ -52,9 +52,9 @@ const INTERIOR_COLORS = [
 const PAPER_TYPES = [
   {
     id: 1,
-    name: "70# White-Uncoated",
+    name: "100# White-Coated",
     price: 0.02,
-    dbName: "70# White-Uncoated",
+    dbName:  "100# White-Coated"
   },
   {
     id: 2,
@@ -249,8 +249,7 @@ const SummaryRow = ({ pairs }) => {
         <p className="font-semibold text-gray-600">{leftPair[0]}</p>
         <p className="text-black">{leftPair[1]}</p>
       </div>
-
-      {/* Right-aligned item */}
+    {/* Right-aligned item */}
       <div className="text-right">
         <p className="font-semibold text-gray-600">{rightPair[0]}</p>
         <p className="text-black">{rightPair[1]}</p>
@@ -338,7 +337,7 @@ const ComicBookCalculator = () => {
     img: {
       "60# Cream-Uncoated": Creamuncoated,
       "60# White-Uncoated": Whiteuncoated,
-      "70# White-Uncoated": Whitecoatedd,
+      "100# White-Coated": Whitecoatedd,
       "80# White-Coated": Whitecoated,
     }[pt.name],
   }));

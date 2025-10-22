@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-
+import { useState } from 'react';
 
 import pro from "@/assets/images/pro.png";
 import arr from "@/assets/images/arr.png";
@@ -41,68 +41,105 @@ import img72 from "@/assets/images/img72.png";
 
 const Products = () => {
   const router = useRouter();
+  const bindingData = [
+    {
+      id: 1,
+      title: "Paperback Perfect Bound",
+      pages: "32-800 pages",
+      description: "The industry term for traditional paperback binding, perfect bound is the most cost-efficient and popular way to bind on-demand products. Suitable for most projects.",
+      mainImage: img54,
+      thumbnail: img55
+    },
+    {
+      id: 2,
+      title: "Coil Bound",
+      pages: "2-800 pages",
+      description: "Coil binding allows books to lay flat and pages to turn 360 degrees. Perfect for workbooks, manuals, and cookbooks. Durable and functional for everyday use.",
+      mainImage: img54,
+      thumbnail: img56
+    },
+    {
+      id: 3,
+      title: "Saddle Stitch",
+      pages: "2-800 pages",
+      description: "Saddle stitch binding uses staples along the spine fold. Ideal for magazines, catalogs, booklets, and shorter page counts. Cost-effective and professional looking.",
+      mainImage: img54,
+      thumbnail: img57
+    },
+    {
+      id: 4,
+      title: "Linen Wrap",
+      pages: "2-800 pages",
+      description: "Linen wrap binding provides a premium, sophisticated look with a cloth-covered spine. Perfect for portfolios, photo books, and high-end presentations.",
+      mainImage: img54,
+      thumbnail: img58
+    }
+  ]
+
+  const [activeBinding, setActiveBinding] = useState(bindingData[0])
+
 
   return (
     <>
 
       {/* Hero Section */}
-     <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden">
-  {/* Background Image */}
-  <div
-    className="absolute inset-0 bg-cover bg-center opacity-20 z-0"
-    style={{
-      backgroundImage: `url(${YourBackgroundImage.src})`,
-    }}
-  ></div>
+      <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20 z-0"
+          style={{
+            backgroundImage: `url(${YourBackgroundImage.src})`,
+          }}
+        ></div>
 
-  {/* Animated Background Elements (Blur Circles) */}
-  <div className="absolute inset-0 z-10">
-    <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-    <div
-      className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-      style={{ animationDelay: "1s" }}
-    ></div>
-    <div
-      className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-      style={{ animationDelay: "2s" }}
-    ></div>
-  </div>
+        {/* Animated Background Elements (Blur Circles) */}
+        <div className="absolute inset-0 z-10">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+            style={{ animationDelay: "2s" }}
+          ></div>
+        </div>
 
-  {/* Content */}
-  <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
-    {/* Left Content */}
-    <div className="flex-1 text-white space-y-8">
-      <div className="scroll-animate slide-in-left">
-        <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
-          Quality You Can Count On
-        </span>
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-          Our{" "}
-          <span className="text-white">
-            Premium Products
-          </span>
-        </h1>
-        <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
-          Explore our diverse range of printing products crafted with precision and care. From custom prints to large-scale orders, we deliver excellence every time.
-        </p>
-      </div>
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+          {/* Left Content */}
+          <div className="flex-1 text-white space-y-8">
+            <div className="scroll-animate slide-in-left">
+              <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
+                Quality You Can Count On
+              </span>
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                Our{" "}
+                <span className="text-white">
+                  Premium Products
+                </span>
+              </h1>
+              <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
+                Explore our diverse range of printing products crafted with precision and care. From custom prints to large-scale orders, we deliver excellence every time.
+              </p>
+            </div>
 
-      <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
-        <button
-          className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
-          onClick={() => router.push("/portfolio")}
-        >
-          View Our Portfolio
-        </button>
-      </div>
-    </div>
+            <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+              <button
+                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+                onClick={() => router.push("/portfolio")}
+              >
+                View Our Portfolio
+              </button>
+            </div>
+          </div>
 
-    {/* Right Image (if you add one later, keep this space) */}
-    {/* <div className="flex-1 scroll-animate slide-in-right">
+          {/* Right Image (if you add one later, keep this space) */}
+          {/* <div className="flex-1 scroll-animate slide-in-right">
       <Image ... />
     </div> */}
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* Book Types Section */}
       <section
@@ -136,9 +173,10 @@ const Products = () => {
             <div className="absolute -top-4 left-0 w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
 
             <h2 className="text-5xl md:text-6xl font-extrabold text-left mb-6 animate-bounceIn leading-tight">
-              <span className="text-gray-900">Book Types You Can </span>
+              <span className="text-gray-900">Book Types You Can Make On</span>
+              <br/>
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
-                Make On
+                Fast Print Guys
               </span>
             </h2>
             <p className="text-gray-700 text-xl max-w-3xl animate-fadeInUp stagger-2 leading-relaxed">
@@ -173,7 +211,6 @@ const Products = () => {
               img: img46,
               gradient: "from-blue-500 to-blue-600",
               bgGradient: "from-blue-50 to-blue-100",
-              icon: "📚",
               route: "/calculator/printbook",
             },
             {
@@ -183,7 +220,6 @@ const Products = () => {
               img: img53,
               gradient: "from-emerald-500 to-emerald-600",
               bgGradient: "from-emerald-50 to-emerald-100",
-              icon: "🎓",
               route: "/calculator/yearbook",
             },
             {
@@ -193,19 +229,18 @@ const Products = () => {
               img: img47,
               gradient: "from-purple-500 to-purple-600",
               bgGradient: "from-purple-50 to-purple-100",
-              icon: "📷",
               route: "/calculator/photobook",
             },
-            {
-              title: "E-book",
+              {
+              title: "Magazine",
               description:
-                "An e-book offers a convenient and accessible way to read, allowing users to enjoy literature on various devices.",
-              img: img48,
-              gradient: "from-orange-500 to-orange-600",
-              bgGradient: "from-orange-50 to-orange-100",
-              icon: "📱",
-              route: "/calculator/printbook",
+                "Professional printing services to design your magazine in any volume, from single copies to large orders.",
+              img: img51,
+              gradient: "from-pink-500 to-pink-600",
+              bgGradient: "from-pink-50 to-pink-100",
+              route: "/calculator/magazine",
             },
+           
             {
               title: "Wall Calendar",
               description:
@@ -213,7 +248,6 @@ const Products = () => {
               img: img49,
               gradient: "from-teal-500 to-teal-600",
               bgGradient: "from-teal-50 to-teal-100",
-              icon: "📅",
               route: "/calculator/calendar",
             },
             {
@@ -223,30 +257,21 @@ const Products = () => {
               img: img50,
               gradient: "from-red-500 to-red-600",
               bgGradient: "from-red-50 to-red-100",
-              icon: "📖",
               route: "/calculator/comicbook",
             },
-            {
-              title: "Magazine",
-              description:
-                "Professional printing services to design your magazine in any volume, from single copies to large orders.",
-              img: img51,
-              gradient: "from-pink-500 to-pink-600",
-              bgGradient: "from-pink-50 to-pink-100",
-              icon: "📰",
-              route: "/calculator/magazine",
+             {
+              title: "Thesis Binding",
+             description:
+  "Give your academic research a premium and long-lasting finish with secure thesis binding, designed for durability and a polished look.",
+
+              img: img48,
+              gradient: "from-orange-500 to-orange-600",
+              bgGradient: "from-orange-50 to-orange-100",
+              route: "/calculator/thesis-binding",
             },
-            {
-              title: "Cookbook",
-              description:
-                "Compile your expert-caliber recipes in a personal or self-published cookbook beautifully printed.",
-              img: img52,
-              gradient: "from-indigo-500 to-indigo-600",
-              bgGradient: "from-indigo-50 to-indigo-100",
-              icon: "🍳",
-              route: "/calculator/printbook",
-            },
-          ].map(({ title, description, img, gradient, bgGradient, icon, route }, index) => (
+          
+           
+          ].map(({ title, description, img, gradient, bgGradient, route }, index) => (
             <div
               key={title}
               className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${index + 1} backdrop-blur-sm`}
@@ -266,12 +291,7 @@ const Products = () => {
                 {/* Image Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                {/* Floating Icon */}
-                <div
-                  className={`absolute top-4 left-4 w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white text-xl shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                >
-                  {icon}
-                </div>
+               
 
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 transform -translate-y-24 group-hover:translate-y-0 transition-transform duration-500 delay-300">
@@ -287,18 +307,7 @@ const Products = () => {
                   >
                     {title}
                   </h3>
-                  <div
-                    className={`w-8 h-8 bg-gradient-to-r ${gradient} rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                  >
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </div>
+               
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed flex-grow animate-fadeInUp stagger-3 group-hover:text-gray-700 transition-colors duration-300">
                   {description}
@@ -340,36 +349,47 @@ const Products = () => {
         <div className="flex flex-col md:flex-row items-start gap-12 md:gap-20">
           {/* Left Image */}
           <div className="md:w-2/5 rounded-lg overflow-hidden shadow-xl transform transition-transform duration-500 hover:scale-105">
-            <img src={img54.src} alt="Book Binding" className="w-full h-auto object-cover" />
+            <img
+              src={activeBinding.mainImage.src}
+              alt={activeBinding.title}
+              className="w-full h-auto object-cover transition-all duration-500"
+            />
           </div>
 
           {/* Right Text and Images */}
           <div className="md:w-3/5 flex flex-col h-full">
             <div className="flex-grow">
-              <h3 className="text-blue-600 text-3xl font-semibold mb-4 tracking-wide">Paperback Perfect Bound</h3>
-              <p className="text-gray-600 font-medium mb-6">32-800 pages</p>
+              <h3 className="text-blue-600 text-3xl font-semibold mb-4 tracking-wide transition-all duration-300">
+                {activeBinding.title}
+              </h3>
+              <p className="text-gray-600 font-medium mb-6 transition-all duration-300">
+                {activeBinding.pages}
+              </p>
               <hr className="border-gray-300 mb-8" />
 
-              <p className="text-gray-700 leading-relaxed mb-10 text-lg">
-                The industry term for traditional paperback binding, perfect bound is the most cost-efficient and popular way to bind on-demand products. Suitable for most projects.
+              <p className="text-gray-700 leading-relaxed mb-10 text-lg transition-all duration-300">
+                {activeBinding.description}
               </p>
 
               {/* Image grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {[img55, img56, img57, img58].map((imgSrc, idx) => (
+                {bindingData.map((binding) => (
                   <div
-                    key={idx}
-                    className="relative rounded-md overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 transform hover:scale-110"
+                    key={binding.id}
+                    onClick={() => setActiveBinding(binding)}
+                    className={`relative rounded-md overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:scale-110 cursor-pointer ${activeBinding.id === binding.id ? 'ring-4 ring-blue-600 scale-105' : ''
+                      }`}
                     style={{ willChange: 'transform' }}
                   >
                     <img
-                      src={imgSrc.src}
-                      alt={`Binding option ${idx + 1}`}
+                      src={binding.thumbnail.src}
+                      alt={binding.title}
                       className="w-full h-24 object-cover"
                       loading="lazy"
                       decoding="async"
                     />
-                    <div className="absolute bottom-0 left-0 w-full h-1 bg-purple-600 origin-left scale-x-0 transition-transform duration-300 pointer-events-none group-hover:scale-x-100"></div>
+                    <div className={`absolute bottom-0 left-0 w-full h-1 bg-purple-600 transition-transform duration-300 ${activeBinding.id === binding.id ? 'scale-x-100' : 'scale-x-0'
+                      } origin-left`}></div>
                   </div>
                 ))}
               </div>
@@ -397,7 +417,7 @@ const Products = () => {
               desc: "Standard black & white printing for novels, memoirs, and other text-heavy books.",
               gradient: "from-blue-500 to-blue-600",
               bgGradient: "from-blue-50 to-blue-100",
-              icon: "🖤",
+
               route: "/calculator/standardbw",
             },
             {
@@ -406,7 +426,7 @@ const Products = () => {
               desc: "Heavy ink coverage great for books with black & white images, graphs, or other graphics.",
               gradient: "from-purple-500 to-purple-600",
               bgGradient: "from-purple-50 to-purple-100",
-              icon: "💜",
+
               route: "/calculator/premiumbw",
             },
             {
@@ -415,7 +435,7 @@ const Products = () => {
               desc: "If your book is predominantly text but has a few color images, standard color is the right option for you.",
               gradient: "from-orange-500 to-orange-600",
               bgGradient: "from-orange-50 to-orange-100",
-              icon: "🧡",
+
               route: "/calculator/standardcolor",
             },
             {
@@ -424,7 +444,7 @@ const Products = () => {
               desc: "The best color printing on every page with rich colors and heavy ink coverage.",
               gradient: "from-teal-500 to-teal-600",
               bgGradient: "from-teal-50 to-teal-100",
-              icon: "💚",
+
               route: "/calculator/premiumcolor",
             },
           ].map(({ img, title, desc, gradient, bgGradient, icon, route }, index) => (
@@ -444,11 +464,7 @@ const Products = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div
-                  className={`absolute top-4 left-4 w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white text-xl shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                >
-                  {icon}
-                </div>
+
 
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 transform -translate-y-24 group-hover:translate-y-0 transition-transform duration-500 delay-300">
                   Premium
@@ -456,24 +472,14 @@ const Products = () => {
               </div>
 
               <div className="p-6 flex flex-col flex-grow relative z-10">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-center mb-4">
                   <h3
-                    className={`text-xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent animate-zoomIn stagger-2 group-hover:scale-105 transition-transform duration-300`}
+                    className={`text-xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent text-center animate-zoomIn stagger-2 group-hover:scale-105 transition-transform duration-300`}
                   >
                     {title}
                   </h3>
-                  <div
-                    className={`w-8 h-8 bg-gradient-to-r ${gradient} rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                  >
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </div>
+
+
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed flex-grow animate-fadeInUp stagger-3 group-hover:text-gray-700 transition-colors duration-300">
                   {desc}
@@ -509,7 +515,7 @@ const Products = () => {
               desc: "Traditional cream paper most frequently used for black & white novels and workbooks.",
               gradient: "from-blue-500 to-blue-600",
               bgGradient: "from-blue-50 to-blue-100",
-              icon: "📄",
+           
               route: "/calculator/60-cream-uncoated",
             },
             {
@@ -518,7 +524,6 @@ const Products = () => {
               desc: "Versatile and economical white paper commonly found in a wide range of books.",
               gradient: "from-emerald-500 to-emerald-600",
               bgGradient: "from-emerald-50 to-emerald-100",
-              icon: "📃",
               route: "/calculator/60-white-uncoated",
             },
             {
@@ -527,7 +532,6 @@ const Products = () => {
               desc: "Ultra-smooth, high opacity bright white paper used for photo books, magazines, and comic books.",
               gradient: "from-purple-500 to-purple-600",
               bgGradient: "from-purple-50 to-purple-100",
-              icon: "📑",
               route: "/calculator/80-white-coated",
             },
             {
@@ -536,10 +540,9 @@ const Products = () => {
               desc: "The heaviest available stock, used to create durable, vibrant calendars.",
               gradient: "from-pink-500 to-pink-600",
               bgGradient: "from-pink-50 to-pink-100",
-              icon: "📚",
               route: "/calculator/100-white-coated",
             },
-          ].map(({ img, title, desc, gradient, bgGradient, icon, route }, index) => (
+          ].map(({ img, title, desc, gradient, bgGradient,  route }, index) => (
             <div
               key={title}
               className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${index + 1} backdrop-blur-sm`}
@@ -556,11 +559,7 @@ const Products = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div
-                  className={`absolute top-4 left-4 w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white text-xl shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                >
-                  {icon}
-                </div>
+             
 
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 transform -translate-y-24 group-hover:translate-y-0 transition-transform duration-500 delay-300">
                   Premium
@@ -574,18 +573,7 @@ const Products = () => {
                   >
                     {title}
                   </h3>
-                  <div
-                    className={`w-8 h-8 bg-gradient-to-r ${gradient} rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
-                  >
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </div>
+                  
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed flex-grow animate-fadeInUp stagger-3 group-hover:text-gray-700 transition-colors duration-300">
                   {desc}

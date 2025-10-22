@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import BackgroundImage from "@/assets/images/PrintShopbanner.png"; // ✅ Add this
 import imgx from "@/assets/images/img74.png";
 import img75 from "@/assets/images/img75.jpeg";
 import img76 from "@/assets/images/img76.jpeg";
@@ -67,73 +67,62 @@ const PrintShop = () => {
   return (
     <>
       {/* Top Section */}
-      <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          ></div>
-          <div
-            className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          ></div>
-        </div>
-
-        {/* Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-10">
-          {/* Left Content */}
-          <div className="flex-1 text-white space-y-8">
-            <div className="scroll-animate slide-in-left">
-              <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
-                Premium Print Shop Services
-              </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Welcome to <span className="">Fast Print Guys Print Shop</span>
-              </h1>
-              <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                Your neighborhood print shop delivering high-quality prints with
-                speed and care. From custom business cards to large banners,
-                we’re here to meet all your printing needs with expert
-                craftsmanship.
-              </p>
-            </div>
-
-            <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
-              <button
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
-                onClick={() => router.push("/about")}
-              >
-                About Us
-              </button>
-            </div>
-          </div>
-
-          {/* Right Image */}
-          <div className="flex-1 scroll-animate slide-in-right max-w-md">
-            <div className="relative w-full max-w-md mx-auto">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-300 to-purple-300 rounded-2xl blur opacity-30 float"></div>
-              <img
-                src={imgx.src}
-                alt="Fast Print Guys Print Shop"
-                className="relative w-full h-auto max-h-[400px] object-contain rounded-2xl shadow-2xl hover-lift"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+         <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden"
+     >
+       {/* Background Image */}
+       <div
+         className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+         style={{
+           backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
+         }}
+       ></div>
+     
+       {/* Animated Background Elements (Blur Circles) - Keep them */}
+       <div className="absolute inset-0 z-10">
+         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+         <div
+           className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+           style={{ animationDelay: "1s" }}
+         ></div>
+         <div
+           className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+           style={{ animationDelay: "2s" }}
+         ></div>
+       </div>
+     
+       {/* Content */}
+       <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+         {/* Left Content */}
+         <div className="flex-1 text-white space-y-8">
+           <div className="scroll-animate slide-in-left">
+             <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
+               Trusted Since 2012
+             </span>
+             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+               Fast Print Guys{" "}
+               <span className="text-white">
+                Print Shop
+               </span>
+             </h1>
+             <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
+          Your neighborhood print shop delivering high-quality prints with speed and care. From custom business cards to large banners, we’re here to meet all your printing needs with expert craftsmanship.
+             </p>
+           </div>
+     
+           <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+             <button
+               className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+               onClick={() => router.push("/services")}
+             >
+               Explore Services
+             </button>
+           
+           </div>
+         </div>
+     
+     
+       </div>
+     </section>
 
       {/* New Card Section */}
       <section className="max-w-7xl mx-auto px-6 py-16">

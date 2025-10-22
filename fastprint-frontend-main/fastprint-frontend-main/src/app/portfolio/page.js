@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import portfolioImg from '@/assets/images/img75.png';
 import Image from 'next/image';
+import BackgroundImage from "@/assets/images/PortfolioBanner.png"; // ✅ Add 
 
 const Portfolio = () => {
   const router = useRouter();
@@ -229,7 +230,7 @@ const Portfolio = () => {
     <div className="portfolio-container">
 
       {/* Hero Section */}
-      <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
+      <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
           <div
@@ -242,16 +243,12 @@ const Portfolio = () => {
           ></div>
         </div>
 
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
-          }}
-        ></div>
+          <div
+            className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+            style={{
+              backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
+            }}
+          ></div>
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-white space-y-8">
@@ -260,10 +257,9 @@ const Portfolio = () => {
                 Our Creative Work
               </span>
               <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Explore the Portfolio of{' '}
-                <span>Fast Print Guys</span>
+              Explore Our Portfolio
               </h1>
-              <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+              <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
                 Discover our wide range of successful projects and creative printed materials. Each project showcases our commitment to quality and innovation.
               </p>
             </div>
@@ -278,16 +274,7 @@ const Portfolio = () => {
             </div>
           </div>
 
-          <div className="flex-1 scroll-animate slide-in-right">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl blur opacity-30 float"></div>
-              <Image
-                src={portfolioImg}
-                alt="Fast Print Guys Portfolio"
-                className="relative w-full max-w-lg h-auto object-cover rounded-2xl shadow-2xl hover-lift"
-              />
-            </div>
-          </div>
+         
         </div>
       </section>
 

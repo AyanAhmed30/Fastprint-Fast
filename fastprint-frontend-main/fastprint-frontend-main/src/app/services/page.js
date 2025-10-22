@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Testimonials from "@/components/Testimonials";
+import BackgroundImage from "@/assets/images/ServicesBanner.png"; // ✅ Add this
+
 import {
   BookOpen,
   PenTool,
@@ -212,76 +214,60 @@ const Services = () => {
   return (
     <div className="services-container">
       {/* Hero Section */}
-      <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          ></div>
-          <div
-            className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          ></div>
-        </div>
-
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="text-center text-white space-y-8">
-            <div
-              id="hero-content"
-              data-animate
-              className={`transition-all duration-1000 ${
-                isVisible["hero-content"]
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
-                Services You Can Trust
-              </span>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Our{" "}
-                <span className="bg-gradient-to-r from-orange-400 to-pink-400 bg-clip-text text-transparent">
-                  Printing Services
-                </span>
-              </h1>
-              <p className="text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
-                From personalized book printing to professional publishing
-                services, we offer comprehensive solutions tailored to authors,
-                businesses, and creative professionals worldwide.
-              </p>
-            </div>
-
-            <div
-              id="hero-button"
-              data-animate
-              className={`transition-all duration-1000 delay-300 ${
-                isVisible["hero-button"]
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-            >
-              <button
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-                onClick={() => router.push("/calculator/printbook")}
-              >
-                Get a Quote
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+         <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden"
+     >
+       {/* Background Image */}
+       <div
+         className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+         style={{
+           backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
+         }}
+       ></div>
+     
+       {/* Animated Background Elements (Blur Circles) - Keep them */}
+       <div className="absolute inset-0 z-10">
+         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+         <div
+           className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+           style={{ animationDelay: "1s" }}
+         ></div>
+         <div
+           className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+           style={{ animationDelay: "2s" }}
+         ></div>
+       </div>
+     
+       {/* Content */}
+       <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+         {/* Left Content */}
+         <div className="flex-1 text-white space-y-8">
+           <div className="scroll-animate slide-in-left">
+            
+             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+               Our{" "}
+               <span className="text-white">
+                 Print Services
+               </span>
+             </h1>
+             <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
+               From personalized book printing to professional publishing services, we offer comprehensive solutions tailored to authors, businesses, and creative professionals worldwide.
+             </p>
+           </div>
+     
+           <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+             <button
+               className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+               onClick={() => router.push("/calculator/printbook")}
+             >
+               Get Qoute Now
+             </button>
+            
+           </div>
+         </div>
+     
+     
+       </div>
+     </section>
       {/* Stats Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-12">

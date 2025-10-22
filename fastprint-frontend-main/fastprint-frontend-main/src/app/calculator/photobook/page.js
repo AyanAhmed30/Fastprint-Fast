@@ -29,6 +29,7 @@ import RedirectButton from "@/components/RedirectButton";
 
 import ShippingEstimate from "@/components/ShippingEstimate";
 import PricingBanner from "@/components/PricingBanner";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Constants
 const BOOK_SIZES = [
@@ -1111,6 +1112,7 @@ const PhotoBookCalculator = () => {
             ))}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

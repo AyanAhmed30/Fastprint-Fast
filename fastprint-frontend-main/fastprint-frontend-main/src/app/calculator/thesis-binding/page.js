@@ -22,6 +22,7 @@ import pg1 from "@/assets/images/qa1.png";
 import pg2 from "@/assets/images/qa2.png";
 import pg3 from "@/assets/images/qa3.png";
 import pg4 from "@/assets/images/qa4.png";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Consolidated data structure with image URLs
 const OPTIONS = {
@@ -794,6 +795,7 @@ const ThesisPricingCalculator = () => {
 
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

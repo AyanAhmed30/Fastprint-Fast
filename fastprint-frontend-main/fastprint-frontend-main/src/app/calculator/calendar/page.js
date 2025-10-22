@@ -15,6 +15,7 @@ import WhiteCoatedImg from '@/assets/images/qa4.png';
 import GlossImg from '@/assets/images/gggg.jpg';
 import MatteImg from '@/assets/images/mmmm.jpg';
 import RightImage from '@/assets/images/right.png';
+import GuideTemplateRedirect from '@/components/GuideTemplateRedirect';
 
 // Calendar-specific constants based on the pricing sheet
 const CALENDAR_SIZES = [
@@ -509,6 +510,7 @@ const CalendarCalculator = () => {
             ))}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

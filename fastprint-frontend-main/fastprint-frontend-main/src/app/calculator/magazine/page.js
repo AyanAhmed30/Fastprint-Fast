@@ -29,6 +29,8 @@ import WhiteCoated2 from "@/assets/images/pp4.jpg";
 import Glossy from "@/assets/images/gggg.jpg";
 import Matty from "@/assets/images/mmmm.jpg";
 import RightImage from "@/assets/images/right.png";
+import GuideTemplate from "@/app/resources/guide-templates/page";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Constants
 const TRIM_SIZES = [
@@ -812,6 +814,7 @@ const MagazineCalculator = () => {
             ))}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

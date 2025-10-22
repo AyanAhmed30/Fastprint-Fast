@@ -30,6 +30,8 @@ import Glossy from "@/assets/images/gggg.jpg";
 import Matty from "@/assets/images/mmmm.jpg";
 import RightImage from "@/assets/images/right.png";
 import Image from "next/image";
+import GuideTemplate from "@/app/resources/guide-templates/page";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Constants
 const BOOK_SIZES = [
@@ -1106,6 +1108,7 @@ const PrintBookCalculator = () => {
 
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

@@ -24,6 +24,7 @@ import Matty from "@/assets/images/mmmm.jpg";
 import RightImage from "@/assets/images/right.png";
 import ShippingEstimate from "@/components/ShippingEstimate";
 import Image from "next/image";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Constants
 const TRIM_SIZES = [
@@ -765,6 +766,7 @@ const YearBookCalculator = () => {
             ))}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

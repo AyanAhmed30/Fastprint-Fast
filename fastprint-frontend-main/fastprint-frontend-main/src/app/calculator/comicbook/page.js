@@ -27,6 +27,7 @@ import RedirectButton from "@/components/RedirectButton";
 import ShippingEstimate from "@/components/ShippingEstimate";
 import PricingBanner from "@/components/PricingBanner";
 import Image from "next/image";
+import GuideTemplateRedirect from "@/components/GuideTemplateRedirect";
 
 // Hardcoded data based on your comic book logic
 const COMIC_TRIM_SIZES = [
@@ -770,6 +771,7 @@ const ComicBookCalculator = () => {
             ))}
             <div className="flex justify-center mt-6">
               <div className="w-full max-w-xs">
+                <GuideTemplateRedirect/>
                 <RedirectButton />
               </div>
             </div>

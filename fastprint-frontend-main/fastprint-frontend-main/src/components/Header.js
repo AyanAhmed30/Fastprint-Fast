@@ -9,19 +9,19 @@ import { FiUser, FiSettings } from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
 import { HiOutlineShoppingBag } from "react-icons/hi";
 import { FiPhone } from "react-icons/fi";
-
 import { AiOutlineShoppingCart } from "react-icons/ai";
-
 import useAuth from "../hooks/useAuth";
 import Image from "next/image";
 import FastPrintLogo from "@/assets/images/fastlogo.svg";
+import axios from "axios"; // ✅ Import axios
+import { BASE_URL } from "@/services/baseUrl"; // ✅ Import BASE_URL
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourceOpen, setResourceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0); // ✅ This will show order count
 
   const resourceRef = useRef();
   const profileRef = useRef();
@@ -32,17 +32,39 @@ const Header = () => {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
+  // 🔁 Fetch order count when user logs in or changes
   useEffect(() => {
-    const updateCartCount = () => {
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      setCartCount(cart.length);
-    };
+    if (user) {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setCartCount(0);
+        return;
+      }
 
-    updateCartCount();
-    window.addEventListener("storage", updateCartCount);
-    return () => window.removeEventListener("storage", updateCartCount);
-  }, []);
+      axios
+        .get(`${BASE_URL}api/book/user-paid-orders/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          const orders = response.data.data || [];
+          setCartCount(orders.length);
 
+          // Optional: Also save to localStorage for consistency
+          const orderCountKey = `order_count_${user.id}`;
+          localStorage.setItem(orderCountKey, JSON.stringify(orders.length));
+
+          // Clean up old cart
+          localStorage.removeItem("cart");
+        })
+        .catch(() => {
+          setCartCount(0);
+        });
+    } else {
+      setCartCount(0);
+    }
+  }, [user]); // ✅ Re-run when user changes
+
+  // Handle clicks outside dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (resourceRef.current && !resourceRef.current.contains(event.target)) {
@@ -129,8 +151,7 @@ const Header = () => {
               <button className="hover:text-blue-600 flex items-center gap-1 transition-colors duration-200">
                 Resources{" "}
                 <IoIosArrowDown
-                  className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""
-                    }`}
+                  className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {resourceOpen && (
@@ -179,23 +200,22 @@ const Header = () => {
               </Link>
             )}
 
-            {/* Cart */}
-           <div
-  className="relative cursor-pointer"
-  onClick={handleCartClick}
-  title="Cart"
->
-  <AiOutlineShoppingCart
-    size={25}
-    className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
-  />
-  {cartCount > 0 && (
-    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full w-4 h-4 min-w-[16px]">
-      {cartCount}
-    </span>
-  )}
-</div>
-
+            {/* Cart Icon with Badge */}
+            <div
+              className="relative cursor-pointer"
+              onClick={handleCartClick}
+              title="Your Orders"
+            >
+              <AiOutlineShoppingCart
+                size={25}
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
+              />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full w-4 h-4 min-w-[16px]">
+                  {cartCount}
+                </span>
+              )}
+            </div>
 
             {/* Profile Dropdown */}
             {user && (
@@ -209,9 +229,8 @@ const Header = () => {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-xl rounded-xl z-20 min-w-[220px] border border-gray-100 ring-1 ring-black ring-opacity-5">
                     <div className="py-3">
-                      {/* Top heading + email for logged-in users */}
                       <div className="px-4 py-4 border-b border-gray-100">
-<div className="text-base font-bold text-gray-800">Fast Print Guys</div>
+                        <div className="text-base font-bold text-gray-800">Fast Print Guys</div>
                         <div className="text-sm text-gray-500 mt-1 truncate">{user?.email}</div>
                       </div>
                       <div className="flex flex-col py-2">
@@ -250,19 +269,12 @@ const Header = () => {
               </div>
             )}
 
-            {/* Profile icon when not logged in */}
             {!user && (
-              <div
-                className="cursor-pointer"
-                onClick={() => router.push("/login")}
-                
-              >
-                
+              <div className="cursor-pointer" onClick={() => router.push("/login")}>
                 <FiUser
                   size={20}
                   className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
                   title="Login"
-                  
                 />
               </div>
             )}
@@ -273,7 +285,7 @@ const Header = () => {
             <div
               className="relative cursor-pointer"
               onClick={handleCartClick}
-              title="Cart"
+              title="Your Orders"
             >
               <HiOutlineShoppingBag
                 size={18}
@@ -286,7 +298,6 @@ const Header = () => {
               )}
             </div>
 
-            {/* Mobile Profile Dropdown */}
             {user && (
               <div className="relative" ref={mobileProfileRef}>
                 <FiUser
@@ -298,7 +309,6 @@ const Header = () => {
                 {mobileProfileOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-xl rounded-xl z-20 min-w-[220px] border border-gray-100 ring-1 ring-black ring-opacity-5">
                     <div className="py-3">
-                      {/* Top heading + email for logged-in users (mobile) */}
                       <div className="px-4 py-4 border-b border-gray-100">
                         <div className="text-sm font-semibold text-gray-800">Fast Print Guys</div>
                         <div className="text-sm text-gray-500 mt-1 truncate">{user?.email}</div>
@@ -351,10 +361,9 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`lg:hidden transition-all duration-300 ease-in-out ${menuOpen
-              ? "max-h-screen opacity-100"
-              : "max-h-0 opacity-0 overflow-hidden"
-            }`}
+          className={`lg:hidden transition-all duration-300 ease-in-out ${
+            menuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+          }`}
         >
           <nav className="py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-1">
@@ -377,7 +386,6 @@ const Header = () => {
                 </Link>
               ))}
 
-              {/* Resources Toggle for Mobile */}
               <div className="border-t border-gray-100 mt-2 pt-2">
                 <button
                   onClick={() => setResourceOpen(!resourceOpen)}
@@ -385,15 +393,13 @@ const Header = () => {
                 >
                   <span>Resources</span>
                   <IoIosArrowDown
-                    className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""
-                      }`}
+                    className={`transition-transform duration-200 ${resourceOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${resourceOpen
-                      ? "max-h-screen opacity-100"
-                      : "max-h-0 opacity-0 overflow-hidden"
-                    }`}
+                  className={`transition-all duration-300 ease-in-out ${
+                    resourceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+                  }`}
                 >
                   <div className="pl-4 space-y-1">
                     {[
@@ -420,7 +426,6 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Auth */}
               <div className="border-t border-gray-100 mt-4 pt-4 px-4">
                 {user ? (
                   <button
@@ -444,7 +449,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Gradient Border */}
       <div className="w-full h-1.5 bg-gradient-to-r from-pink-400 to-purple-600"></div>
     </header>
   );

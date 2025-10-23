@@ -1734,7 +1734,7 @@ const DesignProjectPreview = () => {
                 Preview Book Cover Design
               </h2>
               <div className="w-full bg-white border border-gray-300 rounded-lg p-4 md:p-6 flex justify-center items-center">
-                <div className="relative w-full max-w-md h-96 md:h-[500px] flex justify-center items-center">
+                <div className="relative w-full h-96 md:h-[500px] flex justify-center items-center">
                   {state.coverPdfUrl ? (
                     <Image
                       src={state.coverPdfUrl}

@@ -1,15 +1,15 @@
 "use client";
 // app/start-project/page.jsx
-import { useRouter, useSearchParams } from "next/navigation"; // Next.js v13+ hook for programmatic navigation
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 
 // Images
-import Image1 from "@/assets/images/startproject1.png";
-import Image2 from "@/assets/images/startproject2.png";
-import Image3 from "@/assets/images/startproject3.png";
-import Image4 from "@/assets/images/startproject4.png";
-import Image5 from "@/assets/images/startproject5.png";
-import Image6 from "@/assets/images/startproject6.png";
+import Image1 from "@/assets/images/img46.png";
+import Image2 from "@/assets/images/img47.png";
+import Image3 from "@/assets/images/img50.png";
+import Image4 from "@/assets/images/img51.png";
+import Image5 from "@/assets/images/img53.png";
+import Image6 from "@/assets/images/img48.png";
 import Image7 from "@/assets/images/startproject7.png";
 import Image from "next/image";
 
@@ -59,17 +59,17 @@ const productCards = [
     description: "Organize your daily, weekly, or monthly schedule.",
     calculator: "CalendarCalculator",
   },
- 
 ];
 
 const StartProjectContent = () => {
-  const router = useRouter(); // Use Next.js router
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [text, setText] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedId, setSelectedId] = useState("");
+  const categoryRef = useRef(null);
 
   const isEdit = searchParams.get("edit") === "true";
 
@@ -102,6 +102,23 @@ const StartProjectContent = () => {
   useEffect(() => {
     console.log("Selected Category:", selectedCategory);
   }, [selectedCategory]);
+
+  // Handle product card click
+  const handleProductCardClick = (productTitle) => {
+    setSelectedCategory(productTitle);
+    // Smooth scroll to category section
+    if (categoryRef.current) {
+      categoryRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      // Add a brief highlight effect
+      categoryRef.current.classList.add('highlight-field');
+      setTimeout(() => {
+        categoryRef.current?.classList.remove('highlight-field');
+      }, 2000);
+    }
+  };
 
   const handleButtonClick = () => {
     if (!text.trim()) {
@@ -208,12 +225,26 @@ const StartProjectContent = () => {
                 {productCards.map((product, index) => (
                   <div
                     key={product.id}
-                    className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out transform hover:-translate-y-1 sm:hover:-translate-y-2 hover:scale-[1.02] sm:hover:scale-105 w-full max-w-[320px] sm:max-w-[280px] mx-auto border border-gray-100"
+                    onClick={() => handleProductCardClick(product.title)}
+                    className={`group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out transform hover:-translate-y-1 sm:hover:-translate-y-2 hover:scale-[1.02] sm:hover:scale-105 w-full max-w-[320px] sm:max-w-[280px] mx-auto border cursor-pointer ${
+                      selectedCategory === product.title
+                        ? 'border-blue-500 border-2 ring-2 ring-blue-300'
+                        : 'border-gray-100'
+                    }`}
                     style={{
                       minHeight: "280px",
                       animationDelay: `${index * 0.1}s`,
                     }}
                   >
+                    {/* Selected indicator */}
+                    {selectedCategory === product.title && (
+                      <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1 z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+
                     {/* Gradient overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-purple-600/0 group-hover:from-blue-400/5 group-hover:to-purple-600/5 transition-all duration-500 rounded-xl sm:rounded-2xl"></div>
 
@@ -377,7 +408,8 @@ const StartProjectContent = () => {
                     Book Category
                   </label>
                   <select
-                    className="border border-gray-300 rounded-md p-2 sm:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent "
+                    ref={categoryRef}
+                    className="border border-gray-300 rounded-md p-2 sm:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                   >
@@ -432,6 +464,19 @@ const StartProjectContent = () => {
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        .highlight-field {
+          animation: highlight 2s ease-in-out;
+        }
+
+        @keyframes highlight {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+          }
         }
 
         /* Extra small devices */

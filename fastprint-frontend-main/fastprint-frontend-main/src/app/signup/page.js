@@ -506,7 +506,7 @@ const Signup = () => {
                     aria-describedby="terms-error"
                   />
                   <span className="text-sm text-gray-700 leading-tight">
-                    I have read and agree to the{" "}
+                    I have read and agree to Fast Print Guys'{" "}
                     <Link
                       target="_blank"
                       href="/terms-and-conditions"

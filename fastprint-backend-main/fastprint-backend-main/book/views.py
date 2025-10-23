@@ -236,10 +236,24 @@ def user_unpaid_projects(request):
     try:
         books = BookProject.objects.filter(user=request.user, order_status='draft').order_by('-created_at')
         serializer = BookProjectSerializer(books, many=True)
+        # Ensure file URLs are absolute so frontend can fetch them directly
+        data = serializer.data
+        for item in data:
+            for field in ('pdf_file', 'cover_file'):
+                val = item.get(field)
+                if val:
+                    # If it's already absolute, leave it. Otherwise build absolute URI.
+                    if not str(val).lower().startswith('http'):
+                        try:
+                            item[field] = request.build_absolute_uri(val)
+                        except Exception:
+                            # fallback: leave value as-is
+                            pass
+
         return Response({
             'status': 'success',
-            'results': len(serializer.data),
-            'data': serializer.data
+            'results': len(data),
+            'data': data
         }, status=status.HTTP_200_OK)
     except Exception as e:
         logger.error("Failed to fetch user's unpaid projects", exc_info=True)

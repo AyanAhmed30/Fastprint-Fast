@@ -15,8 +15,69 @@ import {
   FaChartLine,
   FaCheckCircle,
 } from "react-icons/fa";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BASE_URL } from "@/services/baseUrl";
+
+// Simple in-memory cache for generated thumbnails (pdfUrl -> dataUrl)
+const _thumbnailCache = new Map();
+
+// Dynamically load PDF.js in the same way other components do (client-only)
+let _pdfjsLib = null;
+const loadPdfLib = async () => {
+  if (typeof window === "undefined") return null;
+  if (_pdfjsLib) return _pdfjsLib;
+  try {
+    const lib = await import("pdfjs-dist");
+    // worker file path used elsewhere in the repo
+    lib.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.js";
+    _pdfjsLib = lib;
+    return lib;
+  } catch (err) {
+    console.error("Failed to load PDF.js for thumbnails:", err);
+    return null;
+  }
+};
+
+// Render first page of PDF (from an absolute/relative URL) to a PNG data URL
+const renderPdfFirstPageToDataUrl = async (pdfUrl) => {
+  if (!pdfUrl) return null;
+  if (_thumbnailCache.has(pdfUrl)) return _thumbnailCache.get(pdfUrl);
+  try {
+    const pdfjs = await loadPdfLib();
+    if (!pdfjs) return null;
+
+    // Fetch the PDF as arrayBuffer to avoid potential cross-origin and worker issues
+    let res;
+    try {
+      res = await fetch(pdfUrl);
+    } catch (fetchErr) {
+      console.error("Fetch failed (network) for PDF:", pdfUrl, fetchErr);
+      throw fetchErr;
+    }
+    if (!res.ok) {
+      console.error(`Failed to fetch PDF. status=${res.status} url=${res.url}`);
+      throw new Error(`Failed to fetch PDF: ${res.status}`);
+    }
+    const arrayBuffer = await res.arrayBuffer();
+
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    const page = await pdf.getPage(1);
+    const scale = 1.5; // reasonable quality for thumbnails
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const dataUrl = canvas.toDataURL("image/png");
+    _thumbnailCache.set(pdfUrl, dataUrl);
+    return dataUrl;
+  } catch (err) {
+    console.error("PDF thumbnail generation failed for", pdfUrl, err);
+    return null;
+  }
+};
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -27,6 +88,7 @@ const UserDashboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
+  const [thumbnails, setThumbnails] = useState({}); // bookId -> dataUrl
 
   const getUserCartKey = () => `cart_${user?.id || "guest"}`;
 
@@ -72,6 +134,70 @@ const UserDashboard = () => {
     localStorage.setItem("projectData", JSON.stringify(projectData));
     router.push("/start-project?edit=true");
   };
+
+  useEffect(() => {
+    // generate thumbnails for any visible books that include a pdf_file
+    let mounted = true;
+    const generate = async () => {
+      if (!filteredBooks || !filteredBooks.length) return;
+      const jobs = [];
+      for (const book of filteredBooks) {
+        // prefer pdf_file for a generated thumbnail
+        const pdfPath = book.cover_file;
+        if (!pdfPath) continue;
+
+        // Resolve URLs robustly. If pdfPath is an absolute URL use it, otherwise resolve against BASE_URL.
+        let fullUrl;
+        try {
+          // will succeed for absolute URLs (http, https)
+          fullUrl = new URL(String(pdfPath)).href;
+        } catch (e) {
+          // relative path -> resolve against BASE_URL
+          try {
+            fullUrl = new URL(String(pdfPath), BASE_URL).href;
+          } catch (err) {
+            // fallback: join ensuring a single slash
+            const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
+            const path = String(pdfPath).startsWith("/") ? String(pdfPath).slice(1) : String(pdfPath);
+            fullUrl = `${base}/${path}`;
+          }
+        }
+
+        // skip if already cached for this book
+        if (thumbnails[book.id]) continue;
+
+        // if we already generated for this url, reuse it
+        if (_thumbnailCache.has(fullUrl)) {
+          const cached = _thumbnailCache.get(fullUrl);
+          setThumbnails((prev) => ({ ...prev, [book.id]: cached }));
+          continue;
+        }
+
+        // queue generation
+        // debug: show resolved URL so we can inspect in browser network tab
+        try {
+          console.debug("Generating thumbnail for:", { bookId: book.id, pdfPath, fullUrl });
+        } catch (e) {
+          /* ignore logging errors */
+        }
+        jobs.push(
+          (async (bId, url) => {
+            const dataUrl = await renderPdfFirstPageToDataUrl(url);
+            if (mounted && dataUrl) {
+              setThumbnails((prev) => ({ ...prev, [bId]: dataUrl }));
+            }
+          })(book.id, fullUrl)
+        );
+      }
+
+      if (jobs.length) await Promise.allSettled(jobs);
+    };
+
+    generate();
+    return () => {
+      mounted = false;
+    };
+  }, [filteredBooks]);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -331,10 +457,36 @@ const UserDashboard = () => {
                     <tr key={book.id} className="hover:bg-[#F8FAFF] transition">
                       <td className="px-8 py-6">
                         <div className="flex items-center">
-                          <div className="h-12 w-12 bg-gradient-to-br from-[#016AB3] to-[#0096CD] rounded-xl flex items-center justify-center shadow-lg mr-4">
-                            <span className="text-white font-bold text-lg">
-                              {book.title?.charAt(0) || "P"}
-                            </span>
+                          <div className="h-30 w-30 rounded-xl overflow-hidden flex items-center justify-center shadow-lg mr-4 bg-gray-100">
+                            {thumbnails[book.id] ? (
+                              <div className="relative h-30 w-30">
+                                <Image
+                                  src={thumbnails[book.id]}
+                                  alt={book.title || "Project cover"}
+                                  width={48}
+                                  height={48}
+                                  className="object-cover w-full h-full"
+                                  unoptimized
+                                />
+                              </div>
+                            ) : book.cover_file ? (
+                              <div className="relative h-12 w-12">
+                                <Image
+                                  src={book.cover_file}
+                                  alt={book.title || "Project cover"}
+                                  width={48}
+                                  height={48}
+                                  className="object-cover w-full h-full"
+                                  unoptimized
+                                />
+                              </div>
+                            ) : (
+                              <div className="h-12 w-12 bg-gradient-to-br from-[#016AB3] to-[#0096CD] flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">
+                                  {book.title?.charAt(0) || "P"}
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <div className="text-sm font-bold text-gray-900">{book.title || "Untitled Project"}</div>
@@ -378,8 +530,34 @@ const UserDashboard = () => {
                 <div key={book.id} className="p-4 border-b border-gray-200">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 bg-gradient-to-br from-[#016AB3] to-[#0096CD] rounded-lg flex items-center justify-center shadow-md mr-3">
-                        <span className="text-white font-bold text-sm">{book.title?.charAt(0) || "P"}</span>
+                      <div className="h-10 w-10 rounded-lg overflow-hidden flex items-center justify-center shadow-md mr-3 bg-gray-100">
+                        {thumbnails[book.id] ? (
+                          <div className="relative h-10 w-10">
+                            <Image
+                              src={thumbnails[book.id]}
+                              alt={book.title || "Project cover"}
+                              width={40}
+                              height={40}
+                              className="object-cover w-full h-full"
+                              unoptimized
+                            />
+                          </div>
+                        ) : book.cover_file ? (
+                          <div className="relative h-10 w-10">
+                            <Image
+                              src={book.cover_file}
+                              alt={book.title || "Project cover"}
+                              width={40}
+                              height={40}
+                              className="object-cover w-full h-full"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-10 w-10 bg-gradient-to-br from-[#016AB3] to-[#0096CD] flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">{book.title?.charAt(0) || "P"}</span>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="text-sm font-bold text-gray-900">{book.title || "Untitled Project"}</div>

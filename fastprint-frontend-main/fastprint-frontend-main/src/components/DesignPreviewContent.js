@@ -141,11 +141,10 @@ const OptionField = ({
         (opt) => (
           <label
             key={opt.id}
-            className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
-              String(form[name]) === String(opt.id)
-                ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                : "border-gray-300 bg-white"
-            } ${!stepAccessible ? "opacity-40 cursor-not-allowed" : ""}`}
+            className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${String(form[name]) === String(opt.id)
+              ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
+              : "border-gray-300 bg-white"
+              } ${!stepAccessible ? "opacity-40 cursor-not-allowed" : ""}`}
             role="radio"
             aria-checked={String(form[name]) === String(opt.id)}
             aria-disabled={!stepAccessible}
@@ -160,18 +159,16 @@ const OptionField = ({
               className="sr-only"
             />
             <span
-              className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
-                String(form[name]) === String(opt.id)
-                  ? "border-blue-600"
-                  : "border-gray-400"
-              }`}
+              className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${String(form[name]) === String(opt.id)
+                ? "border-blue-600"
+                : "border-gray-400"
+                }`}
             >
               <span
-                className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
-                  String(form[name]) === String(opt.id)
-                    ? "bg-blue-600"
-                    : "bg-transparent"
-                }`}
+                className={`block m-[2px] w-2.5 h-2.5 rounded-full ${String(form[name]) === String(opt.id)
+                  ? "bg-blue-600"
+                  : "bg-transparent"
+                  }`}
               ></span>
             </span>
             {(() => {
@@ -340,22 +337,25 @@ const FileUpload = ({
         </>
       )}
     </div>
-    <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">
-      Requirements:
+    <div>
+      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">
+        Requirements:
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        File Type: <span className="text-gray-800 font-semibold">PDF</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Page Count:{" "}
+        <span className="text-gray-800 font-semibold">2 - 800 pages</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Fonts: <span className="text-gray-800 font-semibold">Embedded</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Layers: <span className="text-gray-800 font-semibold">Flattened</span>
+      </div>
     </div>
-    <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-      File Type: <span className="text-gray-800 font-semibold">PDF</span>
-    </div>
-    <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-      Page Count:{" "}
-      <span className="text-gray-800 font-semibold">2 - 800 pages</span>
-    </div>
-    <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-      Fonts: <span className="text-gray-800 font-semibold">Embedded</span>
-    </div>
-    <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-      Layers: <span className="text-gray-800 font-semibold">Flattened</span>
-    </div>
+
   </div>
 );
 const CoverDesign = ({
@@ -394,24 +394,44 @@ const CoverDesign = ({
       onChange={handleCoverFileChange}
       style={{ display: "none" }}
     />
-    {coverFile && (
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-green-600 text-center text-sm md:text-base">
-          Selected cover: {coverFile.name}
-        </p>
-        <button
-          type="button"
-          className="bg-[#2A428C] text-white font-semibold px-4 py-2 rounded-full shadow hover:bg-[#1d326c] transition ml-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleCoverFileChange({ target: { files: [] } });
-            if (coverFileInputRef.current) coverFileInputRef.current.value = "";
-            coverFileInputRef.current?.click();
-          }}
-        >
-          Replace Cover File
-        </button>
+    <div>
+      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">
+        Requirements:
       </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        File Type: <span className="text-gray-800 font-semibold">PDF</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Page Count:{" "}
+        <span className="text-gray-800 font-semibold">1 page</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Fonts: <span className="text-gray-800 font-semibold">Embedded</span>
+      </div>
+      <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
+        Layers: <span className="text-gray-800 font-semibold">Flattened</span>
+      </div>
+    </div>
+    {coverFile && (
+      <>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-green-600 text-center text-sm md:text-base">
+            Selected cover: {coverFile.name}
+          </p>
+          <button
+            type="button"
+            className="bg-[#2A428C] text-white font-semibold px-4 py-2 rounded-full shadow hover:bg-[#1d326c] transition ml-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCoverFileChange({ target: { files: [] } });
+              if (coverFileInputRef.current) coverFileInputRef.current.value = "";
+              coverFileInputRef.current?.click();
+            }}
+          >
+            Replace Cover File
+          </button>
+        </div>
+      </>
     )}
     {coverFileError && (
       <p className="text-red-600 text-xs md:text-sm text-center mt-2">
@@ -465,7 +485,7 @@ const DesignProjectPreview = () => {
       return newState;
     });
   };
-  
+
   const updateForm = (updates) => {
     setState((prev) => {
       const newState = { ...prev, form: { ...prev.form, ...updates } };
@@ -686,21 +706,21 @@ const DesignProjectPreview = () => {
     const isCalendar = isCalendarCategory(state.projectData?.category);
     const requiredFields = isCalendar
       ? [
-          "binding_id",
-          "interior_color_id",
-          "paper_type_id",
-          "cover_finish_id",
-          "quantity",
-        ]
+        "binding_id",
+        "interior_color_id",
+        "paper_type_id",
+        "cover_finish_id",
+        "quantity",
+      ]
       : [
-          "trim_size_id",
-          "page_count",
-          "binding_id",
-          "interior_color_id",
-          "paper_type_id",
-          "cover_finish_id",
-          "quantity",
-        ];
+        "trim_size_id",
+        "page_count",
+        "binding_id",
+        "interior_color_id",
+        "paper_type_id",
+        "cover_finish_id",
+        "quantity",
+      ];
     const missingFields = requiredFields.filter((field) => !state.form[field]);
     if (missingFields.length > 0) {
       alert(`Please fill in all required fields: ${missingFields.join(", ")}`);
@@ -856,13 +876,13 @@ const DesignProjectPreview = () => {
     const requiredFields = isCalendar
       ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
       : [
-          "trim_size_id",
-          "page_count",
-          "binding_id",
-          "interior_color_id",
-          "paper_type_id",
-          "cover_finish_id",
-        ];
+        "trim_size_id",
+        "page_count",
+        "binding_id",
+        "interior_color_id",
+        "paper_type_id",
+        "cover_finish_id",
+      ];
     const missingFields = requiredFields.filter(
       (field) => !state.form[field] || String(state.form[field]).trim() === ""
     );
@@ -939,7 +959,7 @@ const DesignProjectPreview = () => {
             console.error('Error restoring interior file:', error);
           }
         }
-        
+
         // Restore cover file if available (try IndexedDB first, then base64)
         if (savedData.coverFileData) {
           try {
@@ -952,7 +972,7 @@ const DesignProjectPreview = () => {
                   const arrayBuffer = await restoredCoverFile.arrayBuffer();
                   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
                   const pageCount = pdf.numPages;
-                  
+
                   if (pageCount === 1) {
                     const page = await pdf.getPage(1);
                     const scale = 2;
@@ -961,12 +981,12 @@ const DesignProjectPreview = () => {
                     const context = canvas.getContext("2d");
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
-                    
+
                     await page.render({
                       canvasContext: context,
                       viewport: viewport,
                     }).promise;
-                    
+
                     const pdfImageUrl = canvas.toDataURL("image/png");
                     updateState({
                       coverFile: restoredCoverFile,
@@ -989,7 +1009,7 @@ const DesignProjectPreview = () => {
         }
       }
     };
-    
+
     restoreFiles();
   }, []);
   const handleFileChange = async (e) => {
@@ -1050,7 +1070,7 @@ const DesignProjectPreview = () => {
             ...(matchedId && { trim_size_id: matchedId }),
           });
           updateState({ selectedFile: file, uploadStatus: "success" });
-          
+
           // Save file data for persistence
           try {
             const fileData = await saveFileData(file, 'interior');
@@ -1132,7 +1152,7 @@ const DesignProjectPreview = () => {
         coverPdfUrl: pdfImageUrl,
         coverFileError: "",
       });
-      
+
       // Save cover file data for persistence
       try {
         const coverFileData = await saveFileData(file, 'cover');
@@ -1164,13 +1184,13 @@ const DesignProjectPreview = () => {
     const requiredFields = isCalendar
       ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
       : [
-          "trim_size_id",
-          "page_count",
-          "binding_id",
-          "interior_color_id",
-          "paper_type_id",
-          "cover_finish_id",
-        ];
+        "trim_size_id",
+        "page_count",
+        "binding_id",
+        "interior_color_id",
+        "paper_type_id",
+        "cover_finish_id",
+      ];
     if (!requiredFields.every((field) => state.form[field])) {
       return alert("Please complete all book configuration options");
     }
@@ -1280,8 +1300,8 @@ const DesignProjectPreview = () => {
       console.error("Submission error:", error);
       alert(
         error.response?.data?.message ||
-          error.message ||
-          "An error occurred while submitting your project."
+        error.message ||
+        "An error occurred while submitting your project."
       );
     }
   };
@@ -1461,11 +1481,10 @@ const DesignProjectPreview = () => {
                 return (
                   <label
                     key={opt.id}
-                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
-                      isSelected
-                        ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                        : "border-gray-300 bg-white"
-                    } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected
+                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
+                      : "border-gray-300 bg-white"
+                      } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
                     role="radio"
                     aria-checked={isSelected}
                     aria-disabled={!isAvailable}
@@ -1480,14 +1499,12 @@ const DesignProjectPreview = () => {
                       className="sr-only"
                     />
                     <span
-                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
-                        isSelected ? "border-blue-600" : "border-gray-400"
-                      }`}
+                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? "border-blue-600" : "border-gray-400"
+                        }`}
                     >
                       <span
-                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
-                          isSelected ? "bg-blue-600" : "bg-transparent"
-                        }`}
+                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? "bg-blue-600" : "bg-transparent"
+                          }`}
                       ></span>
                     </span>
                     {(() => {
@@ -1525,11 +1542,10 @@ const DesignProjectPreview = () => {
                 return (
                   <label
                     key={opt.id}
-                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
-                      isSelected
-                        ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                        : "border-gray-300 bg-white"
-                    } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected
+                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
+                      : "border-gray-300 bg-white"
+                      } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
                     role="radio"
                     aria-checked={isSelected}
                     aria-disabled={!isAvailable}
@@ -1544,14 +1560,12 @@ const DesignProjectPreview = () => {
                       className="sr-only"
                     />
                     <span
-                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
-                        isSelected ? "border-blue-600" : "border-gray-400"
-                      }`}
+                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? "border-blue-600" : "border-gray-400"
+                        }`}
                     >
                       <span
-                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
-                          isSelected ? "bg-blue-600" : "bg-transparent"
-                        }`}
+                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? "bg-blue-600" : "bg-transparent"
+                          }`}
                       ></span>
                     </span>
                     {(() => {
@@ -1601,8 +1615,8 @@ const DesignProjectPreview = () => {
           handleChange={handleChange}
           stepAccessible={Boolean(
             state.form.binding_id &&
-              state.form.interior_color_id &&
-              state.form.paper_type_id
+            state.form.interior_color_id &&
+            state.form.paper_type_id
           )}
         />
         <div className="mt-6 md:mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
@@ -1640,9 +1654,8 @@ const DesignProjectPreview = () => {
                 return (
                   <div
                     key={min}
-                    className={`flex justify-between ${
-                      active ? "font-semibold text-green-700" : "text-gray-700"
-                    }`}
+                    className={`flex justify-between ${active ? "font-semibold text-green-700" : "text-gray-700"
+                      }`}
                   >
                     <span>{label} units:</span>
                     <span>{tier.percent}% off</span>
@@ -1759,10 +1772,8 @@ const DesignProjectPreview = () => {
           <div className="flex flex-col items-center gap-4 md:gap-6 mt-6 md:mt-10">
             <button
               onClick={handleContactExpert}
-              disabled={!!state.coverFile}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition ${
-                state.coverFile ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer
+                }`}
             >
               Contact Cover Design Expert
             </button>
@@ -1770,10 +1781,8 @@ const DesignProjectPreview = () => {
               onClick={() => {
                 router.push("/resources/guide-templates");
               }}
-              disabled={!!state.coverFile}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition ${
-                state.coverFile ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer
+                }`}
             >
               Check Cover Design Guidelines
             </button>
@@ -1782,19 +1791,19 @@ const DesignProjectPreview = () => {
                 const isCalendar = state.projectData?.category === "Calender";
                 const requiredFields = isCalendar
                   ? [
-                      "binding_id",
-                      "interior_color_id",
-                      "paper_type_id",
-                      "cover_finish_id",
-                    ]
+                    "binding_id",
+                    "interior_color_id",
+                    "paper_type_id",
+                    "cover_finish_id",
+                  ]
                   : [
-                      "trim_size_id",
-                      "page_count",
-                      "binding_id",
-                      "interior_color_id",
-                      "paper_type_id",
-                      "cover_finish_id",
-                    ];
+                    "trim_size_id",
+                    "page_count",
+                    "binding_id",
+                    "interior_color_id",
+                    "paper_type_id",
+                    "cover_finish_id",
+                  ];
                 const missingFields = requiredFields.filter(
                   (field) => !state.form[field]
                 );
@@ -1859,7 +1868,7 @@ const DesignProjectPreview = () => {
                   : "/book-preview";
                 router.push(targetUrl);
               }}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition `}
+              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer `}
             >
               Preview Your Book
             </button>

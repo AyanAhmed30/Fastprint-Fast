@@ -428,19 +428,22 @@ const BookPreviewContent = () => {
 
             <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-8">
               <h2 className="text-xl font-bold text-[#2A428C] mb-4">
-                Important Information About Your Book
+                Important Information Note
               </h2>
+              <p>Please carefully review your files before uploading to ensure your book is print-ready.
+By proceeding, you acknowledge and accept the following responsibilities:
+</p>
               <ol className="list-decimal pl-6 text-gray-700 space-y-2">
-                <li>Ensure all text is visible and not cut off by margins</li>
-                <li>Verify that images are clear and properly positioned</li>
-                <li>Check that page numbering is correct and consistent</li>
+                <li>	All text, images, and design elements are correctly placed and fully visible within the print margins.</li>
+                <li>All images are high-resolution, clear, and properly aligned.</li>
+                <li>Page numbers are accurate, sequential, and consistently formatted.</li>
                 <li>
-                  Confirm that all chapters and sections are in the right order
+                  All chapters, sections, and pages are in the correct order
                 </li>
-                <li>Review the table of contents for accuracy</li>
+                <li>The table of contents, if included, accurately reflects the final page layout.</li>
               </ol>
               <p className="text-red-600 text-sm font-semibold mt-4">
-                Disclaimer: You are responsible for the book you upload. We are not responsible for any issues that may occur later.
+                Disclaimer:: Fast Print Guys prints files exactly as provided. We do not review or proofread content prior to printing. By submitting your files, you confirm that they are final and approved for production. Fast Print Guys is not responsible for any errors, omissions, or layout issues that appear in the printed product.
               </p>
             </div>
 

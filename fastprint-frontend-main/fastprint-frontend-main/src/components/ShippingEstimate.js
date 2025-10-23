@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { BASE_URL } from "@/services/baseUrl";
 import {
   getBookSpecsForShipping,
@@ -113,7 +114,6 @@ const CANADIAN_PROVINCES = [
   { code: "YT", name: "Yukon" },
 ];
 
-// Australian States and Territories
 const AUSTRALIAN_STATES = [
   { code: "NSW", name: "New South Wales" },
   { code: "VIC", name: "Victoria" },
@@ -125,7 +125,6 @@ const AUSTRALIAN_STATES = [
   { code: "NT", name: "Northern Territory" },
 ];
 
-// German States
 const GERMAN_STATES = [
   { code: "BW", name: "Baden-Württemberg" },
   { code: "BY", name: "Bavaria" },
@@ -145,7 +144,6 @@ const GERMAN_STATES = [
   { code: "TH", name: "Thuringia" },
 ];
 
-// French Regions
 const FRENCH_REGIONS = [
   { code: "ARA", name: "Auvergne-Rhône-Alpes" },
   { code: "BFC", name: "Bourgogne-Franche-Comté" },
@@ -162,7 +160,6 @@ const FRENCH_REGIONS = [
   { code: "PAC", name: "Provence-Alpes-Côte d'Azur" },
 ];
 
-// Italian Regions
 const ITALIAN_REGIONS = [
   { code: "ABR", name: "Abruzzo" },
   { code: "BAS", name: "Basilicata" },
@@ -186,7 +183,6 @@ const ITALIAN_REGIONS = [
   { code: "VEN", name: "Veneto" },
 ];
 
-// Spanish Autonomous Communities
 const SPANISH_REGIONS = [
   { code: "AN", name: "Andalucía" },
   { code: "AR", name: "Aragón" },
@@ -209,7 +205,6 @@ const SPANISH_REGIONS = [
   { code: "ML", name: "Melilla" },
 ];
 
-// Brazilian States
 const BRAZILIAN_STATES = [
   { code: "AC", name: "Acre" },
   { code: "AL", name: "Alagoas" },
@@ -240,7 +235,6 @@ const BRAZILIAN_STATES = [
   { code: "TO", name: "Tocantins" },
 ];
 
-// Mexican States
 const MEXICAN_STATES = [
   { code: "AGU", name: "Aguascalientes" },
   { code: "BCN", name: "Baja California" },
@@ -275,7 +269,6 @@ const MEXICAN_STATES = [
   { code: "ZAC", name: "Zacatecas" },
 ];
 
-// Indian States
 const INDIAN_STATES = [
   { code: "AP", name: "Andhra Pradesh" },
   { code: "AR", name: "Arunachal Pradesh" },
@@ -307,7 +300,6 @@ const INDIAN_STATES = [
   { code: "WB", name: "West Bengal" },
 ];
 
-// Chinese Provinces
 const CHINESE_PROVINCES = [
   { code: "BJ", name: "Beijing" },
   { code: "TJ", name: "Tianjin" },
@@ -345,7 +337,6 @@ const CHINESE_PROVINCES = [
   { code: "TW", name: "Taiwan" },
 ];
 
-// Japanese Prefectures
 const JAPANESE_PREFECTURES = [
   { code: "HOK", name: "Hokkaido" },
   { code: "AOM", name: "Aomori" },
@@ -396,7 +387,6 @@ const JAPANESE_PREFECTURES = [
   { code: "OKIN", name: "Okinawa" },
 ];
 
-// United Kingdom Countries and Regions
 const UK_REGIONS = [
   { code: "ENG", name: "England" },
   { code: "SCT", name: "Scotland" },
@@ -405,7 +395,6 @@ const UK_REGIONS = [
   { code: "GBN", name: "Great Britain" },
 ];
 
-// Netherlands Provinces
 const DUTCH_PROVINCES = [
   { code: "DR", name: "Drenthe" },
   { code: "FL", name: "Flevoland" },
@@ -421,13 +410,6 @@ const DUTCH_PROVINCES = [
   { code: "ZH", name: "Zuid-Holland" },
 ];
 
-// Belgian Regions and Provinces
-const BELGIAN_REGIONS = [
-  { code: "VLG", name: "Flanders" },
-  { code: "WAL", name: "Wallonia" },
-  { code: "BRU", name: "Brussels-Capital Region" },
-];
-
 const BELGIAN_PROVINCES = [
   { code: "ANT", name: "Antwerp" },
   { code: "LIM", name: "Limburg" },
@@ -441,7 +423,6 @@ const BELGIAN_PROVINCES = [
   { code: "WBR", name: "Walloon Brabant" },
 ];
 
-// Swiss Cantons
 const SWISS_CANTONS = [
   { code: "AG", name: "Aargau" },
   { code: "AI", name: "Appenzell Innerrhoden" },
@@ -471,7 +452,6 @@ const SWISS_CANTONS = [
   { code: "ZH", name: "Zürich" },
 ];
 
-// Austrian States (Bundesländer)
 const AUSTRIAN_STATES = [
   { code: "B", name: "Burgenland" },
   { code: "K", name: "Carinthia" },
@@ -484,7 +464,6 @@ const AUSTRIAN_STATES = [
   { code: "W", name: "Vienna" },
 ];
 
-// Swedish Counties (Län)
 const SWEDISH_COUNTIES = [
   { code: "AB", name: "Stockholm County" },
   { code: "AC", name: "Västerbotten County" },
@@ -509,7 +488,6 @@ const SWEDISH_COUNTIES = [
   { code: "Z", name: "Jämtland County" },
 ];
 
-// Norwegian Counties (Fylker)
 const NORWEGIAN_COUNTIES = [
   { code: "03", name: "Oslo" },
   { code: "11", name: "Rogaland" },
@@ -524,7 +502,6 @@ const NORWEGIAN_COUNTIES = [
   { code: "54", name: "Troms og Finnmark" },
 ];
 
-// Danish Regions
 const DANISH_REGIONS = [
   { code: "H", name: "Capital Region" },
   { code: "M", name: "Central Jutland" },
@@ -533,7 +510,6 @@ const DANISH_REGIONS = [
   { code: "Z", name: "Zealand" },
 ];
 
-// Finnish Regions (Maakunnat)
 const FINNISH_REGIONS = [
   { code: "01", name: "Åland Islands" },
   { code: "02", name: "South Karelia" },
@@ -556,19 +532,6 @@ const FINNISH_REGIONS = [
   { code: "19", name: "Southwest Finland" },
 ];
 
-// Icelandic Regions
-const ICELANDIC_REGIONS = [
-  { code: "HÖV", name: "Capital Region" },
-  { code: "SUÐ", name: "Southern Peninsula" },
-  { code: "VES", name: "Western Region" },
-  { code: "VES", name: "Westfjords" },
-  { code: "NOR", name: "Northwestern Region" },
-  { code: "NOR", name: "Northeastern Region" },
-  { code: "AUS", name: "Eastern Region" },
-  { code: "SUÐ", name: "Southern Region" },
-];
-
-// Irish Counties
 const IRISH_COUNTIES = [
   { code: "CW", name: "Carlow" },
   { code: "CN", name: "Cavan" },
@@ -598,7 +561,6 @@ const IRISH_COUNTIES = [
   { code: "WW", name: "Wicklow" },
 ];
 
-// Portuguese Districts and Autonomous Regions
 const PORTUGUESE_REGIONS = [
   { code: "01", name: "Aveiro" },
   { code: "02", name: "Beja" },
@@ -622,7 +584,6 @@ const PORTUGUESE_REGIONS = [
   { code: "30", name: "Madeira" },
 ];
 
-// Polish Voivodeships
 const POLISH_VOIVODESHIPS = [
   { code: "DS", name: "Lower Silesian" },
   { code: "KP", name: "Kuyavian-Pomeranian" },
@@ -642,7 +603,6 @@ const POLISH_VOIVODESHIPS = [
   { code: "ZP", name: "West Pomeranian" },
 ];
 
-// Czech Regions (Kraje)
 const CZECH_REGIONS = [
   { code: "JC", name: "South Bohemian" },
   { code: "JM", name: "South Moravian" },
@@ -660,7 +620,6 @@ const CZECH_REGIONS = [
   { code: "ZL", name: "Zlín" },
 ];
 
-// South Korean Provinces and Special Cities
 const SOUTH_KOREAN_REGIONS = [
   { code: "11", name: "Seoul" },
   { code: "26", name: "Busan" },
@@ -681,7 +640,6 @@ const SOUTH_KOREAN_REGIONS = [
   { code: "50", name: "Jeju" },
 ];
 
-// Argentine Provinces
 const ARGENTINE_PROVINCES = [
   { code: "B", name: "Buenos Aires" },
   { code: "C", name: "Ciudad Autónoma de Buenos Aires" },
@@ -709,7 +667,6 @@ const ARGENTINE_PROVINCES = [
   { code: "T", name: "Tucumán" },
 ];
 
-// Colombian Departments
 const COLOMBIAN_DEPARTMENTS = [
   { code: "AMA", name: "Amazonas" },
   { code: "ANT", name: "Antioquia" },
@@ -745,7 +702,6 @@ const COLOMBIAN_DEPARTMENTS = [
   { code: "VID", name: "Vichada" },
 ];
 
-// South African Provinces
 const SOUTH_AFRICAN_PROVINCES = [
   { code: "EC", name: "Eastern Cape" },
   { code: "FS", name: "Free State" },
@@ -758,7 +714,6 @@ const SOUTH_AFRICAN_PROVINCES = [
   { code: "WC", name: "Western Cape" },
 ];
 
-// Egyptian Governorates
 const EGYPTIAN_GOVERNORATES = [
   { code: "ALX", name: "Alexandria" },
   { code: "ASN", name: "Aswan" },
@@ -788,7 +743,6 @@ const EGYPTIAN_GOVERNORATES = [
   { code: "SUZ", name: "Suez" },
 ];
 
-// Moroccan Regions
 const MOROCCAN_REGIONS = [
   { code: "01", name: "Tanger-Tétouan-Al Hoceïma" },
   { code: "02", name: "L'Oriental" },
@@ -804,7 +758,6 @@ const MOROCCAN_REGIONS = [
   { code: "12", name: "Dakhla-Oued Ed-Dahab" },
 ];
 
-// Zimbabwe Provinces
 const ZIMBABWEAN_PROVINCES = [
   { code: "BU", name: "Bulawayo" },
   { code: "HA", name: "Harare" },
@@ -818,7 +771,6 @@ const ZIMBABWEAN_PROVINCES = [
   { code: "MI", name: "Midlands" },
 ];
 
-// Pakistani Provinces and Territories
 const PAKISTANI_REGIONS = [
   { code: "PB", name: "Punjab" },
   { code: "SD", name: "Sindh" },
@@ -826,6 +778,53 @@ const PAKISTANI_REGIONS = [
   { code: "BA", name: "Balochistan" },
   { code: "GB", name: "Gilgit-Baltistan" },
 ];
+
+// Session Expired Modal Component
+const SessionExpiredModal = ({ isOpen, onClose }) => {
+  const router = useRouter();
+
+  if (!isOpen) return null;
+
+  const handleLogin = () => {
+    router.push("/login");
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <svg
+              className="h-6 w-6 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Session Expired
+          </h3>
+          <p className="text-gray-600 mb-6">
+            Your session has expired. Please login again to continue.
+          </p>
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Login
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ShippingEstimate = ({ bookSpecs = null, pricingResult = null }) => {
   const [address, setAddress] = useState({
@@ -840,8 +839,8 @@ const ShippingEstimate = ({ bookSpecs = null, pricingResult = null }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [availableStates, setAvailableStates] = useState([]);
+  const [showSessionModal, setShowSessionModal] = useState(false);
 
-  // Safely get token only on client
   const getToken = () => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("accessToken");
@@ -981,7 +980,7 @@ const ShippingEstimate = ({ bookSpecs = null, pricingResult = null }) => {
     } catch (err) {
       console.error("Shipping fetch error:", err);
       if (err.response?.status === 401) {
-        setError("Authentication failed. Please log in again.");
+        setShowSessionModal(true);
       } else {
         setError(
           err.response?.data?.error ||
@@ -1001,124 +1000,131 @@ const ShippingEstimate = ({ bookSpecs = null, pricingResult = null }) => {
   }, [address.country, address.state, address.city, address.postal_code, bookSpecs]);
 
   return (
-    <div className="mt-6 p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
-      <h3 className="font-semibold text-blue-700 text-lg mb-4">Shipping Estimate</h3>
+    <>
+      <SessionExpiredModal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-        <select
-          name="country"
-          value={address.country}
-          onChange={handleAddressChange}
-          className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select Country</option>
-          {COUNTRIES.map((country) => (
-            <option key={country.code} value={country.code}>
-              {country.name}
-            </option>
-          ))}
-        </select>
+      <div className="mt-6 p-4 bg-white border border-blue-200 rounded-lg shadow-sm">
+        <h3 className="font-semibold text-blue-700 text-lg mb-4">Shipping Estimate</h3>
 
-        {availableStates.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <select
-            name="state"
-            value={address.state}
+            name="country"
+            value={address.country}
             onChange={handleAddressChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select State/Province</option>
-            {availableStates.map((state) => (
-              <option key={state.code} value={state.code}>
-                {state.name}
+            <option value="">Select Country</option>
+            {COUNTRIES.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.name}
               </option>
             ))}
           </select>
-        ) : (
+
+          {availableStates.length > 0 ? (
+            <select
+              name="state"
+              value={address.state}
+              onChange={handleAddressChange}
+              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select State/Province</option>
+              {availableStates.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              name="state"
+              placeholder="State/Province"
+              value={address.state}
+              onChange={handleAddressChange}
+              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          )}
+
           <input
             type="text"
-            name="state"
-            placeholder="State/Province"
-            value={address.state}
+            name="city"
+            placeholder="City"
+            value={address.city}
             onChange={handleAddressChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <input
+            type="text"
+            name="postal_code"
+            placeholder="Postal Code"
+            value={address.postal_code}
+            onChange={handleAddressChange}
+            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {loading && (
+          <div className="mt-4 flex items-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+            <p className="text-blue-600 text-sm">Loading shipping options...</p>
+          </div>
         )}
 
-        <input
-          type="text"
-          name="city"
-          placeholder="City"
-          value={address.city}
-          onChange={handleAddressChange}
-          className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="text"
-          name="postal_code"
-          placeholder="Postal Code"
-          value={address.postal_code}
-          onChange={handleAddressChange}
-          className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+        {shippingOptions.length > 0 && (
+          <div className="mt-5">
+            <label className="block mb-2 font-medium text-gray-700 text-sm md:text-base">
+              Select Shipping Option:
+            </label>
+            <select
+              className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedOption !== null ? shippingOptions.findIndex(opt => opt === selectedOption) : ""}
+              onChange={(e) => {
+                const idx = e.target.value === "" ? -1 : parseInt(e.target.value);
+                setSelectedOption(idx >= 0 ? shippingOptions[idx] : null);
+              }}
+              disabled={loading}
+            >
+              <option value="">-- Select Shipping Method --</option>
+              {shippingOptions.map((option, index) => (
+                <option key={index} value={index}>
+                  {option.courier_name} - {option.service} — ${option.rate} — {option.estimated_days}
+                </option>
+              ))}
+            </select>
 
-      {loading && (
-        <div className="mt-4 flex items-center">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
-          <p className="text-blue-600 text-sm">Loading shipping options...</p>
-        </div>
-      )}
-
-      {shippingOptions.length > 0 && (
-        <div className="mt-5">
-          <label className="block mb-2 font-medium text-gray-700 text-sm md:text-base">
-            Select Shipping Option:
-          </label>
-          <select
-            className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedOption !== null ? shippingOptions.findIndex(opt => opt === selectedOption) : ""}
-            onChange={(e) => {
-              const idx = e.target.value === "" ? -1 : parseInt(e.target.value);
-              setSelectedOption(idx >= 0 ? shippingOptions[idx] : null);
-            }}
-            disabled={loading}
-          >
-            <option value="">-- Select Shipping Method --</option>
-            {shippingOptions.map((option, index) => (
-              <option key={index} value={index}>
-                {option.courier_name} - {option.service} — ${option.rate} — {option.estimated_days}
-              </option>
-            ))}
-          </select>
-
-          {selectedOption && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-blue-800 font-medium text-sm md:text-base">
-                Shipping and Handling: <span className="font-bold">${selectedOption.rate}</span>
-              </p>
-              {pricingResult && (
-                <p className="text-blue-800 font-bold text-base md:text-lg mt-2">
-                  Subtotal (Excluding taxes and applicable fees):{" "}
-                  <span className="text-green-700">
-                    $
-                    {(
-                      parseFloat(pricingResult.finalPrice || pricingResult.finalAmount || pricingResult.totalPrice) +
-                      parseFloat(selectedOption.rate)
-                    ).toFixed(2)}
-                  </span>
+            {selectedOption && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-blue-800 font-medium text-sm md:text-base">
+                  Shipping and Handling: <span className="font-bold">${selectedOption.rate}</span>
                 </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+                {pricingResult && (
+                  <p className="text-blue-800 font-bold text-base md:text-lg mt-2">
+                    Subtotal (Excluding taxes and applicable fees):{" "}
+                    <span className="text-green-700">
+                      $
+                      {(
+                        parseFloat(pricingResult.finalPrice || pricingResult.finalAmount || pricingResult.totalPrice) +
+                        parseFloat(selectedOption.rate)
+                      ).toFixed(2)}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
-      {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
-      )}
-    </div>
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

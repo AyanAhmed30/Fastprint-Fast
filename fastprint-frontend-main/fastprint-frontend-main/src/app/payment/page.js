@@ -547,11 +547,7 @@ const Payment = () => {
               </div>
 
               {/* Payment Method Indicator */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-6">
-                <p className="text-xs md:text-sm text-gray-700 text-center">
-                  <strong>Payment Method:</strong> {paymentMethod === "credit_card" ? "Credit Card (Stripe)" : "PayPal"}
-                </p>
-              </div>
+         
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { BASE_URL } from "@/services/baseUrl";
@@ -19,761 +19,47 @@ import {
   calculatePriceCalendar,
 } from "@/calculators/pricing";
 
-const COUNTRIES = [
-  { code: "US", name: "United States" },
-  { code: "CA", name: "Canada" },
-  { code: "GB", name: "United Kingdom" },
-  { code: "AU", name: "Australia" },
-  { code: "DE", name: "Germany" },
-  { code: "FR", name: "France" },
-  { code: "IT", name: "Italy" },
-  { code: "ES", name: "Spain" },
-  { code: "NL", name: "Netherlands" },
-  { code: "BE", name: "Belgium" },
-  { code: "CH", name: "Switzerland" },
-  { code: "AT", name: "Austria" },
-  { code: "SE", name: "Sweden" },
-  { code: "NO", name: "Norway" },
-  { code: "DK", name: "Denmark" },
-  { code: "FI", name: "Finland" },
-  { code: "IE", name: "Ireland" },
-  { code: "PT", name: "Portugal" },
-  { code: "PL", name: "Poland" },
-  { code: "CZ", name: "Czech Republic" },
-  { code: "JP", name: "Japan" },
-  { code: "KR", name: "South Korea" },
-  { code: "CN", name: "China" },
-  { code: "IN", name: "India" },
-  { code: "BR", name: "Brazil" },
-  { code: "MX", name: "Mexico" },
-  { code: "AR", name: "Argentina" },
-  { code: "CO", name: "Colombia" },
-  { code: "ZA", name: "South Africa" },
-  { code: "EG", name: "Egypt" },
-  { code: "MA", name: "Morocco" },
-  { code: "ZW", name: "Zimbabwe" },
-  { code: "PK", name: "Pakistan" },
-];
-
-const US_STATES = [
-  { code: "AL", name: "Alabama" },
-  { code: "AK", name: "Alaska" },
-  { code: "AZ", name: "Arizona" },
-  { code: "AR", name: "Arkansas" },
-  { code: "CA", name: "California" },
-  { code: "CO", name: "Colorado" },
-  { code: "CT", name: "Connecticut" },
-  { code: "DE", name: "Delaware" },
-  { code: "FL", name: "Florida" },
-  { code: "GA", name: "Georgia" },
-  { code: "HI", name: "Hawaii" },
-  { code: "ID", name: "Idaho" },
-  { code: "IL", name: "Illinois" },
-  { code: "IN", name: "Indiana" },
-  { code: "IA", name: "Iowa" },
-  { code: "KS", name: "Kansas" },
-  { code: "KY", name: "Kentucky" },
-  { code: "LA", name: "Louisiana" },
-  { code: "ME", name: "Maine" },
-  { code: "MD", name: "Maryland" },
-  { code: "MA", name: "Massachusetts" },
-  { code: "MI", name: "Michigan" },
-  { code: "MN", name: "Minnesota" },
-  { code: "MS", name: "Mississippi" },
-  { code: "MO", name: "Missouri" },
-  { code: "MT", name: "Montana" },
-  { code: "NE", name: "Nebraska" },
-  { code: "NV", name: "Nevada" },
-  { code: "NH", name: "New Hampshire" },
-  { code: "NJ", name: "New Jersey" },
-  { code: "NM", name: "New Mexico" },
-  { code: "NY", name: "New York" },
-  { code: "NC", name: "North Carolina" },
-  { code: "ND", name: "North Dakota" },
-  { code: "OH", name: "Ohio" },
-  { code: "OK", name: "Oklahoma" },
-  { code: "OR", name: "Oregon" },
-  { code: "PA", name: "Pennsylvania" },
-  { code: "RI", name: "Rhode Island" },
-  { code: "SC", name: "South Carolina" },
-  { code: "SD", name: "South Dakota" },
-  { code: "TN", name: "Tennessee" },
-  { code: "TX", name: "Texas" },
-  { code: "UT", name: "Utah" },
-  { code: "VT", name: "Vermont" },
-  { code: "VA", name: "Virginia" },
-  { code: "WA", name: "Washington" },
-  { code: "WV", name: "West Virginia" },
-  { code: "WI", name: "Wisconsin" },
-  { code: "WY", name: "Wyoming" },
-  { code: "DC", name: "District of Columbia" },
-];
-
-const CANADIAN_PROVINCES = [
-  { code: "AB", name: "Alberta" },
-  { code: "BC", name: "British Columbia" },
-  { code: "MB", name: "Manitoba" },
-  { code: "NB", name: "New Brunswick" },
-  { code: "NL", name: "Newfoundland and Labrador" },
-  { code: "NS", name: "Nova Scotia" },
-  { code: "ON", name: "Ontario" },
-  { code: "PE", name: "Prince Edward Island" },
-  { code: "QC", name: "Quebec" },
-  { code: "SK", name: "Saskatchewan" },
-  { code: "NT", name: "Northwest Territories" },
-  { code: "NU", name: "Nunavut" },
-  { code: "YT", name: "Yukon" },
-];
-const AUSTRALIAN_STATES = [
-  { code: "NSW", name: "New South Wales" },
-  { code: "VIC", name: "Victoria" },
-  { code: "QLD", name: "Queensland" },
-  { code: "WA", name: "Western Australia" },
-  { code: "SA", name: "South Australia" },
-  { code: "TAS", name: "Tasmania" },
-  { code: "ACT", name: "Australian Capital Territory" },
-  { code: "NT", name: "Northern Territory" },
-];
-const GERMAN_STATES = [
-  { code: "BW", name: "Baden-Württemberg" },
-  { code: "BY", name: "Bavaria" },
-  { code: "BE", name: "Berlin" },
-  { code: "BB", name: "Brandenburg" },
-  { code: "HB", name: "Bremen" },
-  { code: "HH", name: "Hamburg" },
-  { code: "HE", name: "Hesse" },
-  { code: "MV", name: "Mecklenburg-Vorpommern" },
-  { code: "NI", name: "Lower Saxony" },
-  { code: "NW", name: "North Rhine-Westphalia" },
-  { code: "RP", name: "Rhineland-Palatinate" },
-  { code: "SL", name: "Saarland" },
-  { code: "SN", name: "Saxony" },
-  { code: "ST", name: "Saxony-Anhalt" },
-  { code: "SH", name: "Schleswig-Holstein" },
-  { code: "TH", name: "Thuringia" },
-];
-const FRENCH_REGIONS = [
-  { code: "ARA", name: "Auvergne-Rhône-Alpes" },
-  { code: "BFC", name: "Bourgogne-Franche-Comté" },
-  { code: "BRE", name: "Bretagne" },
-  { code: "CVL", name: "Centre-Val de Loire" },
-  { code: "COR", name: "Corse" },
-  { code: "GES", name: "Grand Est" },
-  { code: "HDF", name: "Hauts-de-France" },
-  { code: "IDF", name: "Île-de-France" },
-  { code: "NOR", name: "Normandie" },
-  { code: "NAQ", name: "Nouvelle-Aquitaine" },
-  { code: "OCC", name: "Occitanie" },
-  { code: "PDL", name: "Pays de la Loire" },
-  { code: "PAC", name: "Provence-Alpes-Côte d'Azur" },
-];
-const ITALIAN_REGIONS = [
-  { code: "ABR", name: "Abruzzo" },
-  { code: "BAS", name: "Basilicata" },
-  { code: "CAL", name: "Calabria" },
-  { code: "CAM", name: "Campania" },
-  { code: "EMR", name: "Emilia-Romagna" },
-  { code: "FVG", name: "Friuli-Venezia Giulia" },
-  { code: "LAZ", name: "Lazio" },
-  { code: "LIG", name: "Liguria" },
-  { code: "LOM", name: "Lombardia" },
-  { code: "MAR", name: "Marche" },
-  { code: "MOL", name: "Molise" },
-  { code: "PAB", name: "Piemonte" },
-  { code: "PUG", name: "Puglia" },
-  { code: "SAR", name: "Sardegna" },
-  { code: "SIC", name: "Sicilia" },
-  { code: "TOS", name: "Toscana" },
-  { code: "TAA", name: "Trentino-Alto Adige" },
-  { code: "UMB", name: "Umbria" },
-  { code: "VDA", name: "Valle d'Aosta" },
-  { code: "VEN", name: "Veneto" },
-];
-const SPANISH_REGIONS = [
-  { code: "AN", name: "Andalucía" },
-  { code: "AR", name: "Aragón" },
-  { code: "AS", name: "Asturias" },
-  { code: "CB", name: "Cantabria" },
-  { code: "CL", name: "Castilla y León" },
-  { code: "CM", name: "Castilla-La Mancha" },
-  { code: "CT", name: "Cataluña" },
-  { code: "EX", name: "Extremadura" },
-  { code: "GA", name: "Galicia" },
-  { code: "IB", name: "Islas Baleares" },
-  { code: "CN", name: "Canarias" },
-  { code: "RI", name: "La Rioja" },
-  { code: "MD", name: "Madrid" },
-  { code: "MC", name: "Murcia" },
-  { code: "NC", name: "Navarra" },
-  { code: "PV", name: "País Vasco" },
-  { code: "VC", name: "Valencia" },
-  { code: "CE", name: "Ceuta" },
-  { code: "ML", name: "Melilla" },
-];
-const BRAZILIAN_STATES = [
-  { code: "AC", name: "Acre" },
-  { code: "AL", name: "Alagoas" },
-  { code: "AP", name: "Amapá" },
-  { code: "AM", name: "Amazonas" },
-  { code: "BA", name: "Bahia" },
-  { code: "CE", name: "Ceará" },
-  { code: "DF", name: "Distrito Federal" },
-  { code: "ES", name: "Espírito Santo" },
-  { code: "GO", name: "Goiás" },
-  { code: "MA", name: "Maranhão" },
-  { code: "MT", name: "Mato Grosso" },
-  { code: "MS", name: "Mato Grosso do Sul" },
-  { code: "MG", name: "Minas Gerais" },
-  { code: "PA", name: "Pará" },
-  { code: "PB", name: "Paraíba" },
-  { code: "PR", name: "Paraná" },
-  { code: "PE", name: "Pernambuco" },
-  { code: "PI", name: "Piauí" },
-  { code: "RJ", name: "Rio de Janeiro" },
-  { code: "RN", name: "Rio Grande do Norte" },
-  { code: "RS", name: "Rio Grande do Sul" },
-  { code: "RO", name: "Rondônia" },
-  { code: "RR", name: "Roraima" },
-  { code: "SC", name: "Santa Catarina" },
-  { code: "SP", name: "São Paulo" },
-  { code: "SE", name: "Sergipe" },
-  { code: "TO", name: "Tocantins" },
-];
-const MEXICAN_STATES = [
-  { code: "AGU", name: "Aguascalientes" },
-  { code: "BCN", name: "Baja California" },
-  { code: "BCS", name: "Baja California Sur" },
-  { code: "CAM", name: "Campeche" },
-  { code: "CHP", name: "Chiapas" },
-  { code: "CHH", name: "Chihuahua" },
-  { code: "COA", name: "Coahuila" },
-  { code: "COL", name: "Colima" },
-  { code: "DUR", name: "Durango" },
-  { code: "GUA", name: "Guanajuato" },
-  { code: "GRO", name: "Guerrero" },
-  { code: "HID", name: "Hidalgo" },
-  { code: "JAL", name: "Jalisco" },
-  { code: "MEX", name: "México" },
-  { code: "MIC", name: "Michoacán" },
-  { code: "MOR", name: "Morelos" },
-  { code: "NAY", name: "Nayarit" },
-  { code: "NLE", name: "Nuevo León" },
-  { code: "OAX", name: "Oaxaca" },
-  { code: "PUE", name: "Puebla" },
-  { code: "QUE", name: "Querétaro" },
-  { code: "ROO", name: "Quintana Roo" },
-  { code: "SLP", name: "San Luis Potosí" },
-  { code: "SIN", name: "Sinaloa" },
-  { code: "SON", name: "Sonora" },
-  { code: "TAB", name: "Tabasco" },
-  { code: "TAM", name: "Tamaulipas" },
-  { code: "TLA", name: "Tlaxcala" },
-  { code: "VER", name: "Veracruz" },
-  { code: "YUC", name: "Yucatán" },
-  { code: "ZAC", name: "Zacatecas" },
-];
-const INDIAN_STATES = [
-  { code: "AP", name: "Andhra Pradesh" },
-  { code: "AR", name: "Arunachal Pradesh" },
-  { code: "AS", name: "Assam" },
-  { code: "BR", name: "Bihar" },
-  { code: "CT", name: "Chhattisgarh" },
-  { code: "GA", name: "Goa" },
-  { code: "GJ", name: "Gujarat" },
-  { code: "HR", name: "Haryana" },
-  { code: "HP", name: "Himachal Pradesh" },
-  { code: "JH", name: "Jharkhand" },
-  { code: "KA", name: "Karnataka" },
-  { code: "KL", name: "Kerala" },
-  { code: "MP", name: "Madhya Pradesh" },
-  { code: "MH", name: "Maharashtra" },
-  { code: "MN", name: "Manipur" },
-  { code: "ML", name: "Meghalaya" },
-  { code: "MZ", name: "Mizoram" },
-  { code: "NL", name: "Nagaland" },
-  { code: "OR", name: "Odisha" },
-  { code: "PB", name: "Punjab" },
-  { code: "RJ", name: "Rajasthan" },
-  { code: "SK", name: "Sikkim" },
-  { code: "TN", name: "Tamil Nadu" },
-  { code: "TS", name: "Telangana" },
-  { code: "TR", name: "Tripura" },
-  { code: "UP", name: "Uttar Pradesh" },
-  { code: "UT", name: "Uttarakhand" },
-  { code: "WB", name: "West Bengal" },
-];
-const CHINESE_PROVINCES = [
-  { code: "BJ", name: "Beijing" },
-  { code: "TJ", name: "Tianjin" },
-  { code: "HE", name: "Hebei" },
-  { code: "SX", name: "Shanxi" },
-  { code: "NM", name: "Inner Mongolia" },
-  { code: "LN", name: "Liaoning" },
-  { code: "JL", name: "Jilin" },
-  { code: "HL", name: "Heilongjiang" },
-  { code: "SH", name: "Shanghai" },
-  { code: "JS", name: "Jiangsu" },
-  { code: "ZJ", name: "Zhejiang" },
-  { code: "AH", name: "Anhui" },
-  { code: "FJ", name: "Fujian" },
-  { code: "JX", name: "Jiangxi" },
-  { code: "SD", name: "Shandong" },
-  { code: "HA", name: "Henan" },
-  { code: "HB", name: "Hubei" },
-  { code: "HN", name: "Hunan" },
-  { code: "GD", name: "Guangdong" },
-  { code: "GX", name: "Guangxi" },
-  { code: "HI", name: "Hainan" },
-  { code: "CQ", name: "Chongqing" },
-  { code: "SC", name: "Sichuan" },
-  { code: "GZ", name: "Guizhou" },
-  { code: "YN", name: "Yunnan" },
-  { code: "XZ", name: "Tibet" },
-  { code: "SN", name: "Shaanxi" },
-  { code: "GS", name: "Gansu" },
-  { code: "QH", name: "Qinghai" },
-  { code: "NX", name: "Ningxia" },
-  { code: "XJ", name: "Xinjiang" },
-  { code: "HK", name: "Hong Kong" },
-  { code: "MO", name: "Macau" },
-  { code: "TW", name: "Taiwan" },
-];
-const JAPANESE_PREFECTURES = [
-  { code: "HOK", name: "Hokkaido" },
-  { code: "AOM", name: "Aomori" },
-  { code: "IWA", name: "Iwate" },
-  { code: "MIY", name: "Miyagi" },
-  { code: "AKI", name: "Akita" },
-  { code: "YAMA", name: "Yamagata" },
-  { code: "FUKS", name: "Fukushima" }, // Changed from FUKU to FUKS
-  { code: "IBR", name: "Ibaraki" },
-  { code: "TOCH", name: "Tochigi" },
-  { code: "GUN", name: "Gunma" },
-  { code: "SAIT", name: "Saitama" },
-  { code: "CHIB", name: "Chiba" },
-  { code: "TOKY", name: "Tokyo" },
-  { code: "KANA", name: "Kanagawa" },
-  { code: "NIIG", name: "Niigata" },
-  { code: "TOYA", name: "Toyama" },
-  { code: "ISHI", name: "Ishikawa" },
-  { code: "FUKI", name: "Fukui" }, // Changed from FUKU to FUKI
-  { code: "YAMN", name: "Yamanashi" }, // Changed from YAMA to YAMN
-  { code: "NGNO", name: "Nagano" }, // Changed from NAGA to NGNO
-  { code: "GIFU", name: "Gifu" },
-  { code: "SHIZ", name: "Shizuoka" },
-  { code: "AICH", name: "Aichi" },
-  { code: "MIE", name: "Mie" },
-  { code: "SHIG", name: "Shiga" },
-  { code: "KYOT", name: "Kyoto" },
-  { code: "OSAK", name: "Osaka" },
-  { code: "HYOG", name: "Hyogo" },
-  { code: "NARA", name: "Nara" },
-  { code: "WAKA", name: "Wakayama" },
-  { code: "TOTT", name: "Tottori" },
-  { code: "SHIM", name: "Shimane" },
-  { code: "OKAY", name: "Okayama" },
-  { code: "HIRO", name: "Hiroshima" },
-  { code: "YAMG", name: "Yamaguchi" }, // Changed from YAMA to YAMG (different from Yamagata)
-  { code: "TOKU", name: "Tokushima" },
-  { code: "KAGA", name: "Kagawa" },
-  { code: "EHIM", name: "Ehime" },
-  { code: "KOCH", name: "Kochi" },
-  { code: "FUKU", name: "Fukuoka" }, // Kept as FUKU (unique now)
-  { code: "SAGA", name: "Saga" },
-  { code: "NGSK", name: "Nagasaki" }, // Changed from NAGA to NGSK
-  { code: "KUM", name: "Kumamoto" },
-  { code: "OITA", name: "Oita" },
-  { code: "MIYA", name: "Miyazaki" },
-  { code: "KAGO", name: "Kagoshima" },
-  { code: "OKIN", name: "Okinawa" },
-];
-const UK_REGIONS = [
-  { code: "ENG", name: "England" },
-  { code: "SCT", name: "Scotland" },
-  { code: "WLS", name: "Wales" },
-  { code: "NIR", name: "Northern Ireland" },
-  { code: "GBN", name: "Great Britain" },
-];
-const DUTCH_PROVINCES = [
-  { code: "DR", name: "Drenthe" },
-  { code: "FL", name: "Flevoland" },
-  { code: "FR", name: "Friesland" },
-  { code: "GE", name: "Gelderland" },
-  { code: "GR", name: "Groningen" },
-  { code: "LI", name: "Limburg" },
-  { code: "NB", name: "Noord-Brabant" },
-  { code: "NH", name: "Noord-Holland" },
-  { code: "OV", name: "Overijssel" },
-  { code: "UT", name: "Utrecht" },
-  { code: "ZE", name: "Zeeland" },
-  { code: "ZH", name: "Zuid-Holland" },
-];
-const BELGIAN_PROVINCES = [
-  { code: "ANT", name: "Antwerp" },
-  { code: "LIM", name: "Limburg" },
-  { code: "OVL", name: "East Flanders" },
-  { code: "VBR", name: "Flemish Brabant" },
-  { code: "WVL", name: "West Flanders" },
-  { code: "HAI", name: "Hainaut" },
-  { code: "LIE", name: "Liège" },
-  { code: "LUX", name: "Luxembourg" },
-  { code: "NAM", name: "Namur" },
-  { code: "WBR", name: "Walloon Brabant" },
-];
-const SWISS_CANTONS = [
-  { code: "AG", name: "Aargau" },
-  { code: "AI", name: "Appenzell Innerrhoden" },
-  { code: "AR", name: "Appenzell Ausserrhoden" },
-  { code: "BE", name: "Bern" },
-  { code: "BL", name: "Basel-Landschaft" },
-  { code: "BS", name: "Basel-Stadt" },
-  { code: "FR", name: "Fribourg" },
-  { code: "GE", name: "Geneva" },
-  { code: "GL", name: "Glarus" },
-  { code: "GR", name: "Graubünden" },
-  { code: "JU", name: "Jura" },
-  { code: "LU", name: "Lucerne" },
-  { code: "NE", name: "Neuchâtel" },
-  { code: "NW", name: "Nidwalden" },
-  { code: "OW", name: "Obwalden" },
-  { code: "SG", name: "St. Gallen" },
-  { code: "SH", name: "Schaffhausen" },
-  { code: "SO", name: "Solothurn" },
-  { code: "SZ", name: "Schwyz" },
-  { code: "TG", name: "Thurgau" },
-  { code: "TI", name: "Ticino" },
-  { code: "UR", name: "Uri" },
-  { code: "VD", name: "Vaud" },
-  { code: "VS", name: "Valais" },
-  { code: "ZG", name: "Zug" },
-  { code: "ZH", name: "Zürich" },
-];
-const AUSTRIAN_STATES = [
-  { code: "B", name: "Burgenland" },
-  { code: "K", name: "Carinthia" },
-  { code: "NÖ", name: "Lower Austria" },
-  { code: "OÖ", name: "Upper Austria" },
-  { code: "S", name: "Salzburg" },
-  { code: "ST", name: "Styria" },
-  { code: "T", name: "Tyrol" },
-  { code: "V", name: "Vorarlberg" },
-  { code: "W", name: "Vienna" },
-];
-const SWEDISH_COUNTIES = [
-  { code: "AB", name: "Stockholm County" },
-  { code: "AC", name: "Västerbotten County" },
-  { code: "BD", name: "Norrbotten County" },
-  { code: "C", name: "Uppsala County" },
-  { code: "D", name: "Södermanland County" },
-  { code: "E", name: "Östergötland County" },
-  { code: "F", name: "Jönköping County" },
-  { code: "G", name: "Kronoberg County" },
-  { code: "H", name: "Kalmar County" },
-  { code: "I", name: "Gotland County" },
-  { code: "K", name: "Blekinge County" },
-  { code: "M", name: "Skåne County" },
-  { code: "N", name: "Halland County" },
-  { code: "O", name: "Västra Götaland County" },
-  { code: "S", name: "Värmland County" },
-  { code: "T", name: "Örebro County" },
-  { code: "U", name: "Västmanland County" },
-  { code: "W", name: "Dalarna County" },
-  { code: "X", name: "Gävleborg County" },
-  { code: "Y", name: "Västernorrland County" },
-  { code: "Z", name: "Jämtland County" },
-];
-const NORWEGIAN_COUNTIES = [
-  { code: "03", name: "Oslo" },
-  { code: "11", name: "Rogaland" },
-  { code: "15", name: "Møre og Romsdal" },
-  { code: "18", name: "Nordland" },
-  { code: "30", name: "Viken" },
-  { code: "34", name: "Innlandet" },
-  { code: "38", name: "Vestfold og Telemark" },
-  { code: "42", name: "Agder" },
-  { code: "46", name: "Vestland" },
-  { code: "50", name: "Trøndelag" },
-  { code: "54", name: "Troms og Finnmark" },
-];
-const DANISH_REGIONS = [
-  { code: "H", name: "Capital Region" },
-  { code: "M", name: "Central Jutland" },
-  { code: "N", name: "North Jutland" },
-  { code: "S", name: "Southern Denmark" },
-  { code: "Z", name: "Zealand" },
-];
-const FINNISH_REGIONS = [
-  { code: "01", name: "Åland Islands" },
-  { code: "02", name: "South Karelia" },
-  { code: "03", name: "Southern Ostrobothnia" },
-  { code: "04", name: "Southern Savonia" },
-  { code: "05", name: "Kainuu" },
-  { code: "06", name: "Tavastia Proper" },
-  { code: "07", name: "Central Ostrobothnia" },
-  { code: "08", name: "Central Finland" },
-  { code: "09", name: "Kymenlaakso" },
-  { code: "10", name: "Lappi" },
-  { code: "11", name: "Pirkanmaa" },
-  { code: "12", name: "Ostrobothnia" },
-  { code: "13", name: "North Karelia" },
-  { code: "14", name: "Northern Ostrobothnia" },
-  { code: "15", name: "Northern Savonia" },
-  { code: "16", name: "Päijänne Tavastia" },
-  { code: "17", name: "Satakunta" },
-  { code: "18", name: "Uusimaa" },
-  { code: "19", name: "Southwest Finland" },
-];
-const ICELANDIC_REGIONS = [
-  { code: "HÖV", name: "Capital Region" },
-  { code: "SUÐ", name: "Southern Peninsula" },
-  { code: "VES", name: "Western Region" },
-  { code: "VES", name: "Westfjords" },
-  { code: "NOR", name: "Northwestern Region" },
-  { code: "NOR", name: "Northeastern Region" },
-  { code: "AUS", name: "Eastern Region" },
-  { code: "SUÐ", name: "Southern Region" },
-];
-const IRISH_COUNTIES = [
-  { code: "CW", name: "Carlow" },
-  { code: "CN", name: "Cavan" },
-  { code: "CE", name: "Clare" },
-  { code: "CK", name: "Cork" },
-  { code: "DL", name: "Donegal" },
-  { code: "D", name: "Dublin" },
-  { code: "G", name: "Galway" },
-  { code: "KY", name: "Kerry" },
-  { code: "KE", name: "Kildare" },
-  { code: "KK", name: "Kilkenny" },
-  { code: "LS", name: "Laois" },
-  { code: "LM", name: "Leitrim" },
-  { code: "LK", name: "Limerick" },
-  { code: "LD", name: "Longford" },
-  { code: "LH", name: "Louth" },
-  { code: "MO", name: "Mayo" },
-  { code: "MH", name: "Meath" },
-  { code: "MN", name: "Monaghan" },
-  { code: "OY", name: "Offaly" },
-  { code: "RN", name: "Roscommon" },
-  { code: "SO", name: "Sligo" },
-  { code: "TA", name: "Tipperary" },
-  { code: "WD", name: "Waterford" },
-  { code: "WH", name: "Westmeath" },
-  { code: "WX", name: "Wexford" },
-  { code: "WW", name: "Wicklow" },
-];
-const PORTUGUESE_REGIONS = [
-  { code: "01", name: "Aveiro" },
-  { code: "02", name: "Beja" },
-  { code: "03", name: "Braga" },
-  { code: "04", name: "Bragança" },
-  { code: "05", name: "Castelo Branco" },
-  { code: "06", name: "Coimbra" },
-  { code: "07", name: "Évora" },
-  { code: "08", name: "Faro" },
-  { code: "09", name: "Guarda" },
-  { code: "10", name: "Leiria" },
-  { code: "11", name: "Lisboa" },
-  { code: "12", name: "Portalegre" },
-  { code: "13", name: "Porto" },
-  { code: "14", name: "Santarém" },
-  { code: "15", name: "Setúbal" },
-  { code: "16", name: "Viana do Castelo" },
-  { code: "17", name: "Vila Real" },
-  { code: "18", name: "Viseu" },
-  { code: "20", name: "Azores" },
-  { code: "30", name: "Madeira" },
-];
-const POLISH_VOIVODESHIPS = [
-  { code: "DS", name: "Lower Silesian" },
-  { code: "KP", name: "Kuyavian-Pomeranian" },
-  { code: "LU", name: "Lublin" },
-  { code: "LB", name: "Lubusz" },
-  { code: "LD", name: "Łódź" },
-  { code: "MA", name: "Lesser Poland" },
-  { code: "MZ", name: "Masovian" },
-  { code: "OP", name: "Opole" },
-  { code: "PK", name: "Subcarpathian" },
-  { code: "PD", name: "Podlaskie" },
-  { code: "PM", name: "Pomeranian" },
-  { code: "SL", name: "Silesian" },
-  { code: "SK", name: "Świętokrzyskie" },
-  { code: "WN", name: "Warmian-Masurian" },
-  { code: "WP", name: "Greater Poland" },
-  { code: "ZP", name: "West Pomeranian" },
-];
-const CZECH_REGIONS = [
-  { code: "JC", name: "South Bohemian" },
-  { code: "JM", name: "South Moravian" },
-  { code: "KA", name: "Karlovy Vary" },
-  { code: "KR", name: "Hradec Králové" },
-  { code: "LI", name: "Liberec" },
-  { code: "MO", name: "Moravian-Silesian" },
-  { code: "OL", name: "Olomouc" },
-  { code: "PA", name: "Pardubice" },
-  { code: "PL", name: "Plzeň" },
-  { code: "PR", name: "Prague" },
-  { code: "ST", name: "Central Bohemian" },
-  { code: "US", name: "Ústí nad Labem" },
-  { code: "VY", name: "Vysočina" },
-  { code: "ZL", name: "Zlín" },
-];
-const SOUTH_KOREAN_REGIONS = [
-  { code: "11", name: "Seoul" },
-  { code: "26", name: "Busan" },
-  { code: "27", name: "Daegu" },
-  { code: "28", name: "Incheon" },
-  { code: "29", name: "Gwangju" },
-  { code: "30", name: "Daejeon" },
-  { code: "31", name: "Ulsan" },
-  { code: "36", name: "Sejong" },
-  { code: "41", name: "Gyeonggi" },
-  { code: "42", name: "Gangwon" },
-  { code: "43", name: "North Chungcheong" },
-  { code: "44", name: "South Chungcheong" },
-  { code: "45", name: "North Jeolla" },
-  { code: "46", name: "South Jeolla" },
-  { code: "47", name: "North Gyeongsang" },
-  { code: "48", name: "South Gyeongsang" },
-  { code: "50", name: "Jeju" },
-];
-const ARGENTINE_PROVINCES = [
-  { code: "B", name: "Buenos Aires" },
-  { code: "C", name: "Ciudad Autónoma de Buenos Aires" },
-  { code: "K", name: "Catamarca" },
-  { code: "H", name: "Chaco" },
-  { code: "U", name: "Chubut" },
-  { code: "X", name: "Córdoba" },
-  { code: "W", name: "Corrientes" },
-  { code: "E", name: "Entre Ríos" },
-  { code: "P", name: "Formosa" },
-  { code: "Y", name: "Jujuy" },
-  { code: "L", name: "La Pampa" },
-  { code: "F", name: "La Rioja" },
-  { code: "M", name: "Mendoza" },
-  { code: "N", name: "Misiones" },
-  { code: "Q", name: "Neuquén" },
-  { code: "R", name: "Río Negro" },
-  { code: "A", name: "Salta" },
-  { code: "J", name: "San Juan" },
-  { code: "D", name: "San Luis" },
-  { code: "Z", name: "Santa Cruz" },
-  { code: "S", name: "Santa Fe" },
-  { code: "G", name: "Santiago del Estero" },
-  { code: "V", name: "Tierra del Fuego" },
-  { code: "T", name: "Tucumán" },
-];
-const COLOMBIAN_DEPARTMENTS = [
-  { code: "AMA", name: "Amazonas" },
-  { code: "ANT", name: "Antioquia" },
-  { code: "ARA", name: "Arauca" },
-  { code: "ATL", name: "Atlántico" },
-  { code: "BOL", name: "Bolívar" },
-  { code: "BOY", name: "Boyacá" },
-  { code: "CAL", name: "Caldas" },
-  { code: "CAQ", name: "Caquetá" },
-  { code: "CAS", name: "Casanare" },
-  { code: "CAU", name: "Cauca" },
-  { code: "CES", name: "Cesar" },
-  { code: "CHO", name: "Chocó" },
-  { code: "COR", name: "Córdoba" },
-  { code: "CUN", name: "Cundinamarca" },
-  { code: "GUA", name: "Guainía" },
-  { code: "GUV", name: "Guaviare" },
-  { code: "HUI", name: "Huila" },
-  { code: "LAG", name: "La Guajira" },
-  { code: "MAG", name: "Magdalena" },
-  { code: "MET", name: "Meta" },
-  { code: "NAR", name: "Nariño" },
-  { code: "NSA", name: "Norte de Santander" },
-  { code: "PUT", name: "Putumayo" },
-  { code: "QUI", name: "Quindío" },
-  { code: "RIS", name: "Risaralda" },
-  { code: "SAP", name: "San Andrés y Providencia" },
-  { code: "SAN", name: "Santander" },
-  { code: "SUC", name: "Sucre" },
-  { code: "TOL", name: "Tolima" },
-  { code: "VAC", name: "Valle del Cauca" },
-  { code: "VAU", name: "Vaupés" },
-  { code: "VID", name: "Vichada" },
-];
-const SOUTH_AFRICAN_PROVINCES = [
-  { code: "EC", name: "Eastern Cape" },
-  { code: "FS", name: "Free State" },
-  { code: "GP", name: "Gauteng" },
-  { code: "KZN", name: "KwaZulu-Natal" },
-  { code: "LP", name: "Limpopo" },
-  { code: "MP", name: "Mpumalanga" },
-  { code: "NC", name: "Northern Cape" },
-  { code: "NW", name: "North West" },
-  { code: "WC", name: "Western Cape" },
-];
-const EGYPTIAN_GOVERNORATES = [
-  { code: "ALX", name: "Alexandria" },
-  { code: "ASN", name: "Aswan" },
-  { code: "ASY", name: "Asyut" },
-  { code: "BH", name: "Beheira" },
-  { code: "BNS", name: "Beni Suef" },
-  { code: "C", name: "Cairo" },
-  { code: "DK", name: "Dakahlia" },
-  { code: "DT", name: "Damietta" },
-  { code: "FYM", name: "Faiyum" },
-  { code: "GH", name: "Gharbia" },
-  { code: "GZ", name: "Giza" },
-  { code: "IS", name: "Ismailia" },
-  { code: "KFS", name: "Kafr El Sheikh" },
-  { code: "MT", name: "Matruh" },
-  { code: "MN", name: "Minya" },
-  { code: "MNF", name: "Monufia" },
-  { code: "WAD", name: "New Valley" },
-  { code: "SIN", name: "North Sinai" },
-  { code: "PTS", name: "Port Said" },
-  { code: "KB", name: "Qalyubia" },
-  { code: "KN", name: "Qena" },
-  { code: "BA", name: "Red Sea" },
-  { code: "SHR", name: "Sharqia" },
-  { code: "SHG", name: "Sohag" },
-  { code: "JS", name: "South Sinai" },
-  { code: "SUZ", name: "Suez" },
-];
-const MOROCCAN_REGIONS = [
-  { code: "01", name: "Tanger-Tétouan-Al Hoceïma" },
-  { code: "02", name: "L'Oriental" },
-  { code: "03", name: "Fès-Meknès" },
-  { code: "04", name: "Rabat-Salé-Kénitra" },
-  { code: "05", name: "Béni Mellal-Khénifra" },
-  { code: "06", name: "Casablanca-Settat" },
-  { code: "07", name: "Marrakech-Safi" },
-  { code: "08", name: "Drâa-Tafilalet" },
-  { code: "09", name: "Souss-Massa" },
-  { code: "10", name: "Guelmim-Oued Noun" },
-  { code: "11", name: "Laâyoune-Sakia El Hamra" },
-  { code: "12", name: "Dakhla-Oued Ed-Dahab" },
-];
-const ZIMBABWEAN_PROVINCES = [
-  { code: "BU", name: "Bulawayo" },
-  { code: "HA", name: "Harare" },
-  { code: "MA", name: "Manicaland" },
-  { code: "MC", name: "Mashonaland Central" },
-  { code: "ME", name: "Mashonaland East" },
-  { code: "MW", name: "Mashonaland West" },
-  { code: "MV", name: "Masvingo" },
-  { code: "MN", name: "Matabeleland North" },
-  { code: "MS", name: "Matabeleland South" },
-  { code: "MI", name: "Midlands" },
-];
-const PAKISTANI_REGIONS = [
-  { code: "PB", name: "Punjab" },
-  { code: "SD", name: "Sindh" },
-  { code: "KP", name: "Khyber Pakhtunkhwa" },
-  { code: "BA", name: "Balochistan" },
-  { code: "GB", name: "Gilgit-Baltistan" },
-];
+import {
+  COUNTRIES,
+  US_STATES,
+  CANADIAN_PROVINCES,
+  AUSTRALIAN_STATES,
+  GERMAN_STATES,
+  FRENCH_REGIONS,
+  ITALIAN_REGIONS,
+  SPANISH_REGIONS,
+  BRAZILIAN_STATES,
+  MEXICAN_STATES,
+  INDIAN_STATES,
+  CHINESE_PROVINCES,
+  JAPANESE_PREFECTURES,
+  UK_REGIONS,
+  DUTCH_PROVINCES,
+  BELGIAN_PROVINCES,
+  SWISS_CANTONS,
+  AUSTRIAN_STATES,
+  SWEDISH_COUNTIES,
+  NORWEGIAN_COUNTIES,
+  DANISH_REGIONS,
+  FINNISH_REGIONS,
+  ICELANDIC_REGIONS,
+  IRISH_COUNTIES,
+  PORTUGUESE_REGIONS,
+  POLISH_VOIVODESHIPS,
+  CZECH_REGIONS,
+  SOUTH_KOREAN_REGIONS,
+  ARGENTINE_PROVINCES,
+  COLOMBIAN_DEPARTMENTS,
+  SOUTH_AFRICAN_PROVINCES,
+  EGYPTIAN_GOVERNORATES,
+  MOROCCAN_REGIONS,
+  ZIMBABWEAN_PROVINCES,
+  PAKISTANI_REGIONS,
+} from "../../lib/locationData";
 
 const Shop = () => {
   const router = useRouter();
   const [projectData, setProjectData] = useState(null);
-
-  // Get data from localStorage (passed from DesignProject)
 
   useEffect(() => {
     const fetchLocalStorageData = () => {
@@ -787,7 +73,6 @@ const Shop = () => {
         console.warn("Error accessing localStorage");
       }
     };
-
     fetchLocalStorageData();
   }, []);
 
@@ -820,7 +105,6 @@ const Shop = () => {
     };
 
     const reconstructShopData = () => {
-      // Attempt to reconstruct from previewFormData + previewDropdowns
       const previewFormRaw = localStorage.getItem("previewFormData");
       const previewProjectRaw = localStorage.getItem("previewProjectData");
       const dropdownsRaw = localStorage.getItem("previewDropdowns");
@@ -833,7 +117,6 @@ const Shop = () => {
       const category = previewProject.category;
       const qty = Number(previewForm.quantity) || 1;
 
-      // Helper to map id -> name for dropdown lists
       const findName = (arr, id) => {
         if (!arr || !id) return "";
         const found = arr.find((o) => String(o.id) === String(id));
@@ -895,34 +178,27 @@ const Shop = () => {
         productQuantity: qty,
         costPerBook: calc.unitPrice ?? 0,
       };
-      // persist reconstructed data so subsequent pages see it
       try {
         localStorage.setItem("shopData", JSON.stringify(reconstructed));
       } catch (err) {
         console.warn("Failed to persist reconstructed shopData", err);
       }
-
       return reconstructed;
     };
 
-    // Use saved shopData if valid
     const parsed = tryParse(saved);
     if (parsed && (parsed.finalTotalCost || parsed.totalCost || parsed.originalTotalCost)) {
       applyShopData(parsed);
       return;
     }
 
-    // Attempt to reconstruct from preview data
     const reconstructed = reconstructShopData();
     if (reconstructed) {
       applyShopData(reconstructed);
       return;
     }
-
-    // Nothing found; keep defaults
   }, []);
 
-  // Destructure initial data
   const {
     originalTotalCost = 0,
     finalTotalCost = 0,
@@ -931,10 +207,7 @@ const Shop = () => {
     costPerBook = 0,
   } = initialData;
 
-  // Determine which total cost to use
   const displayTotalCost = finalTotalCost || totalCost || originalTotalCost;
-
-  // Calculate cost per book
   const calculatedCostPerBook =
     displayTotalCost && productQuantity
       ? displayTotalCost / productQuantity
@@ -955,6 +228,129 @@ const Shop = () => {
     has_resale_cert: false,
   });
 
+  const [sameAsAccount, setSameAsAccount] = useState(null);
+  const skipStateClearRef = useRef(false);
+
+  const loadAccountProfileFromLocalStorage = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
+      const userObj = JSON.parse(userStr);
+      const email = userObj?.email;
+      if (!email) return null;
+      const saved = localStorage.getItem(`user_profile_${email}`);
+      if (!saved) return null;
+      return JSON.parse(saved);
+    } catch (err) {
+      console.error("Error reading account profile from localStorage:", err);
+      return null;
+    }
+  };
+
+  const applyAccountProfileToShipping = async () => {
+    const token = getToken();
+    if (!token) {
+      alert("You must be logged in to use your account address.");
+      router.push("/login");
+      return;
+    }
+
+    setIsLoading(true); // Optional: show loading state
+    try {
+      // 1. Try to fetch fresh profile from backend
+      const response = await axios.get(
+        `${BASE_URL}api/userprofiles/profiles/me/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const profile = response.data;
+
+      // Save to localStorage (like AccountSettings does)
+      if (profile?.email) {
+        try {
+          localStorage.setItem(`user_profile_${profile.email}`, JSON.stringify(profile));
+        } catch (err) {
+          console.warn("Failed to save profile to localStorage", err);
+        }
+      }
+
+      // Apply to form
+      skipStateClearRef.current = true;
+      setForm((prev) => ({
+        ...prev,
+        first_name: profile.first_name || prev.first_name,
+        last_name: profile.last_name || prev.last_name,
+        company: profile.username || prev.company,
+        address: profile.address || prev.address,
+        country: profile.country || prev.country,
+        state: profile.state || prev.state,
+        city: profile.city || prev.city,
+        postal_code: profile.postal_code || prev.postal_code,
+        phone_number: profile.phone_number || prev.phone_number,
+        account_type: profile.account_type === "business" ? "business" : "individual",
+      }));
+
+      resetShippingData();
+    } catch (error) {
+      console.error("Failed to fetch profile from API:", error);
+
+      // 2. Fallback to localStorage (offline or API down)
+      const fallbackProfile = loadAccountProfileFromLocalStorage();
+      if (fallbackProfile) {
+        skipStateClearRef.current = true;
+        setForm((prev) => ({
+          ...prev,
+          first_name: fallbackProfile.first_name || prev.first_name,
+          last_name: fallbackProfile.last_name || prev.last_name,
+          company: fallbackProfile.username || prev.company,
+          address: fallbackProfile.address || prev.address,
+          country: fallbackProfile.country || prev.country,
+          state: fallbackProfile.state || prev.state,
+          city: fallbackProfile.city || prev.city,
+          postal_code: fallbackProfile.postal_code || prev.postal_code,
+          phone_number: fallbackProfile.phone_number || prev.phone_number,
+          account_type: fallbackProfile.account_type === "business" ? "business" : "individual",
+        }));
+        resetShippingData();
+      } else {
+        alert("No saved account address found. Please update your Account Settings first.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearShippingAddressFields = () => {
+    setForm((prev) => ({
+      ...prev,
+      address: "",
+      apt_floor: "",
+      company: "",
+      country: "",
+      state: "",
+      city: "",
+      postal_code: "",
+      phone_number: "",
+    }));
+    setAvailableStates([]);
+    resetShippingData();
+  };
+
+  const resetShippingData = () => {
+    setShippingRate(null);
+    setTax(null);
+    setTaxRate(null);
+    setTaxReason(null);
+    setAvailableServices([]);
+    setSelectedService(null);
+    setShippingError(null);
+  };
+
   const [shippingRate, setShippingRate] = useState(null);
   const [tax, setTax] = useState(null);
   const [taxRate, setTaxRate] = useState(null);
@@ -966,6 +362,7 @@ const Shop = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [shippingError, setShippingError] = useState(null);
+  const [lastFetchSuccess, setLastFetchSuccess] = useState(false); // to prevent retries on error
 
   const [availableStates, setAvailableStates] = useState([]);
   useEffect(() => {
@@ -1077,12 +474,14 @@ const Shop = () => {
         states = [];
     }
     setAvailableStates(states);
-    setForm((prev) => ({ ...prev, state: "" }));
-    // eslint-disable-next-line
+    if (skipStateClearRef.current) {
+      skipStateClearRef.current = false;
+    } else {
+      setForm((prev) => ({ ...prev, state: "" }));
+      resetShippingData();
+    }
   }, [form.country]);
 
-  // Dynamic quantity state
-  // const [productQuantity, setProductQuantity] = useState(initialQuantity);
   const productPrice = calculatedCostPerBook;
   const subtotal = finalTotalCost;
 
@@ -1093,7 +492,6 @@ const Shop = () => {
     return total;
   };
 
-  // Get token from localStorage
   const getToken = () => {
     return localStorage.getItem("accessToken");
   };
@@ -1117,13 +515,13 @@ const Shop = () => {
       alert("Please fill all required fields.");
       return;
     }
-    if (shippingRate === null) {
-      alert("Please calculate shipping rate first.");
+
+    if (!selectedService) {
+      alert("Please wait for shipping options to load and select one.");
       return;
     }
 
     try {
-      // Collect design and project data saved earlier
       const previewForm = localStorage.getItem("previewFormData");
       const previewProject = localStorage.getItem("previewProjectData");
       const bookFile = window.tempBookFileForSubmission;
@@ -1133,13 +531,13 @@ const Shop = () => {
         router.push("/design-project");
         return;
       }
-      // Store all data in localStorage for payment page
+
       localStorage.setItem(
         "pendingOrderData",
         JSON.stringify({
           previewForm,
           previewProject,
-          bookFile: null, // File objects can't be stored, handle in memory if needed
+          bookFile: null,
           coverFile: null,
           form,
           shippingRate,
@@ -1172,7 +570,7 @@ const Shop = () => {
       );
       router.push("/payment");
     } catch (error) {
-      console.error("Shipping save error:", error.response?.data || error.message);
+      console.error("Shipping save error:", error);
       alert("Failed to save shipping info. Please try again.");
     }
   };
@@ -1180,16 +578,12 @@ const Shop = () => {
   const fetchShippingRate = async () => {
     const token = getToken();
     if (!token) {
-      alert(
-        "You need to be logged in to calculate shipping. Redirecting to login..."
-      );
       router.push("/login");
       return;
     }
 
     const { country, state, city, postal_code } = form;
     if (!country || !state || !city || !postal_code) {
-      alert("Please fill country, state, city, and postal code.");
       return;
     }
 
@@ -1212,6 +606,7 @@ const Shop = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          timeout: 10000, // 10s timeout
         }
       );
 
@@ -1226,7 +621,6 @@ const Shop = () => {
         available_services = [],
       } = res.data;
 
-      // Double the shipping rate from API
       const doubledShippingRate = shipping_rate * 2;
 
       setShippingRate(doubledShippingRate);
@@ -1237,42 +631,41 @@ const Shop = () => {
       setCourierName(courier_name);
       setEstimatedDelivery(estimated_delivery);
 
-      // Double the shipping rates in available services
       const modifiedServices = (available_services || []).map((service) => ({
         ...service,
         total_charge: service.total_charge * 2,
       }));
       setAvailableServices(modifiedServices);
 
-      if (modifiedServices && modifiedServices.length > 0) {
+      if (modifiedServices.length > 0) {
         const cheapestService = modifiedServices.reduce((prev, current) =>
           prev.total_charge < current.total_charge ? prev : current
         );
         setSelectedService(cheapestService);
       }
+
+      setLastFetchSuccess(true);
     } catch (error) {
-      console.error("Rate error:", error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        setShippingError("Authentication failed. Please log in again.");
-      } else {
-        setShippingError(
-          error.response?.data?.error?.includes("No DHL or FedEx")
-            ? `No DHL or FedEx services available for this destination. Available couriers: ${error.response.data.available_couriers?.join(", ") || "None"
-            }`
-            : "Failed to fetch shipping rate. Please try again."
-        );
+      console.error("Shipping API error:", error);
+      setLastFetchSuccess(false);
+      let errorMessage = "Failed to fetch shipping rates. Please try again later.";
+
+      if (error.code === "ECONNABORTED") {
+        errorMessage = "Request timed out. Please check your connection.";
+      } else if (error.response) {
+        // If response is HTML (like Django error page), detect it
+        if (typeof error.response.data === "string" && error.response.data.includes("<html")) {
+          errorMessage = "Shipping service is temporarily unavailable. Please try again soon.";
+        } else if (error.response.status === 401) {
+          errorMessage = "Session expired. Please log in again.";
+          router.push("/login");
+        } else if (error.response.data?.error) {
+          errorMessage = error.response.data.error;
+        }
       }
-      [
-        setShippingRate,
-        setTax,
-        setTaxRate,
-        setTaxReason,
-        setCourierName,
-        setEstimatedDelivery,
-        setSelectedService,
-        setShippingError,
-      ].forEach((fn) => fn(null));
-      setAvailableServices([]);
+
+      setShippingError(errorMessage);
+      resetShippingData();
     } finally {
       setIsLoading(false);
     }
@@ -1293,29 +686,25 @@ const Shop = () => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
 
-    if (
-      [
-        "country",
-        "state",
-        "city",
-        "postal_code",
-        "account_type",
-        "has_resale_cert",
-      ].includes(name)
-    ) {
-      [
-        setShippingRate,
-        setTax,
-        setTaxRate,
-        setTaxReason,
-        setCourierName,
-        setEstimatedDelivery,
-        setSelectedService,
-        setShippingError,
-      ].forEach((fn) => fn(null));
-      setAvailableServices([]);
+    if (["country", "state", "city", "postal_code", "account_type", "has_resale_cert"].includes(name)) {
+      resetShippingData();
     }
   };
+
+  // ✅ Auto-fetch shipping with debounce and error guard
+  useEffect(() => {
+    const { country, state, city, postal_code } = form;
+    const hasRequiredFields = country.trim() && state.trim() && city.trim() && postal_code.trim();
+
+    if (hasRequiredFields && !isLoading && lastFetchSuccess === false) {
+      const timer = setTimeout(() => {
+        fetchShippingRate();
+      }, 600);
+      return () => clearTimeout(timer);
+    } else if (!hasRequiredFields) {
+      resetShippingData();
+    }
+  }, [form.country, form.state, form.city, form.postal_code, isLoading]);
 
   const inputClass =
     "w-full p-2 md:p-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
@@ -1326,6 +715,10 @@ const Shop = () => {
     router.push("/design-project");
   };
 
+  // ✅ Determine button text and state
+  const isReadyForCheckout = selectedService && !isLoading && shippingRate !== null;
+  const buttonText = isReadyForCheckout ? "Checkout" : (isLoading ? "Calculating Shipping..." : "Check Delivery Method");
+
   return (
     <>
       <div
@@ -1335,7 +728,7 @@ const Shop = () => {
             "linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)",
         }}
       >
-        <h1 className="text-white text-base md:text-lg font-semibold">Shop</h1>
+        <h1 className="text-white text-base md:text-lg font-semibold">Cart</h1>
       </div>
 
       <div className="w-full min-h-screen bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] px-4 md:px-6 py-6 md:py-10 font-sans relative">
@@ -1347,7 +740,35 @@ const Shop = () => {
             </h2>
             <hr className="mb-4 md:mb-6 border-[#2A428C]" />
 
-           
+            {/* Same-as-account prompt */}
+            <div className="mb-4 p-3 bg-white/60 rounded-lg border border-gray-200 flex items-center justify-between">
+              <div className="text-sm md:text-base text-gray-800">
+                <strong>Is your shipping address the same as your customer address?</strong>
+                <div className="text-xs text-gray-500">(Use the address from your Account Settings)</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setSameAsAccount(true);
+                    await applyAccountProfileToShipping();
+                  }}
+                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${sameAsAccount === true ? "bg-blue-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSameAsAccount(false);
+                    clearShippingAddressFields();
+                  }}
+                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${sameAsAccount === false ? "bg-blue-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
 
             {/* Form Fields */}
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -1469,20 +890,8 @@ const Shop = () => {
               </div>
             )}
 
-            {/* Calculate Rate */}
-            <button
-              className={`${buttonClass} mb-3 ${isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#44c6ff] to-[#1786ff] hover:from-[#3bb5ff] hover:to-[#0f75ff]"
-                }`}
-              onClick={fetchShippingRate}
-              disabled={isLoading}
-            >
-              {isLoading ? "Calculating..." : "Calculate Shipping Rate "}
-            </button>
-
             {/* Available Services */}
-            {availableServices && availableServices.length > 0 && (
+            {availableServices.length > 0 && (
               <div className="mb-4 p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h3 className="text-base md:text-lg font-semibold text-[#2A428C] mb-2 md:mb-3">
                   Available Shipping Services
@@ -1496,10 +905,8 @@ const Shop = () => {
                       <input
                         type="radio"
                         name="selected_service"
-                        value={index}
                         checked={
-                          selectedService?.courier_name ===
-                          service.courier_name &&
+                          selectedService?.courier_name === service.courier_name &&
                           selectedService?.service_name === service.service_name
                         }
                         onChange={() => handleServiceSelection(service)}
@@ -1515,9 +922,7 @@ const Shop = () => {
                           </span>
                         </div>
                         <div className="text-xs md:text-sm text-gray-600">
-                          {service.service_name && (
-                            <span>{service.service_name} • </span>
-                          )}
+                          {service.service_name && <span>{service.service_name} • </span>}
                           <span>Delivery: {service.delivery_time}</span>
                         </div>
                       </div>
@@ -1530,46 +935,35 @@ const Shop = () => {
             {/* Shipping Info Display */}
             {selectedService && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm md:text-base">
-                <p>
-                  <strong>Selected Service:</strong>{" "}
-                  {selectedService.courier_name}
-                </p>
-                <p>
-                  <strong>Service Type:</strong>{" "}
-                  {selectedService.service_name || "Standard"}
-                </p>
-                <p>
-                  <strong>Estimated Delivery:</strong>{" "}
-                  {selectedService.delivery_time}
-                </p>
-
+                <p><strong>Selected Service:</strong> {selectedService.courier_name}</p>
+                <p><strong>Service Type:</strong> {selectedService.service_name || "Standard"}</p>
+                <p><strong>Estimated Delivery:</strong> {selectedService.delivery_time}</p>
               </div>
             )}
 
-            {/* Save Info */}
+            {/* ✅ Dynamic Button */}
             <button
-              className={`${buttonClass} bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] hover:from-[#0968d9] hover:to-[#1560d5]`}
+              className={`${buttonClass} ${isReadyForCheckout
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                : "bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] hover:from-[#0968d9] hover:to-[#1560d5]"
+                }`}
               onClick={deliveryHandler}
+              disabled={isLoading || !isReadyForCheckout}
             >
-              Check Delivery Method
+              {buttonText}
             </button>
           </div>
 
           {/* Right Section - Cart Summary */}
-          <div className="w-full lg:w-[40%] ">
+          <div className="w-full lg:w-[40%]">
             <div className="sticky top-30 z-10 bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
               <div className="flex justify-between mb-4">
-                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">
-                  Cart Summary
-                </h3>
+                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart Summary</h3>
                 <div
                   className="flex items-center gap-2 text-[#2A428C] font-semibold text-lg md:text-xl cursor-pointer hover:text-blue-600 transition-colors"
                   onClick={handleEditClick}
                 >
-                  <svg
-                    className="w-4 h-4 md:w-5 md:h-5 fill-current"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
                     <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
                   </svg>
                 </div>
@@ -1581,19 +975,15 @@ const Shop = () => {
                     {projectData?.projectTitle || "Book"}
                   </h4>
                   <p className="text-[#2A428C] text-base md:text-lg font-semibold">
-                    Total Price: $
-                    {displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}
+                    Total Price: ${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}
                   </p>
                 </div>
               </div>
 
               <div className="text-sm space-y-2 md:space-y-3 mb-4 md:mb-6">
                 <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">Subtotal </span>
-                  <span className="text-[#2A428C]">
-                    {" "}
-                    ${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}
-                  </span>
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-[#2A428C]">${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-600">Quantity</span>
@@ -1601,51 +991,30 @@ const Shop = () => {
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-600">
-                    Shipping{" "}
-                    {selectedService && `(${selectedService.courier_name})`}
+                    Shipping {selectedService && `(${selectedService.courier_name})`}
                   </span>
-                  <span
-                    className={
-                      shippingRate !== null ? "text-gray-900" : "text-gray-400"
-                    }
-                  >
-                    {shippingRate !== null
-                      ? `$${shippingRate.toFixed(2)}`
-                      : "Calculate first"}
+                  <span className={shippingRate !== null ? "text-gray-900" : "text-gray-400"}>
+                    {shippingRate !== null ? `$${shippingRate.toFixed(2)}` : "Calculating..."}
                   </span>
                 </div>
                 <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">
-                    Taxes {taxRate && `(${taxRate})`}
-                  </span>
-                  <span
-                    className={tax !== null ? "text-gray-900" : "text-gray-400"}
-                  >
-                    {tax !== null ? `$${tax.toFixed(2)}` : "Calculate first"}
+                  <span className="text-gray-600">Taxes {taxRate && `(${taxRate})`}</span>
+                  <span className={tax !== null ? "text-gray-900" : "text-gray-400"}>
+                    {tax !== null ? `$${tax.toFixed(2)}` : "Calculating..."}
                   </span>
                 </div>
-                {taxReason && (
-                  <div className="text-xs text-gray-500 italic pl-2">
-                    {taxReason}
-                  </div>
-                )}
+                {taxReason && <div className="text-xs text-gray-500 italic pl-2">{taxReason}</div>}
                 <hr className="border-gray-200" />
                 <div className="flex justify-between font-bold text-base md:text-lg">
                   <span className="text-[#2A428C]">Total</span>
-                  <span className="text-[#2A428C]">
-                    ${calculateTotal().toFixed(2)}
-                  </span>
+                  <span className="text-[#2A428C]">${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
 
-          
-
-              {/* Shipping Status */}
-              {shippingRate !== null && selectedService && (
+              {isReadyForCheckout && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 md:p-3 mb-3 md:mb-4">
                   <p className="text-xs md:text-sm text-green-800">
-                    <strong>Ready to checkout!</strong>{" "}
-                    {selectedService.courier_name} shipping selected.
+                    <strong>Ready to checkout!</strong> {selectedService.courier_name} shipping selected.
                   </p>
                 </div>
               )}

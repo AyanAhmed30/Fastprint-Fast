@@ -347,12 +347,12 @@ const BookPreviewContent = () => {
               <HTMLFlipBook
                 onFlip={handleFlip}
                 width={isMobile ? 320 : 500}
-                height={isMobile ? 450 : 700}
+                height={isMobile ? 450 : 750}
                 size="stretch"
                 minWidth={250}
                 maxWidth={1000}
                 minHeight={300}
-                maxHeight={1500}
+                maxHeight={1000}
                 maxShadowOpacity={0.5}
                 showCover={false}
                 mobileScrollSupport={true}

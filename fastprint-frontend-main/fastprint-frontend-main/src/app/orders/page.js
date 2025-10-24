@@ -288,12 +288,11 @@ const Orders = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                    Items in Cart
+                    Total Orders
                   </p>
                   <p className="text-2xl md:text-4xl font-bold text-[#016AB3] mt-1 md:mt-2">
                     {projects.length}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Ready to order</p>
                 </div>
                 <div className="bg-gradient-to-br from-[#016AB3] to-[#0096CD] p-3 md:p-4 rounded-xl md:rounded-2xl shadow-lg">
                   <FaShoppingCart className="text-white text-lg md:text-xl" />

@@ -2,43 +2,58 @@ import React from "react";
 import Book1 from "@/assets/images/book1.png"; // Adjust path as needed
 import Book2 from "@/assets/images/Group.png"; // Adjust path as needed
 import Image from "next/image";
+import BackgroundImage from "@/assets/images/Pricingbanner.png"; // ✅ Add this
 
 const PricingBanner = () => {
   return (
-    <section
-      className="relative w-full max-w-none h-auto rounded-[20px] border-[5px] border-white/50 backdrop-blur-xl px-4 sm:px-6 md:px-10 py-8 flex flex-col md:flex-row items-center justify-between"
-      style={{
-        background:
-          "linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)",
-      }}
-    >
-      {/* Left Content */}
-      <div className="w-full md:w-1/2 text-white text-center md:text-left mb-6 md:mb-0">
-        <h2 className="text-[28px] sm:text-[36px] md:text-[50px] font-bold leading-tight mb-3">
-          Pricing <span className="text-[#F8C20A]">Calculator</span>
-        </h2>
-        <p className="text-sm sm:text-base leading-relaxed px-2 md:px-0">
-          Easily calculate the printing cost of your book using our simple book
-          cost calculator.
-        </p>
-      </div>
-      {/* Right Images */}
-      <div className="w-full md:w-1/2 flex justify-center md:justify-end items-center relative">
-        <div className="flex items-center relative">
-          <Image
-            src={Book1}
-            alt="Book1"
-            className="w-[160px] sm:w-[200px] md:w-[240px] lg:w-[260px] h-auto object-contain z-10"
-            style={{ background: "transparent", marginRight: "-135px" }}
-          />
-          <Image
-            src={Book2}
-            alt="Book2"
-            className="w-[170px] sm:w-[210px] md:w-[250px] lg:w-[270px] h-auto object-contain rotate-[4deg] z-0"
-          />
-        </div>
-      </div>
-    </section>
+     <section className="relative w-full py-25 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden"
+ >
+   {/* Background Image */}
+   <div
+     className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+     style={{
+       backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
+     }}
+   ></div>
+ 
+   {/* Animated Background Elements (Blur Circles) - Keep them */}
+   <div className="absolute inset-0 z-10">
+     <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+     <div
+       className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+       style={{ animationDelay: "1s" }}
+     ></div>
+     <div
+       className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+       style={{ animationDelay: "2s" }}
+     ></div>
+   </div>
+ 
+   {/* Content */}
+   <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+     {/* Left Content */}
+     <div className="flex-1 text-white space-y-8">
+       <div className="scroll-animate slide-in-left">
+         
+         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+           Pricing{" "}
+           <span className="text-white">
+             Calculator
+           </span>
+         </h1>
+         <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
+         Easily calculate the printing cost of your book using our simple book cost calculator.
+
+
+         </p>
+       </div>
+ 
+    
+     </div>
+ 
+ 
+   </div>
+ </section>
   );
 };
 

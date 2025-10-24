@@ -55,7 +55,7 @@ import {
   MOROCCAN_REGIONS,
   ZIMBABWEAN_PROVINCES,
   PAKISTANI_REGIONS,
-} from "../../lib/locationData";
+} from "@/lib/locationData";
 
 const Shop = () => {
   const router = useRouter();
@@ -591,16 +591,72 @@ const Shop = () => {
     setShippingError(null);
 
     try {
+      const previewForm = JSON.parse(localStorage.getItem("previewFormData") || "{}");
+      const previewProject = JSON.parse(localStorage.getItem("previewProjectData") || "{}");
+      const dropdowns = JSON.parse(localStorage.getItem("previewDropdowns") || "{}");
+
+      let specs = null;
+      if (previewProject.category === "Print Book" || previewProject.category === "Photo Book") {
+        const findName = (arr, id) => {
+          if (!arr || !id) return "";
+          const found = arr.find((o) => String(o.id) === String(id));
+          return found?.dbName || found?.name || "";
+        };
+
+        const trimName = findName(dropdowns.trim_sizes || [], previewForm.trim_size_id);
+        const binding = findName(dropdowns.bindings || [], previewForm.binding_id);
+        const interiorColor = findName(dropdowns.interior_colors || [], previewForm.interior_color_id);
+        const paperType = findName(dropdowns.paper_types || [], previewForm.paper_type_id);
+
+        specs = {
+          bookSize: trimName,
+          page_count: Number(previewForm.page_count),
+          binding_id: binding,
+          interior_color_id: interiorColor,
+          paper_type_id: paperType,
+          quantity: Number(previewForm.quantity) || 1
+        };
+      }
+
+      const requestData = {
+        country: country.trim().toUpperCase(),
+        state: state.trim().toUpperCase(),
+        city: city.trim(),
+        postal_code: postal_code.trim(),
+        account_type: form.account_type,
+        has_resale_cert: form.has_resale_cert
+      };
+
+      // Add shipping specs if we have book data
+      let shippingSpecs = null;
+      if (specs) {
+        // load both helpers used by the ShippingEstimate component so we calculate
+        // weight/dimensions here the same way the calculator page does
+        const { getBookSpecsForShipping, getShippingWeightMultiplier } = await import(
+          '@/utils/bookWeightCalculator'
+        );
+        shippingSpecs = getBookSpecsForShipping(specs);
+        if (shippingSpecs) {
+          requestData.package_specs = {
+            weight: shippingSpecs.totalWeight,
+            length: shippingSpecs.dimensions.length,
+            width: shippingSpecs.dimensions.width,
+            height: shippingSpecs.dimensions.height,
+            quantity: shippingSpecs.quantity,
+            description: shippingSpecs.description,
+            packaging_type: shippingSpecs.packaging.type,
+            packages_needed: shippingSpecs.packaging.packagesNeeded,
+          };
+          // keep the multiplier helper available on the local scope by attaching it
+          // to the shippingSpecs object so we can apply the same multiplier to
+          // API rates after the response returns
+          shippingSpecs._getShippingWeightMultiplier = getShippingWeightMultiplier;
+        }
+      }
+
       const res = await axios.post(
         `${BASE_URL}api/shipping-rate/`,
-        {
-          country: country.trim().toUpperCase(),
-          state: state.trim().toUpperCase(),
-          city: city.trim(),
-          postal_code: postal_code.trim(),
-          account_type: form.account_type,
-          has_resale_cert: form.has_resale_cert,
-        },
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -621,28 +677,55 @@ const Shop = () => {
         available_services = [],
       } = res.data;
 
-      const doubledShippingRate = shipping_rate * 2;
+      // If we calculated shippingSpecs locally (so we know actual weight/packaging),
+      // apply the same weight multiplier to the returned rates so they reflect
+      // quantity/packaging the same way ShippingEstimate does.
+      if (shippingSpecs && typeof shippingSpecs._getShippingWeightMultiplier === 'function') {
+        try {
+          const weightMultiplier = shippingSpecs._getShippingWeightMultiplier(shippingSpecs.packaging);
+          setShippingRate(parseFloat(shipping_rate) * weightMultiplier);
+          // adjust available services' charges below
+          const adjustedServices = (available_services || []).map((svc) => ({
+            ...svc,
+            total_charge: parseFloat(svc.total_charge) * weightMultiplier,
+          }));
+          setAvailableServices(adjustedServices);
+          if (adjustedServices.length > 0) {
+            const cheapestService = adjustedServices.reduce((prev, current) =>
+              prev.total_charge < current.total_charge ? prev : current
+            );
+            setSelectedService(cheapestService);
+          }
+        } catch (err) {
+          // If anything goes wrong with multiplier logic, fall back to raw values
+          console.warn('Failed to apply weight multiplier to shipping rates', err);
+          setShippingRate(shipping_rate);
+          setAvailableServices(available_services || []);
+          if (available_services?.length > 0) {
+            const cheapestService = available_services.reduce((prev, current) =>
+              prev.total_charge < current.total_charge ? prev : current
+            );
+            setSelectedService(cheapestService);
+          }
+        }
+      } else {
+        setShippingRate(shipping_rate);
+        // Keep available services without artificially doubling the price
+        setAvailableServices(available_services || []);
 
-      setShippingRate(doubledShippingRate);
+        if (available_services?.length > 0) {
+          const cheapestService = available_services.reduce((prev, current) =>
+            prev.total_charge < current.total_charge ? prev : current
+          );
+          setSelectedService(cheapestService);
+        }
+      }
       setTax(resTax);
       setTaxRate(tax_rate);
       setTaxReason(tax_reason);
       setAccountType(resAccountType);
       setCourierName(courier_name);
       setEstimatedDelivery(estimated_delivery);
-
-      const modifiedServices = (available_services || []).map((service) => ({
-        ...service,
-        total_charge: service.total_charge * 2,
-      }));
-      setAvailableServices(modifiedServices);
-
-      if (modifiedServices.length > 0) {
-        const cheapestService = modifiedServices.reduce((prev, current) =>
-          prev.total_charge < current.total_charge ? prev : current
-        );
-        setSelectedService(cheapestService);
-      }
 
       setLastFetchSuccess(true);
     } catch (error) {

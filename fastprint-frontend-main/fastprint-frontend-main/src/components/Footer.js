@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 import { FaTiktok, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
-import pngLogo from "@/assets/images/FastPrintGuys_Logo.png"
+import pngLogo from "@/assets/images/FastPrintGuysLogo.png"
 import { useState } from "react";
 import Image from "next/image";
 

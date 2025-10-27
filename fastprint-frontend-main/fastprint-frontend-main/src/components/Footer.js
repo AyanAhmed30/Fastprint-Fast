@@ -20,9 +20,7 @@ import {
 } from "react-icons/fa";
 import { FaTiktok, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
-import pngLogo from "@/assets/images/FastPrintGuysLogo.png"
 import { useState } from "react";
-import Image from "next/image";
 
 const Footer = () => {
   const [communityOpen, setCommunityOpen] = useState(false);
@@ -46,7 +44,6 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row md:justify-between gap-10 md:gap-0">
         {/* Left Section */}
         <div className="flex flex-col gap-6 md:w-1/2">
-            <Image src={pngLogo} width={150} />
           {/* Navigation Links */}
           <div className="flex flex-wrap gap-6 text-base font-medium">
             <div>

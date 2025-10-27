@@ -1,47 +1,98 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Verify Your Email - FastPrintGuys</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      padding: 20px;
-    }
-    .container {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      max-width: 600px;
-      margin: 0 auto;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .btn {
-      display: inline-block;
-      padding: 12px 25px;
-      font-size: 16px;
-      background-color: #22c55e;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    p {
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Hello {{ name }} 👋</h2>
-    <p>Thank you for registering with <strong>FastPrintGuys</strong>.</p>
-    <p>Please click the button below to verify your email address and activate your account:</p>
-    <a href="{{ verification_link }}" class="btn">Verify My Email</a>
-    <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
-    <p><a href="{{ verification_link }}">{{ verification_link }}</a></p>
-    <p>— The FastPrintGuys Team</p>
-  </div>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your Email - Fast Print Guys</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f4f4f4;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .header {
+        background: #007bff;
+        padding: 20px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 160px;
+        height: auto;
+      }
+      .body {
+        padding: 30px;
+        color: #333;
+        line-height: 1.6;
+        font-size: 16px;
+      }
+      .body h1 {
+        font-size: 22px;
+        color: #007bff;
+        margin-bottom: 10px;
+      }
+      .button {
+        display: inline-block;
+        background: #007bff;
+        color: #fff;
+        padding: 12px 20px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 13px;
+        color: #777;
+        background: #f9f9f9;
+      }
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 5px;
+      }
+      @media (max-width: 600px) {
+        .body {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="body">
+        <h1>Verify Your Email Address</h1>
+        <p>Hi {{ name }},</p>
+        <p>
+          Thank you for registering with <strong>Fast Print Guys</strong>. To complete your registration, please verify your email address by clicking the button below:
+        </p>
+        <p style="text-align:center; margin:30px 0;">
+          <a href="{{ verification_link }}" style="display:inline-block; background:#007bff; color:#fff; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:16px; text-align:center; line-height:1.4; border:1px solid #007bff;">Verify My Email</a>
+        </p>
+        <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+        <p>
+          <a href="{{ verification_link }}">{{ verification_link }}</a>
+        </p>
+        <p>If you didn’t sign up for an account, you can safely ignore this email.</p>
+        <p>
+          Best regards,<br /><strong>The Fast Print Guys Team</strong>
+        </p>
+      </div>
+      <div class="footer">
+        © 2025 Fast Print Guys |
+        <a href="https://www.fastprintguys.com/terms">Terms</a> |
+        <a href="https://www.fastprintguys.com/privacy">Privacy</a> |
+        <a href="https://www.fastprintguys.com/contact">Contact Us</a><br />
+        <a href="https://www.fastprintguys.com">www.fastprintguys.com</a>
+      </div>
+    </div>
+  </body>
 </html>

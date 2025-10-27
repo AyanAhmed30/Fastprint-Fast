@@ -355,7 +355,6 @@ const FileUpload = ({
         Layers: <span className="text-gray-800 font-semibold">Flattened</span>
       </div>
     </div>
-
   </div>
 );
 const CoverDesign = ({
@@ -485,7 +484,6 @@ const DesignProjectPreview = () => {
       return newState;
     });
   };
-
   const updateForm = (updates) => {
     setState((prev) => {
       const newState = { ...prev, form: { ...prev.form, ...updates } };
@@ -938,7 +936,6 @@ const DesignProjectPreview = () => {
   useEffect(() => {
     loadPdfLib();
   }, []);
-
   // Restore file information from saved data
   useEffect(() => {
     const restoreFiles = async () => {
@@ -959,7 +956,6 @@ const DesignProjectPreview = () => {
             console.error('Error restoring interior file:', error);
           }
         }
-
         // Restore cover file if available (try IndexedDB first, then base64)
         if (savedData.coverFileData) {
           try {
@@ -972,7 +968,6 @@ const DesignProjectPreview = () => {
                   const arrayBuffer = await restoredCoverFile.arrayBuffer();
                   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
                   const pageCount = pdf.numPages;
-
                   if (pageCount === 1) {
                     const page = await pdf.getPage(1);
                     const scale = 2;
@@ -981,12 +976,10 @@ const DesignProjectPreview = () => {
                     const context = canvas.getContext("2d");
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
-
                     await page.render({
                       canvasContext: context,
                       viewport: viewport,
                     }).promise;
-
                     const pdfImageUrl = canvas.toDataURL("image/png");
                     updateState({
                       coverFile: restoredCoverFile,
@@ -1009,7 +1002,6 @@ const DesignProjectPreview = () => {
         }
       }
     };
-
     restoreFiles();
   }, []);
   const handleFileChange = async (e) => {
@@ -1070,7 +1062,6 @@ const DesignProjectPreview = () => {
             ...(matchedId && { trim_size_id: matchedId }),
           });
           updateState({ selectedFile: file, uploadStatus: "success" });
-
           // Save file data for persistence
           try {
             const fileData = await saveFileData(file, 'interior');
@@ -1105,7 +1096,6 @@ const DesignProjectPreview = () => {
     const file = e.target.files?.[0];
     updateState({ coverFile: null, coverPdfUrl: null, coverFileError: "" });
     if (!file) return;
-
     // Only allow PDF
     if (file.type !== "application/pdf") {
       updateState({
@@ -1113,25 +1103,21 @@ const DesignProjectPreview = () => {
       });
       return;
     }
-
     try {
       const pdfjs = await loadPdfLib();
       if (!pdfjs) {
         updateState({ coverFileError: "PDF processor not available." });
         return;
       }
-
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const pageCount = pdf.numPages;
-
       if (pageCount !== 1) {
         updateState({
           coverFileError: "Book cover design PDF must be exactly 1 page.",
         });
         return;
       }
-
       // Render page 1
       const page = await pdf.getPage(1);
       const scale = 2; // higher = better quality
@@ -1140,19 +1126,16 @@ const DesignProjectPreview = () => {
       const context = canvas.getContext("2d");
       canvas.height = viewport.height;
       canvas.width = viewport.width;
-
       await page.render({
         canvasContext: context,
         viewport: viewport,
       }).promise;
-
       const pdfImageUrl = canvas.toDataURL("image/png");
       updateState({
         coverFile: file,
         coverPdfUrl: pdfImageUrl,
         coverFileError: "",
       });
-
       // Save cover file data for persistence
       try {
         const coverFileData = await saveFileData(file, 'cover');
@@ -1828,7 +1811,34 @@ const DesignProjectPreview = () => {
                 if (state.coverFile) {
                   window.tempCoverFileForSubmission = state.coverFile;
                 }
-                // Only store non-file data in localStorage
+
+                // 👇 NEW: Build and save shopBookDetails
+                const getOptionName = (options, id) =>
+                  options.find((opt) => String(opt.id) === String(id))?.name || "";
+
+                const shopBookDetails = {
+                  "page_count": state.form.page_count || "",
+                  "trim_size": isCalendar
+                    ? ""
+                    : getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id),
+                  "cover_finish": getOptionName(
+                    state.dropdowns.cover_finishes || [],
+                    state.form.cover_finish_id
+                  ),
+                  "interior_color": getOptionName(
+                    state.dropdowns.interior_colors || [],
+                    state.form.interior_color_id
+                  ),
+                  "paper_type": getOptionName(
+                    state.dropdowns.paper_types || [],
+                    state.form.paper_type_id
+                  ),
+                  "binding_type": getOptionName(state.bindings || [], state.form.binding_id),
+                };
+
+                localStorage.setItem("shopBookDetails", JSON.stringify(shopBookDetails));
+
+                // Keep existing localStorage saves
                 localStorage.setItem(
                   "previewFormData",
                   JSON.stringify(state.form)

@@ -60,6 +60,7 @@ import {
 const Shop = () => {
   const router = useRouter();
   const [projectData, setProjectData] = useState(null);
+  const [shopBookDetails, setShopBookDetails] = useState(null);
 
   useEffect(() => {
     const fetchLocalStorageData = () => {
@@ -68,6 +69,11 @@ const Shop = () => {
         if (data) {
           const parsedData = JSON.parse(data);
           setProjectData(parsedData);
+        }
+        const shopBookDetails = localStorage.getItem("shopBookDetails");
+        if (shopBookDetails) {
+          const parsedData = JSON.parse(shopBookDetails);
+          setShopBookDetails(parsedData);
         }
       } catch (e) {
         console.warn("Error accessing localStorage");
@@ -126,41 +132,92 @@ const Shop = () => {
       let calc = null;
       try {
         if (category === "Print Book" || category === "Photo Book") {
-          const trimName = findName(dropdowns.trim_sizes || [], previewForm.trim_size_id);
+          const trimName = findName(
+            dropdowns.trim_sizes || [],
+            previewForm.trim_size_id
+          );
           calc = calculatePriceBook({
             bookSize: trimName,
             page_count: Number(previewForm.page_count),
-            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
-            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
-            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
-            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            binding_id: findName(
+              dropdowns.bindings || [],
+              previewForm.binding_id
+            ),
+            interior_color_id: findName(
+              dropdowns.interior_colors || [],
+              previewForm.interior_color_id
+            ),
+            paper_type_id: findName(
+              dropdowns.paper_types || [],
+              previewForm.paper_type_id
+            ),
+            cover_finish_id: findName(
+              dropdowns.cover_finishes || [],
+              previewForm.cover_finish_id
+            ),
             quantity: qty,
           });
         } else if (category === "Comic Book") {
           calc = calculatePriceComic({
             trim_size_id: previewForm.trim_size_id,
             page_count: Number(previewForm.page_count),
-            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
-            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
-            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
-            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            binding_id: findName(
+              dropdowns.bindings || [],
+              previewForm.binding_id
+            ),
+            interior_color_id: findName(
+              dropdowns.interior_colors || [],
+              previewForm.interior_color_id
+            ),
+            paper_type_id: findName(
+              dropdowns.paper_types || [],
+              previewForm.paper_type_id
+            ),
+            cover_finish_id: findName(
+              dropdowns.cover_finishes || [],
+              previewForm.cover_finish_id
+            ),
             quantity: qty,
           });
         } else if (category === "Magazine" || category === "Year Book") {
           calc = calculatePriceSimple({
             page_count: Number(previewForm.page_count),
-            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
-            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
-            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
-            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            binding_id: findName(
+              dropdowns.bindings || [],
+              previewForm.binding_id
+            ),
+            interior_color_id: findName(
+              dropdowns.interior_colors || [],
+              previewForm.interior_color_id
+            ),
+            paper_type_id: findName(
+              dropdowns.paper_types || [],
+              previewForm.paper_type_id
+            ),
+            cover_finish_id: findName(
+              dropdowns.cover_finishes || [],
+              previewForm.cover_finish_id
+            ),
             quantity: qty,
           });
         } else if (category === "Calender" || category === "Calendar") {
           calc = calculatePriceCalendar({
-            binding_id: findName(dropdowns.bindings || [], previewForm.binding_id),
-            interior_color_id: findName(dropdowns.interior_colors || [], previewForm.interior_color_id),
-            paper_type_id: findName(dropdowns.paper_types || [], previewForm.paper_type_id),
-            cover_finish_id: findName(dropdowns.cover_finishes || [], previewForm.cover_finish_id),
+            binding_id: findName(
+              dropdowns.bindings || [],
+              previewForm.binding_id
+            ),
+            interior_color_id: findName(
+              dropdowns.interior_colors || [],
+              previewForm.interior_color_id
+            ),
+            paper_type_id: findName(
+              dropdowns.paper_types || [],
+              previewForm.paper_type_id
+            ),
+            cover_finish_id: findName(
+              dropdowns.cover_finishes || [],
+              previewForm.cover_finish_id
+            ),
             quantity: qty,
           });
         }
@@ -187,7 +244,10 @@ const Shop = () => {
     };
 
     const parsed = tryParse(saved);
-    if (parsed && (parsed.finalTotalCost || parsed.totalCost || parsed.originalTotalCost)) {
+    if (
+      parsed &&
+      (parsed.finalTotalCost || parsed.totalCost || parsed.originalTotalCost)
+    ) {
       applyShopData(parsed);
       return;
     }
@@ -273,7 +333,10 @@ const Shop = () => {
       // Save to localStorage (like AccountSettings does)
       if (profile?.email) {
         try {
-          localStorage.setItem(`user_profile_${profile.email}`, JSON.stringify(profile));
+          localStorage.setItem(
+            `user_profile_${profile.email}`,
+            JSON.stringify(profile)
+          );
         } catch (err) {
           console.warn("Failed to save profile to localStorage", err);
         }
@@ -292,7 +355,8 @@ const Shop = () => {
         city: profile.city || prev.city,
         postal_code: profile.postal_code || prev.postal_code,
         phone_number: profile.phone_number || prev.phone_number,
-        account_type: profile.account_type === "business" ? "business" : "individual",
+        account_type:
+          profile.account_type === "business" ? "business" : "individual",
       }));
 
       resetShippingData();
@@ -314,11 +378,16 @@ const Shop = () => {
           city: fallbackProfile.city || prev.city,
           postal_code: fallbackProfile.postal_code || prev.postal_code,
           phone_number: fallbackProfile.phone_number || prev.phone_number,
-          account_type: fallbackProfile.account_type === "business" ? "business" : "individual",
+          account_type:
+            fallbackProfile.account_type === "business"
+              ? "business"
+              : "individual",
         }));
         resetShippingData();
       } else {
-        alert("No saved account address found. Please update your Account Settings first.");
+        alert(
+          "No saved account address found. Please update your Account Settings first."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -591,22 +660,43 @@ const Shop = () => {
     setShippingError(null);
 
     try {
-      const previewForm = JSON.parse(localStorage.getItem("previewFormData") || "{}");
-      const previewProject = JSON.parse(localStorage.getItem("previewProjectData") || "{}");
-      const dropdowns = JSON.parse(localStorage.getItem("previewDropdowns") || "{}");
+      const previewForm = JSON.parse(
+        localStorage.getItem("previewFormData") || "{}"
+      );
+      const previewProject = JSON.parse(
+        localStorage.getItem("previewProjectData") || "{}"
+      );
+      const dropdowns = JSON.parse(
+        localStorage.getItem("previewDropdowns") || "{}"
+      );
 
       let specs = null;
-      if (previewProject.category === "Print Book" || previewProject.category === "Photo Book") {
+      if (
+        previewProject.category === "Print Book" ||
+        previewProject.category === "Photo Book"
+      ) {
         const findName = (arr, id) => {
           if (!arr || !id) return "";
           const found = arr.find((o) => String(o.id) === String(id));
           return found?.dbName || found?.name || "";
         };
 
-        const trimName = findName(dropdowns.trim_sizes || [], previewForm.trim_size_id);
-        const binding = findName(dropdowns.bindings || [], previewForm.binding_id);
-        const interiorColor = findName(dropdowns.interior_colors || [], previewForm.interior_color_id);
-        const paperType = findName(dropdowns.paper_types || [], previewForm.paper_type_id);
+        const trimName = findName(
+          dropdowns.trim_sizes || [],
+          previewForm.trim_size_id
+        );
+        const binding = findName(
+          dropdowns.bindings || [],
+          previewForm.binding_id
+        );
+        const interiorColor = findName(
+          dropdowns.interior_colors || [],
+          previewForm.interior_color_id
+        );
+        const paperType = findName(
+          dropdowns.paper_types || [],
+          previewForm.paper_type_id
+        );
 
         specs = {
           bookSize: trimName,
@@ -614,7 +704,7 @@ const Shop = () => {
           binding_id: binding,
           interior_color_id: interiorColor,
           paper_type_id: paperType,
-          quantity: Number(previewForm.quantity) || 1
+          quantity: Number(previewForm.quantity) || 1,
         };
       }
 
@@ -624,7 +714,7 @@ const Shop = () => {
         city: city.trim(),
         postal_code: postal_code.trim(),
         account_type: form.account_type,
-        has_resale_cert: form.has_resale_cert
+        has_resale_cert: form.has_resale_cert,
       };
 
       // Add shipping specs if we have book data
@@ -632,9 +722,8 @@ const Shop = () => {
       if (specs) {
         // load both helpers used by the ShippingEstimate component so we calculate
         // weight/dimensions here the same way the calculator page does
-        const { getBookSpecsForShipping, getShippingWeightMultiplier } = await import(
-          '@/utils/bookWeightCalculator'
-        );
+        const { getBookSpecsForShipping, getShippingWeightMultiplier } =
+          await import("@/utils/bookWeightCalculator");
         shippingSpecs = getBookSpecsForShipping(specs);
         if (shippingSpecs) {
           requestData.package_specs = {
@@ -650,7 +739,8 @@ const Shop = () => {
           // keep the multiplier helper available on the local scope by attaching it
           // to the shippingSpecs object so we can apply the same multiplier to
           // API rates after the response returns
-          shippingSpecs._getShippingWeightMultiplier = getShippingWeightMultiplier;
+          shippingSpecs._getShippingWeightMultiplier =
+            getShippingWeightMultiplier;
         }
       }
 
@@ -680,9 +770,14 @@ const Shop = () => {
       // If we calculated shippingSpecs locally (so we know actual weight/packaging),
       // apply the same weight multiplier to the returned rates so they reflect
       // quantity/packaging the same way ShippingEstimate does.
-      if (shippingSpecs && typeof shippingSpecs._getShippingWeightMultiplier === 'function') {
+      if (
+        shippingSpecs &&
+        typeof shippingSpecs._getShippingWeightMultiplier === "function"
+      ) {
         try {
-          const weightMultiplier = shippingSpecs._getShippingWeightMultiplier(shippingSpecs.packaging);
+          const weightMultiplier = shippingSpecs._getShippingWeightMultiplier(
+            shippingSpecs.packaging
+          );
           setShippingRate(parseFloat(shipping_rate) * weightMultiplier);
           // adjust available services' charges below
           const adjustedServices = (available_services || []).map((svc) => ({
@@ -698,7 +793,10 @@ const Shop = () => {
           }
         } catch (err) {
           // If anything goes wrong with multiplier logic, fall back to raw values
-          console.warn('Failed to apply weight multiplier to shipping rates', err);
+          console.warn(
+            "Failed to apply weight multiplier to shipping rates",
+            err
+          );
           setShippingRate(shipping_rate);
           setAvailableServices(available_services || []);
           if (available_services?.length > 0) {
@@ -731,14 +829,19 @@ const Shop = () => {
     } catch (error) {
       console.error("Shipping API error:", error);
       setLastFetchSuccess(false);
-      let errorMessage = "Failed to fetch shipping rates. Please try again later.";
+      let errorMessage =
+        "Failed to fetch shipping rates. Please try again later.";
 
       if (error.code === "ECONNABORTED") {
         errorMessage = "Request timed out. Please check your connection.";
       } else if (error.response) {
         // If response is HTML (like Django error page), detect it
-        if (typeof error.response.data === "string" && error.response.data.includes("<html")) {
-          errorMessage = "Shipping service is temporarily unavailable. Please try again soon.";
+        if (
+          typeof error.response.data === "string" &&
+          error.response.data.includes("<html")
+        ) {
+          errorMessage =
+            "Shipping service is temporarily unavailable. Please try again soon.";
         } else if (error.response.status === 401) {
           errorMessage = "Session expired. Please log in again.";
           router.push("/login");
@@ -769,7 +872,16 @@ const Shop = () => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
 
-    if (["country", "state", "city", "postal_code", "account_type", "has_resale_cert"].includes(name)) {
+    if (
+      [
+        "country",
+        "state",
+        "city",
+        "postal_code",
+        "account_type",
+        "has_resale_cert",
+      ].includes(name)
+    ) {
       resetShippingData();
     }
   };
@@ -777,7 +889,8 @@ const Shop = () => {
   // ✅ Auto-fetch shipping with debounce and error guard
   useEffect(() => {
     const { country, state, city, postal_code } = form;
-    const hasRequiredFields = country.trim() && state.trim() && city.trim() && postal_code.trim();
+    const hasRequiredFields =
+      country.trim() && state.trim() && city.trim() && postal_code.trim();
 
     if (hasRequiredFields && !isLoading && lastFetchSuccess === false) {
       const timer = setTimeout(() => {
@@ -799,8 +912,13 @@ const Shop = () => {
   };
 
   // ✅ Determine button text and state
-  const isReadyForCheckout = selectedService && !isLoading && shippingRate !== null;
-  const buttonText = isReadyForCheckout ? "Checkout" : (isLoading ? "Calculating Shipping..." : "Check Delivery Method");
+  const isReadyForCheckout =
+    selectedService && !isLoading && shippingRate !== null;
+  const buttonText = isReadyForCheckout
+    ? "Checkout"
+    : isLoading
+    ? "Calculating Shipping..."
+    : "Check Delivery Method";
 
   return (
     <>
@@ -826,8 +944,12 @@ const Shop = () => {
             {/* Same-as-account prompt */}
             <div className="mb-4 p-3 bg-white/60 rounded-lg border border-gray-200 flex items-center justify-between">
               <div className="text-sm md:text-base text-gray-800">
-                <strong>Is your shipping address the same as your customer address?</strong>
-                <div className="text-xs text-gray-500">(Use the address from your Account Settings)</div>
+                <strong>
+                  Is your shipping address the same as your customer address?
+                </strong>
+                <div className="text-xs text-gray-500">
+                  (Use the address from your Account Settings)
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -836,7 +958,11 @@ const Shop = () => {
                     setSameAsAccount(true);
                     await applyAccountProfileToShipping();
                   }}
-                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${sameAsAccount === true ? "bg-blue-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${
+                    sameAsAccount === true
+                      ? "bg-blue-600 text-white"
+                      : "bg-white border border-gray-300 text-gray-700"
+                  }`}
                 >
                   Yes
                 </button>
@@ -846,7 +972,11 @@ const Shop = () => {
                     setSameAsAccount(false);
                     clearShippingAddressFields();
                   }}
-                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${sameAsAccount === false ? "bg-blue-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                  className={`py-2 px-3 rounded-full font-medium text-sm transition-colors ${
+                    sameAsAccount === false
+                      ? "bg-blue-600 text-white"
+                      : "bg-white border border-gray-300 text-gray-700"
+                  }`}
                 >
                   No
                 </button>
@@ -989,7 +1119,8 @@ const Shop = () => {
                         type="radio"
                         name="selected_service"
                         checked={
-                          selectedService?.courier_name === service.courier_name &&
+                          selectedService?.courier_name ===
+                            service.courier_name &&
                           selectedService?.service_name === service.service_name
                         }
                         onChange={() => handleServiceSelection(service)}
@@ -1005,7 +1136,9 @@ const Shop = () => {
                           </span>
                         </div>
                         <div className="text-xs md:text-sm text-gray-600">
-                          {service.service_name && <span>{service.service_name} • </span>}
+                          {service.service_name && (
+                            <span>{service.service_name} • </span>
+                          )}
                           <span>Delivery: {service.delivery_time}</span>
                         </div>
                       </div>
@@ -1018,18 +1151,28 @@ const Shop = () => {
             {/* Shipping Info Display */}
             {selectedService && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm md:text-base">
-                <p><strong>Selected Service:</strong> {selectedService.courier_name}</p>
-                <p><strong>Service Type:</strong> {selectedService.service_name || "Standard"}</p>
-                <p><strong>Estimated Delivery:</strong> {selectedService.delivery_time}</p>
+                <p>
+                  <strong>Selected Service:</strong>{" "}
+                  {selectedService.courier_name}
+                </p>
+                <p>
+                  <strong>Service Type:</strong>{" "}
+                  {selectedService.service_name || "Standard"}
+                </p>
+                <p>
+                  <strong>Estimated Delivery:</strong>{" "}
+                  {selectedService.delivery_time}
+                </p>
               </div>
             )}
 
             {/* ✅ Dynamic Button */}
             <button
-              className={`${buttonClass} ${isReadyForCheckout
-                ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                : "bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] hover:from-[#0968d9] hover:to-[#1560d5]"
-                }`}
+              className={`${buttonClass} ${
+                isReadyForCheckout
+                  ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  : "bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] hover:from-[#0968d9] hover:to-[#1560d5]"
+              }`}
               onClick={deliveryHandler}
               disabled={isLoading || !isReadyForCheckout}
             >
@@ -1041,12 +1184,17 @@ const Shop = () => {
           <div className="w-full lg:w-[40%]">
             <div className="sticky top-30 z-10 bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
               <div className="flex justify-between mb-4">
-                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart Summary</h3>
+                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">
+                  Cart Summary
+                </h3>
                 <div
                   className="flex items-center gap-2 text-[#2A428C] font-semibold text-lg md:text-xl cursor-pointer hover:text-blue-600 transition-colors"
                   onClick={handleEditClick}
                 >
-                  <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4 md:w-5 md:h-5 fill-current"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
                   </svg>
                 </div>
@@ -1057,16 +1205,41 @@ const Shop = () => {
                   <h4 className="text-[#2A428C] font-bold text-lg md:text-xl mb-1">
                     {projectData?.projectTitle || "Book"}
                   </h4>
-                  <p className="text-[#2A428C] text-base md:text-lg font-semibold">
-                    Total Price: ${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}
-                  </p>
+                  <div>
+                    <h4 className="text-[#2A428C] font-bold text-lg md:text-xl mb-1">
+                      Book Specifications:
+                    </h4>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Book size: {shopBookDetails?.trim_size || "Book Size"}
+                    </p>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Page Count: {shopBookDetails?.page_count || "Page Count"}
+                    </p>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Interior Color:{" "}
+                      {shopBookDetails?.interior_color || "Interior Color"}
+                    </p>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Paper Type: {shopBookDetails?.paper_type || "Paper Type"}
+                    </p>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Binding Type:{" "}
+                      {shopBookDetails?.binding_typr || "Binding Type"}
+                    </p>
+                    <p className="text-[#2A428C] text-base md:text-sm font-semibold">
+                      Cover Finish:{" "}
+                      {shopBookDetails?.cover_finish || "Cover Finish"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div className="text-sm space-y-2 md:space-y-3 mb-4 md:mb-6">
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="text-[#2A428C]">${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}</span>
+                  <span className="text-[#2A428C]">
+                    ${displayTotalCost ? displayTotalCost.toFixed(2) : "0.00"}
+                  </span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-600">Quantity</span>
@@ -1074,30 +1247,48 @@ const Shop = () => {
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-gray-600">
-                    Shipping {selectedService && `(${selectedService.courier_name})`}
+                    Shipping{" "}
+                    {selectedService && `(${selectedService.courier_name})`}
                   </span>
-                  <span className={shippingRate !== null ? "text-gray-900" : "text-gray-400"}>
-                    {shippingRate !== null ? `$${shippingRate.toFixed(2)}` : "Calculating..."}
+                  <span
+                    className={
+                      shippingRate !== null ? "text-gray-900" : "text-gray-400"
+                    }
+                  >
+                    {shippingRate !== null
+                      ? `$${shippingRate.toFixed(2)}`
+                      : "Calculating..."}
                   </span>
                 </div>
                 <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">Taxes {taxRate && `(${taxRate})`}</span>
-                  <span className={tax !== null ? "text-gray-900" : "text-gray-400"}>
+                  <span className="text-gray-600">
+                    Taxes {taxRate && `(${taxRate})`}
+                  </span>
+                  <span
+                    className={tax !== null ? "text-gray-900" : "text-gray-400"}
+                  >
                     {tax !== null ? `$${tax.toFixed(2)}` : "Calculating..."}
                   </span>
                 </div>
-                {taxReason && <div className="text-xs text-gray-500 italic pl-2">{taxReason}</div>}
+                {taxReason && (
+                  <div className="text-xs text-gray-500 italic pl-2">
+                    {taxReason}
+                  </div>
+                )}
                 <hr className="border-gray-200" />
                 <div className="flex justify-between font-bold text-base md:text-lg">
                   <span className="text-[#2A428C]">Total</span>
-                  <span className="text-[#2A428C]">${calculateTotal().toFixed(2)}</span>
+                  <span className="text-[#2A428C]">
+                    ${calculateTotal().toFixed(2)}
+                  </span>
                 </div>
               </div>
 
               {isReadyForCheckout && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 md:p-3 mb-3 md:mb-4">
                   <p className="text-xs md:text-sm text-green-800">
-                    <strong>Ready to checkout!</strong> {selectedService.courier_name} shipping selected.
+                    <strong>Ready to checkout!</strong>{" "}
+                    {selectedService.courier_name} shipping selected.
                   </p>
                 </div>
               )}

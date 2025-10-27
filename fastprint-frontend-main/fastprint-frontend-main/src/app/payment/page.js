@@ -335,7 +335,7 @@ const Payment = () => {
             "linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)",
         }}
       >
-        <h1 className="text-white text-lg font-semibold">Payment</h1>
+        <h1 className="text-white text-lg font-semibold">Checkout Page</h1>
       </div>
 
       <div className="min-h-screen bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] px-4 py-6 sm:px-8 sm:py-10 font-sans">
@@ -488,68 +488,65 @@ const Payment = () => {
 
           {/* Right Section - Cart Summary */}
           <div className="w-full lg:w-[42%] flex items-stretch">
-            <div className="w-full h-auto bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-2xl shadow-2xl p-6 flex flex-col justify-between min-h-[600px]">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart summary</h3>
-                <div
-                  className="flex items-center gap-1 md:gap-2 text-[#2A428C] font-semibold text-lg md:text-xl cursor-pointer hover:text-blue-600 transition-colors"
-                  onClick={handleEditClick}
-                >
-                  <span className="text-sm md:text-base">Edit</span>
-                  <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
-                  </svg>
-                </div>
-              </div>
+  <div className="w-full h-auto bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-2xl shadow-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[600px]">
+    {/* Header */}
+    <div className="flex justify-between items-center mb-6">
+      <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart Summary</h3>
+      <button
+        onClick={handleEditClick}
+        className="flex items-center gap-1 md:gap-2 text-[#2A428C] font-semibold text-sm md:text-base cursor-pointer hover:text-blue-600 transition-colors focus:outline-none"
+        aria-label="Edit cart"
+      >
+        <span>Edit</span>
+        <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
+          <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
+        </svg>
+      </button>
+    </div>
 
-              <div className="bg-[#E5FBFF] rounded-xl p-4 flex gap-4 mb-6 items-center">
-                <div className="flex flex-col justify-center w-full">
-                  <h4 className="text-[#2A428C] font-bold text-lg md:text-xl mb-1">
-                    {projectData.projectTitle}
-                  </h4>
-                  <p className="text-black font-bold text-base md:text-lg mt-2">
-                    ${bookPrice ? bookPrice.toFixed(2) : '0.00'}
-                  </p>
-                </div>
-              </div>
+    {/* Project Info Card */}
+    <div className="bg-[#E5FBFF] rounded-xl p-4 mb-6">
+      <h4 className="text-[#2A428C] font-bold text-base md:text-lg mb-2">
+        Project Title: {projectData?.projectTitle || '—'}
+      </h4>
+      <div className="space-y-1.5 text-sm md:text-base">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Subtotal</span>
+          <span className="font-bold text-black">${bookPrice ? bookPrice.toFixed(2) : '0.00'}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Quantity</span>
+          <span className="font-bold text-[#2A428C]">{productQuantity}</span>
+        </div>
+      </div>
+    </div>
 
-              {/* Pricing */}
-              <div className="text-xs md:text-sm space-y-2 md:space-y-3 mb-6">
-                <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="text-[#2A428C] font-bold">
-                    ${subtotal ? subtotal.toFixed(2) : '0.00'}
-                  </span>
-                </div>
-                <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">
-                    Shipping {selectedService && `(${selectedService.courier_name})`}
-                  </span>
-                  <span className="text-gray-900 font-bold">
-                    ${shippingRate ? shippingRate.toFixed(2) : '0.00'}
-                  </span>
-                </div>
-                <div className="flex justify-between font-medium">
-                  <span className="text-gray-600">
-                    Taxes {taxRate && taxRate !== "0.00%" && `(${taxRate})`}
-                  </span>
-                  <span className="text-gray-900 font-bold">
-                    ${tax ? tax.toFixed(2) : '0.00'}
-                  </span>
-                </div>
-                <hr className="border-gray-200" />
-                <div className="flex justify-between font-bold text-base md:text-lg">
-                  <span className="text-[#2A428C]">Total</span>
-                  <span className="text-[#2A428C]">
-                    ${totalAmount ? totalAmount.toFixed(2) : '0.00'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Payment Method Indicator */}
-         
-            </div>
-          </div>
+    {/* Pricing Breakdown */}
+    <div className="text-xs md:text-sm space-y-2.5 mb-6">
+      <div className="flex justify-between font-medium">
+        <span className="text-gray-600">Subtotal</span>
+        <span className="text-[#2A428C] font-bold">${subtotal ? subtotal.toFixed(2) : '0.00'}</span>
+      </div>
+      <div className="flex justify-between font-medium">
+        <span className="text-gray-600">
+          Shipping {selectedService && `(${selectedService.courier_name})`}
+        </span>
+        <span className="text-gray-900 font-bold">${shippingRate ? shippingRate.toFixed(2) : '0.00'}</span>
+      </div>
+      <div className="flex justify-between font-medium">
+        <span className="text-gray-600">
+          Taxes {taxRate && taxRate !== "0.00%" && `(${taxRate})`}
+        </span>
+        <span className="text-gray-900 font-bold">${tax ? tax.toFixed(2) : '0.00'}</span>
+      </div>
+      <hr className="border-gray-200 my-2" />
+      <div className="flex justify-between font-bold text-base md:text-lg">
+        <span className="text-[#2A428C]">Total</span>
+        <span className="text-[#2A428C]">${totalAmount ? totalAmount.toFixed(2) : '0.00'}</span>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -94,6 +94,145 @@ const services = [
 ];
 
 const HireProfessional = () => {
+  // ⚙️ Web3Forms Configuration
+  const WEB3FORMS_ACCESS_KEY = "f3c1f7c7-ed2b-4739-a1de-9fd98eb23b25";
+  const RECEIVER_EMAIL = "ayan3092003@gmail.com";
+
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    manuscriptReady: "",
+    publishedBefore: "",
+    bookType: "",
+    servicesNeeded: [],
+  });
+
+  const [formStatus, setFormStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (service) => {
+    setFormData((prev) => {
+      const services = [...prev.servicesNeeded];
+      if (services.includes(service)) {
+        return { ...prev, servicesNeeded: services.filter((s) => s !== service) };
+      } else {
+        return { ...prev, servicesNeeded: [...services, service] };
+      }
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormStatus({ type: "", message: "" });
+
+    if (!formData.name || !formData.email || !formData.phone) {
+      setFormStatus({
+        type: "error",
+        message: "Please fill in all required fields (Name, Email, Phone).",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setFormStatus({
+        type: "error",
+        message: "Please enter a valid email address.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (WEB3FORMS_ACCESS_KEY === "YOUR_ACCESS_KEY_HERE") {
+      setFormStatus({
+        type: "error",
+        message: "⚠️ Web3Forms access key not configured. Get it at https://web3forms.com",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const emailBody = `
+═══════════════════════════════════
+FASTPRINT GUYS — HIRE PROFESSIONAL FORM
+═══════════════════════════════════
+CONTACT:
+• Name: ${formData.name}
+• Email: ${formData.email}
+• Phone: ${formData.phone}
+
+PROJECT DETAILS:
+• Manuscript Ready? ${formData.manuscriptReady || "Not specified"}
+• Published Before? ${formData.publishedBefore || "Not specified"}
+• Book Type: ${formData.bookType || "Not specified"}
+
+SERVICES NEEDED:
+• ${formData.servicesNeeded.length > 0 ? formData.servicesNeeded.join(", ") : "None selected"}
+
+═══════════════════════════════════
+Submitted via Fast Print Guys Hire Professional Page
+      `;
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `🤝 Hire Pro Inquiry from ${formData.name}`,
+          from_name: formData.name,
+          from_email: formData.email,
+          to_email: RECEIVER_EMAIL,
+          message: emailBody,
+          phone: formData.phone,
+          manuscriptReady: formData.manuscriptReady,
+          publishedBefore: formData.publishedBefore,
+          bookType: formData.bookType,
+          servicesNeeded: formData.servicesNeeded.join(", "),
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setFormStatus({
+          type: "success",
+          message: "✅ Your request has been sent! We’ll contact you soon.",
+        });
+        setFormData({
+          name: "",
+          phone: "",
+          email: "",
+          manuscriptReady: "",
+          publishedBefore: "",
+          bookType: "",
+          servicesNeeded: [],
+        });
+        setTimeout(() => setFormStatus({ type: "", message: "" }), 5000);
+      } else {
+        throw new Error(result.message || "Submission failed");
+      }
+    } catch (error) {
+      console.error("Form error:", error);
+      setFormStatus({
+        type: "error",
+        message: "❌ Failed to send. Please try again or email us at " + RECEIVER_EMAIL,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       {/* Banner */}
@@ -341,132 +480,135 @@ const HireProfessional = () => {
                 </motion.div>
               </motion.div>
 
-              {/* Right Form Section */}
+              {/* Right Form Section — DYNAMIC */}
               <motion.div 
                 className="bg-white shadow-lg rounded-xl p-6 space-y-4"
                 variants={slideInFromRight}
               >
-                <motion.input
-                  type="text"
-                  placeholder="Name"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.input
-                  type="text"
-                  placeholder="Phone Number"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.input
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.select 
-                  className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <option>Do You Have a manuscript ready?</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </motion.select>
-                <motion.select 
-                  className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <option>Have you published before?</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </motion.select>
-                <motion.select 
-                  className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <option>
-                    What type of book do you plan on publishing?
-                  </option>
-                  <option>Fiction</option>
-                  <option>Non-fiction</option>
-                  <option>Children's Book</option>
-                  <option>Other</option>
-                </motion.select>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <motion.input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                  <motion.input
+                    type="text"
+                    name="phone"
+                    placeholder="Phone Number"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                  <motion.input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                  <motion.select 
+                    name="manuscriptReady"
+                    className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.manuscriptReady}
+                    onChange={handleInputChange}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <option value="">Do You Have a manuscript ready?</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </motion.select>
+                  <motion.select 
+                    name="publishedBefore"
+                    className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.publishedBefore}
+                    onChange={handleInputChange}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <option value="">Have you published before?</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </motion.select>
+                  <motion.select 
+                    name="bookType"
+                    className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    value={formData.bookType}
+                    onChange={handleInputChange}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <option value="">What type of book do you plan on publishing?</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Non-fiction">Non-fiction</option>
+                    <option value="Children's Book">Children's Book</option>
+                    <option value="Other">Other</option>
+                  </motion.select>
 
-                {/* Checkboxes */}
-                <motion.div 
-                  className="grid grid-cols-2 gap-2 text-gray-700"
-                  variants={staggerContainer}
-                >
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
+                  {/* Checkboxes */}
+                  <motion.div 
+                    className="grid grid-cols-2 gap-2 text-gray-700"
+                    variants={staggerContainer}
                   >
-                    <input type="checkbox" /> <span>Self Publishing</span>
-                  </motion.label>
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input type="checkbox" /> <span>Illustration</span>
-                  </motion.label>
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input type="checkbox" /> <span>Formatting</span>
-                  </motion.label>
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input type="checkbox" /> <span>Cover Design</span>
-                  </motion.label>
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input type="checkbox" /> <span>Editing</span>
-                  </motion.label>
-                  <motion.label 
-                    className="flex items-center space-x-2"
-                    variants={fadeInUp}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input type="checkbox" /> <span>Book Marketing</span>
-                  </motion.label>
-                </motion.div>
+                    {["Self Publishing", "Illustration", "Formatting", "Cover Design", "Editing", "Book Marketing"].map((service) => (
+                      <motion.label 
+                        key={service}
+                        className="flex items-center space-x-2"
+                        variants={fadeInUp}
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.servicesNeeded.includes(service)}
+                          onChange={() => handleCheckboxChange(service)}
+                        />
+                        <span>{service}</span>
+                      </motion.label>
+                    ))}
+                  </motion.div>
 
-                <motion.button 
-                  className="p-5 custom-btn-gradient text-white py-3 rounded-md hover:bg-blue-700 transition"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Submit Now
-                </motion.button>
+                  {/* Status Message */}
+                  {formStatus.message && (
+                    <div
+                      className={`p-3 rounded-md text-sm font-medium ${
+                        formStatus.type === "success"
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : "bg-red-100 text-red-800 border border-red-200"
+                      }`}
+                    >
+                      {formStatus.message}
+                    </div>
+                  )}
+
+                  <motion.button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`p-5 custom-btn-gradient text-white py-3 rounded-md transition ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                    whileHover={isSubmitting ? {} : { scale: 1.05 }}
+                    whileTap={isSubmitting ? {} : { scale: 0.95 }}
+                  >
+                    {isSubmitting ? "Sending..." : "Submit Now"}
+                  </motion.button>
+                </form>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Feature 3 */}
-
+          {/* FAQ */}
           <Faq />
         </div>
       </motion.div>

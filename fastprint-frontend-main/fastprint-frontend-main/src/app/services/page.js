@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Testimonials from "@/components/Testimonials";
-import BackgroundImage from "@/assets/images/ServicesBanner.png"; // ✅ Add this
+import BackgroundImage from "@/assets/images/ServicesBanner.png";
 
 import {
   BookOpen,
@@ -22,11 +22,8 @@ const Services = () => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState({});
   const [hasAnimatedStats, setHasAnimatedStats] = useState(false);
-
   const [hasAnimatedFeatures, setHasAnimatedFeatures] = useState(false);
-  const [featureCountValues, setFeatureCountValues] = useState([0, 0, 0, 0]); // 4 values
-
-  // Add this near your other data (e.g., after `features`)
+  const [featureCountValues, setFeatureCountValues] = useState([0, 0, 0, 0]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,6 +58,7 @@ const Services = () => {
       ],
       color: "from-blue-500 to-blue-600",
       delay: "0s",
+      route: "/services/book-printing",
     },
     {
       icon: PenTool,
@@ -75,6 +73,7 @@ const Services = () => {
       ],
       color: "from-purple-500 to-purple-600",
       delay: "0.2s",
+      route: "/services/book-writing-formatting",
     },
     {
       icon: Palette,
@@ -89,6 +88,7 @@ const Services = () => {
       ],
       color: "from-orange-500 to-orange-600",
       delay: "0.4s",
+      route: "/services/book-cover-design",
     },
     {
       icon: Globe,
@@ -103,6 +103,7 @@ const Services = () => {
       ],
       color: "from-green-500 to-green-600",
       delay: "0.6s",
+      route: "/services/book-publishing-services",
     },
   ];
 
@@ -146,15 +147,11 @@ const Services = () => {
     requestAnimationFrame(step);
   };
 
-  // Add this useEffect
   useEffect(() => {
-    // Only animate if section is visible AND animation hasn't run before
     if (isVisible["stats"] && !hasAnimatedStats) {
-      setHasAnimatedStats(true); // Mark as animated
-
+      setHasAnimatedStats(true);
       stats.forEach((stat, index) => {
-        if (stat.number.includes("/")) return; // Skip "24/7"
-
+        if (stat.number.includes("/")) return;
         const cleanNum = stat.number.replace(/[^0-9]/g, "");
         const num = parseInt(cleanNum, 10);
         if (!isNaN(num)) {
@@ -196,15 +193,12 @@ const Services = () => {
   useEffect(() => {
     if (isVisible["features-visual"] && !hasAnimatedFeatures) {
       setHasAnimatedFeatures(true);
-
-      // Define target values
       const targets = [
         { value: 5.0, isDecimal: true },
         { value: 50, isDecimal: false },
         { value: 15000, isDecimal: false },
         { value: 99, isDecimal: false },
       ];
-
       targets.forEach((target, index) => {
         animateFeatureCount(target.value, 1500, index, target.isDecimal);
       });
@@ -214,60 +208,51 @@ const Services = () => {
   return (
     <div className="services-container">
       {/* Hero Section */}
-         <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden"
-     >
-       {/* Background Image */}
-       <div
-         className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
-         style={{
-           backgroundImage: `url(${BackgroundImage.src})`, // Replace `YourBackgroundImage` with actual imported image
-         }}
-       ></div>
-     
-       {/* Animated Background Elements (Blur Circles) - Keep them */}
-       <div className="absolute inset-0 z-10">
-         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-         <div
-           className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-           style={{ animationDelay: "1s" }}
-         ></div>
-         <div
-           className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-           style={{ animationDelay: "2s" }}
-         ></div>
-       </div>
-     
-       {/* Content */}
-       <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
-         {/* Left Content */}
-         <div className="flex-1 text-white space-y-8">
-           <div className="scroll-animate slide-in-left">
-            
-             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-               Our{" "}
-               <span className="text-white">
-                 Print Services
-               </span>
-             </h1>
-             <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
-               From personalized book printing to professional publishing services, we offer comprehensive solutions tailored to authors, businesses, and creative professionals worldwide.
-             </p>
-           </div>
-     
-           <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
-             <button
-               className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
-               onClick={() => router.push("/calculator/printbook")}
-             >
-               Get Qoute Now
-             </button>
-            
-           </div>
-         </div>
-     
-     
-       </div>
-     </section>
+      <section className="relative w-full py-14 bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center z-0 opacity-20"
+          style={{
+            backgroundImage: `url(${BackgroundImage.src})`,
+          }}
+        ></div>
+
+        <div className="absolute inset-0 z-10">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
+            style={{ animationDelay: "2s" }}
+          ></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-20">
+          <div className="flex-1 text-white space-y-8">
+            <div className="scroll-animate slide-in-left">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                Our <span className="text-white">Print Services</span>
+              </h1>
+              <p className="text-xl text-white-300 leading-relaxed max-w-2xl">
+                From personalized book printing to professional publishing
+                services, we offer comprehensive solutions tailored to authors,
+                businesses, and creative professionals worldwide.
+              </p>
+            </div>
+
+            <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+              <button
+                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover"
+                onClick={() => router.push("/calculator/printbook")}
+              >
+                Get Qoute Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -298,6 +283,7 @@ const Services = () => {
           </div>
         </div>
       </section>
+
       {/* Enhanced Services Grid */}
       <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -369,55 +355,75 @@ const Services = () => {
                 key={index}
                 id={`service-${index}`}
                 data-animate
-                className={`group relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-3 hover:scale-105 border border-white/50 ${
+                className={`group relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-3 hover:scale-105 border border-white/50 ${
                   isVisible[`service-${index}`]
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-10"
                 }`}
                 style={{ animationDelay: service.delay }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 rounded-3xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+                {/* 👇 NEW: Inner wrapper with overflow-hidden to clip the animated line */}
+                <div className="relative z-10 overflow-hidden rounded-3xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 rounded-3xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
 
-                <div className="relative z-10">
-                  <div
-                    className={`relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r ${service.color} rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}
-                  >
-                    <service.icon className="w-10 h-10 text-white transform group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
+                  <div className="relative z-10 p-8">
                     <div
-                      className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"
-                      style={{ animationDelay: "0.5s" }}
-                    ></div>
+                      className={`relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r ${service.color} rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}
+                    >
+                      <service.icon className="w-10 h-10 text-white transform group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
+                      <div
+                        className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"
+                        style={{ animationDelay: "0.5s" }}
+                      ></div>
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300 group-hover:scale-105 transform">
+                      {service.title}
+                    </h3>
+
+                    <p className="text-gray-600 mb-6 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                      {service.description}
+                    </p>
+
+                    <ul className="space-y-4 mb-8">
+                      {service.features.map((feature, featureIndex) => (
+                        <li
+                          key={featureIndex}
+                          className="flex items-center text-gray-700 transform hover:translate-x-2 transition-all duration-300"
+                          style={{ animationDelay: `${featureIndex * 0.1}s` }}
+                        >
+                          <div className="relative mr-3">
+                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300" />
+                            <div className="absolute inset-0 bg-green-400 rounded-full opacity-0 group-hover:opacity-20 group-hover:animate-ping"></div>
+                          </div>
+                          <span className="group-hover:font-medium transition-all duration-300">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Learn More Button */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <button
+                        onClick={() => router.push(service.route)}
+                        className={`w-full py-3 cursor-pointer bg-gradient-to-r ${service.color} text-white font-medium rounded-xl opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-300 hover:scale-105 flex items-center justify-center gap-2`}
+                      >
+                        Learn More
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300 group-hover:scale-105 transform">
-                    {service.title}
-                  </h3>
-
-                  <p className="text-gray-600 mb-6 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                    {service.description}
-                  </p>
-
-                  <ul className="space-y-4 mb-8">
-                    {service.features.map((feature, featureIndex) => (
-                      <li
-                        key={featureIndex}
-                        className="flex items-center text-gray-700 transform hover:translate-x-2 transition-all duration-300"
-                        style={{ animationDelay: `${featureIndex * 0.1}s` }}
-                      >
-                        <div className="relative mr-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300" />
-                          <div className="absolute inset-0 bg-green-400 rounded-full opacity-0 group-hover:opacity-20 group-hover:animate-ping"></div>
-                        </div>
-                        <span className="group-hover:font-medium transition-all duration-300">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* ✅ Animated bottom line — now safely clipped by overflow-hidden parent */}
+                  <div
+                    className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${service.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
+                  ></div>
                 </div>
 
+                {/* Optional decorative corners (keep outside inner wrapper) */}
                 <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-blue-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-purple-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
@@ -435,6 +441,7 @@ const Services = () => {
           ></div>
         </div>
       </section>
+
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -526,6 +533,7 @@ const Services = () => {
           </div>
         </div>
       </section>
+
       {/* Testimonials */}
       <Testimonials />
 

@@ -87,10 +87,146 @@ const cards = [
 
 const ContactResources = () => {
   const [fileName, setFileName] = useState(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    service: "",
+    subject: "",
+    businessLine: "",
+    message: "",
+    helpWith: "",
+    orderId: "",
+    trackingId: "",
+    projectId: "",
+    projectTitle: "",
+    isbn: "",
+  });
+
+  // ⚙️ Web3Forms Configuration
+  const WEB3FORMS_ACCESS_KEY = "f3c1f7c7-ed2b-4739-a1de-9fd98eb23b25";
+  const RECEIVER_EMAIL = "ayan3092003@gmail.com";
+
+  const [formStatus, setFormStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       setFileName(e.target.files[0].name);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormStatus({ type: "", message: "" });
+
+    if (!formData.firstName || !formData.email) {
+      setFormStatus({
+        type: "error",
+        message: "Please fill in required fields (First Name, Email).",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setFormStatus({
+        type: "error",
+        message: "Please enter a valid email address.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (WEB3FORMS_ACCESS_KEY === "YOUR_ACCESS_KEY_HERE") {
+      setFormStatus({
+        type: "error",
+        message: "⚠️ Web3Forms access key not configured. Get it at https://web3forms.com",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const emailBody = `
+═══════════════════════════════════
+FASTPRINT GUYS — GENERAL INQUIRY
+═══════════════════════════════════
+CONTACT:
+• Name: ${formData.firstName} ${formData.lastName}
+• Email: ${formData.email}
+• Service: ${formData.service || "Not specified"}
+• Subject: ${formData.subject || "N/A"}
+
+DETAILS:
+• Line of Business: ${formData.businessLine || "N/A"}
+• Help Needed With: ${formData.helpWith || "N/A"}
+• Order/Project/Tracking/ISBN:
+  - Order ID: ${formData.orderId || "N/A"}
+  - Tracking ID: ${formData.trackingId || "N/A"}
+  - Project ID: ${formData.projectId || "N/A"}
+  - Project Title: ${formData.projectTitle || "N/A"}
+  - ISBN: ${formData.isbn || "N/A"}
+
+MESSAGE:
+${formData.message || "No message provided."}
+═══════════════════════════════════
+Submitted via Fast Print Guys Contact Page
+      `;
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `📩 Contact Form: ${formData.subject || "General Inquiry"}`,
+          from_name: `${formData.firstName} ${formData.lastName}`.trim() || "Anonymous",
+          from_email: formData.email,
+          to_email: RECEIVER_EMAIL,
+          message: emailBody,
+          ...formData,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setFormStatus({
+          type: "success",
+          message: "✅ Your message has been sent! We’ll reply soon.",
+        });
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          service: "",
+          subject: "",
+          businessLine: "",
+          message: "",
+          helpWith: "",
+          orderId: "",
+          trackingId: "",
+          projectId: "",
+          projectTitle: "",
+          isbn: "",
+        });
+        setFileName(null);
+        setTimeout(() => setFormStatus({ type: "", message: "" }), 5000);
+      } else {
+        throw new Error(result.message || "Submission failed");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      setFormStatus({
+        type: "error",
+        message: "❌ Failed to send. Please try again or email us directly at " + RECEIVER_EMAIL,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -205,152 +341,195 @@ const ContactResources = () => {
                 className="bg-[#E9E9E9] shadow-lg rounded-xl p-6 space-y-4"
                 variants={slideInFromLeft}
               >
-                <div className="flex gap-3">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="flex gap-3">
+                    <motion.input
+                      type="text"
+                      placeholder="First Name"
+                      className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      required
+                    />
+                    <motion.input
+                      type="text"
+                      placeholder="Last Name"
+                      className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <motion.input
+                      type="email"
+                      placeholder="Email Address"
+                      className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                    <motion.select 
+                      className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      value={formData.service}
+                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                    >
+                      <option value="">Select Service</option>
+                      <option value="Book Printing">Book Printing</option>
+                      <option value="E-Book">E-Book</option>
+                      <option value="Book Cover Design">Book Cover Design</option>
+                      <option value="Book Publishing">Book Publishing</option>
+                      <option value="Book Writing">Book Writing</option>
+                    </motion.select>
+                  </div>
+
                   <motion.input
                     type="text"
-                    placeholder="First Name"
+                    placeholder="Subject"
                     className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
                     whileFocus={{ scale: 1.02 }}
                     transition={{ duration: 0.2 }}
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   />
-                  <motion.input
-                    type="text"
-                    placeholder="Last Name"
-                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                    whileFocus={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <motion.input
-                    type="email"
-                    placeholder="Email Address"
-                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                    whileFocus={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  />
+
                   <motion.select 
                     className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
                     whileFocus={{ scale: 1.02 }}
                     transition={{ duration: 0.2 }}
+                    value={formData.businessLine}
+                    onChange={(e) => setFormData({ ...formData, businessLine: e.target.value })}
                   >
-                    <option>Select Service</option>
-                    <option>Book Printing</option>
-                    <option>E-Book</option>
-                    <option>Book Cover Design</option>
-                    <option>Book Publishing</option>
-                    <option>Book Writing</option>
+                    <option value="">Line of Business</option>
+                    <option value="fastprintguys.com">fastprintguys.com</option>
+                    <option value="otherbusiness.com">otherbusiness.com</option>
+                    <option value="example.com">example.com</option>
                   </motion.select>
-                </div>
 
-                <motion.input
-                  type="email"
-                  placeholder="Subject"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.select 
-                  className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <option>Line of Business</option>
-                  <option>fastprintguys.com</option>
-                  <option>otherbusiness.com</option>
-                  <option>example.com</option>
-                </motion.select>
-
-                <motion.textarea
-                  type="email"
-                  placeholder="Describe Your Issue"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
-
-                <motion.div
-                  onClick={() =>
-                    document.getElementById("customFileInput")?.click()
-                  }
-                  className="w-full h-24 border-2 border-dashed border-blue-400 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-200 transition"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="text-gray-600">
-                    {fileName ? fileName : "Attach a File"}
-                  </span>
-                  <input
-                    id="customFileInput"
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileChange}
+                  <motion.textarea
+                    placeholder="Describe Your Issue"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd] h-24 resize-none"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   />
-                </motion.div>
 
-                <motion.select 
-                  className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <option>I Need Help With</option>
-                  <option>Buying/My Order</option>
-                  <option>The Printed Product(s) I received</option>
-                  <option>My Account</option>
-                  <option>Creating/Publishing</option>
-                  <option>Selling/Global Distribution</option>
-                  <option>My Creattor Revenue</option>
-                  <option>My Creattor Revenue</option>
-                  <option>Report Content/Review</option>
-                </motion.select>
+                  <motion.div
+                    onClick={() => document.getElementById("customFileInput")?.click()}
+                    className="w-full h-24 border-2 border-dashed border-blue-400 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-200 transition"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="text-gray-600">
+                      {fileName ? fileName : "Attach a File"}
+                    </span>
+                    <input
+                      id="customFileInput"
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </motion.div>
 
-                <motion.input
-                  type="text"
-                  placeholder="Order or Print Job ID"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
+                  <motion.select 
+                    className="w-full text-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.helpWith}
+                    onChange={(e) => setFormData({ ...formData, helpWith: e.target.value })}
+                  >
+                    <option value="">I Need Help With</option>
+                    <option value="Buying/My Order">Buying/My Order</option>
+                    <option value="The Printed Product(s) I received">The Printed Product(s) I received</option>
+                    <option value="My Account">My Account</option>
+                    <option value="Creating/Publishing">Creating/Publishing</option>
+                    <option value="Selling/Global Distribution">Selling/Global Distribution</option>
+                    <option value="My Creattor Revenue">My Creattor Revenue</option>
+                    <option value="Report Content/Review">Report Content/Review</option>
+                  </motion.select>
 
-                <motion.input
-                  type="text"
-                  placeholder="Order Tracking ID"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
+                  <motion.input
+                    type="text"
+                    placeholder="Order or Print Job ID"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.orderId}
+                    onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+                  />
 
-                <motion.input
-                  type="text"
-                  placeholder="Project ID"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
+                  <motion.input
+                    type="text"
+                    placeholder="Order Tracking ID"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.trackingId}
+                    onChange={(e) => setFormData({ ...formData, trackingId: e.target.value })}
+                  />
 
-                <motion.input
-                  type="text"
-                  placeholder="Project Title"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
+                  <motion.input
+                    type="text"
+                    placeholder="Project ID"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.projectId}
+                    onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                  />
 
-                <motion.input
-                  type="text"
-                  placeholder="ISBN"
-                  className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
-                  whileFocus={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                />
+                  <motion.input
+                    type="text"
+                    placeholder="Project Title"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.projectTitle}
+                    onChange={(e) => setFormData({ ...formData, projectTitle: e.target.value })}
+                  />
 
-                <motion.button 
-                  className="p-5 custom-btn-gradient text-white py-3 rounded-md hover:bg-blue-700 transition"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Submit Form
-                </motion.button>
+                  <motion.input
+                    type="text"
+                    placeholder="ISBN"
+                    className="w-full placeholder-[#868E96] bg-[#F7F8F9] border rounded-md p-3 border-[#dadbdd]"
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    value={formData.isbn}
+                    onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                  />
+
+                  {/* Status Message */}
+                  {formStatus.message && (
+                    <div
+                      className={`p-3 rounded-md text-sm font-medium ${
+                        formStatus.type === "success"
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : "bg-red-100 text-red-800 border border-red-200"
+                      }`}
+                    >
+                      {formStatus.message}
+                    </div>
+                  )}
+
+                  <motion.button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`p-5 custom-btn-gradient text-white py-3 rounded-md transition ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                    whileHover={isSubmitting ? {} : { scale: 1.05 }}
+                    whileTap={isSubmitting ? {} : { scale: 0.95 }}
+                  >
+                    {isSubmitting ? "Sending..." : "Submit Form"}
+                  </motion.button>
+                </form>
               </motion.div>
 
               {/* Right Section */}
@@ -405,7 +584,6 @@ const ContactResources = () => {
             ))}
           </motion.div>
 
-          {/* Feature 3 */}
           {/* Bottom CTA */}
           <motion.div 
             className="relative mt-16 mx-10 rounded-xl overflow-hidden"
@@ -414,7 +592,6 @@ const ContactResources = () => {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {/* Background image */}
             <Image
               src={ContactFooterImg}
               alt="Contact section background"
@@ -422,8 +599,6 @@ const ContactResources = () => {
               className="object-cover"
               priority
             />
-
-            {/* Content */}
             <div className="relative px-6 py-24 text-center z-10">
               <motion.h3 
                 className="text-2xl capitalize md:text-5xl font-bold mb-10 text-white"

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { BASE_URL } from "@/services/baseUrl";
+import { addCartItem, updateCartItem } from "@/services/cartService";
 import {
   BOOK_SIZES,
   OPTIONS_CONFIG_BOOK,
@@ -479,56 +480,84 @@ const deliveryHandler = async () => {
       return;
     }
 
-    // ✅ Create new cart item with unique ID
-    const newItem = {
-      id: Date.now(),
-      previewForm,
-      previewProject,
-      bookFile: null,
-      coverFile: null,
-      form: { ...form },
-      shippingRate,
-      tax,
-      taxRate,
-      taxReason,
-      accountType,
-      courierName,
-      estimatedDelivery,
-      selectedService,
-      productQuantity,
-      productPrice,
-      subtotal,
-      displayTotalCost,
-      addedAt: new Date().toISOString(),
+    // Prepare cart item data for backend
+    const toMoney = (v) => {
+      if (v === null || v === undefined || v === "") return null;
+      const num = Number(v);
+      if (Number.isNaN(num)) return null;
+      return num.toFixed(2);
+    };
+    const cartItemData = {
+      preview_form: previewForm,
+      preview_project: previewProject,
+      first_name: form.first_name,
+      last_name: form.last_name,
+      company: form.company || "",
+      address: form.address,
+      apt_floor: form.apt_floor || "",
+      country: form.country,
+      state: form.state,
+      city: form.city,
+      postal_code: form.postal_code,
+      phone_number: form.phone_number,
+      account_type: form.account_type || accountType || "individual",
+      has_resale_cert: form.has_resale_cert || false,
+      shipping_rate: toMoney(shippingRate),
+      tax: toMoney(tax),
+      tax_rate: taxRate || null,
+      tax_reason: taxReason || null,
+      courier_name: courierName || null,
+      estimated_delivery: estimatedDelivery || null,
+      selected_service: selectedService || null,
+      product_quantity: productQuantity || 1,
+      product_price: toMoney(productPrice),
+      subtotal: toMoney(subtotal || 0),
+      display_total_cost: toMoney(displayTotalCost || 0),
     };
 
-    // ✅ Append to cartItems (preserve all past items)
-    const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
-    const updatedCart = [...existingCart, newItem];
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-
-    // ✅ Keep current flow for immediate payment
-    localStorage.setItem("pendingOrderData", JSON.stringify(newItem));
-    localStorage.setItem(
-      "paymentData",
-      JSON.stringify({
-        bookPrice: displayTotalCost || 0,
-        productQuantity: productQuantity,
-        subtotal: displayTotalCost || 0,
-        shippingRate: shippingRate || 0,
-        tax: tax || 0,
-        totalAmount: calculateTotal(),
-        selectedService: selectedService,
-        taxRate: taxRate,
-        accountType: accountType,
-      })
-    );
-
-    // ✅ Go to cart (not payment)
-    router.push("/cart");
+    // Save cart item to backend
+    setIsLoading(true);
+    let response;
+    const editingId = (typeof window !== 'undefined') ? localStorage.getItem("editingCartItemId") : null;
+    if (editingId) {
+      // update existing cart item
+      response = await updateCartItem(editingId, cartItemData);
+    } else {
+      // create new cart item
+      response = await addCartItem(cartItemData);
+    }
+    
+    if (response.status === "success") {
+      // Store payment data in localStorage for payment page (still needed for payment flow)
+      localStorage.setItem(
+        "paymentData",
+        JSON.stringify({
+          bookPrice: displayTotalCost || 0,
+          productQuantity: productQuantity,
+          subtotal: displayTotalCost || 0,
+          shippingRate: shippingRate || 0,
+          tax: tax || 0,
+          totalAmount: calculateTotal(),
+          selectedService: selectedService,
+          taxRate: taxRate,
+          accountType: accountType,
+        })
+      );
+      
+      // Clear edit marker if present and navigate to cart page
+      try {
+        localStorage.removeItem("editingCartItemId");
+      } catch (e) {}
+      router.push("/cart");
+    } else {
+      alert(response.message || "Failed to save cart item. Please try again.");
+    }
   } catch (error) {
-    console.error("Shipping save error:", error);
-    alert("Failed to save shipping info. Please try again.");
+    console.error("Cart save error:", error);
+    const errorMessage = error.error || error.message || "Failed to save cart item. Please try again.";
+    alert(errorMessage);
+  } finally {
+    setIsLoading(false);
   }
 };
 

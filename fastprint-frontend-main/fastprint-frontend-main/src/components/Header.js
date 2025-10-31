@@ -13,15 +13,15 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import useAuth from "../hooks/useAuth";
 import Image from "next/image";
 import FastPrintLogo from "@/assets/images/fastlogo.svg";
-import axios from "axios"; // ✅ Import axios
-import { BASE_URL } from "@/services/baseUrl"; // ✅ Import BASE_URL
+import axios from "axios";
+import { BASE_URL } from "@/services/baseUrl";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourceOpen, setResourceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0); // ✅ This will show order count
+  const [cartCount, setCartCount] = useState(0); // ✅ Now reflects cart item count
 
   const resourceRef = useRef();
   const profileRef = useRef();
@@ -32,7 +32,7 @@ const Header = () => {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  // 🔁 Fetch order count when user logs in or changes
+  // 🔁 Fetch CART items count (not paid orders)
   useEffect(() => {
     if (user) {
       const token = localStorage.getItem("accessToken");
@@ -42,27 +42,29 @@ const Header = () => {
       }
 
       axios
-        .get(`${BASE_URL}api/book/user-paid-orders/`, {
+        .get(`${BASE_URL}api/cart/items/`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          const orders = response.data.data || [];
-          setCartCount(orders.length);
+          // Assuming response.data is an array of cart items
+          const cartItems = Array.isArray(response.data) ? response.data : response.data?.data || [];
+          setCartCount(cartItems.length);
 
-          // Optional: Also save to localStorage for consistency
-          const orderCountKey = `order_count_${user.id}`;
-          localStorage.setItem(orderCountKey, JSON.stringify(orders.length));
+          // Optional: Save to localStorage for consistency
+          const cartCountKey = `cart_count_${user.id}`;
+          localStorage.setItem(cartCountKey, JSON.stringify(cartItems.length));
 
-          // Clean up old cart
+          // Clean up old order-based cart key if needed
           localStorage.removeItem("cart");
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("Failed to fetch cart items:", error);
           setCartCount(0);
         });
     } else {
       setCartCount(0);
     }
-  }, [user]); // ✅ Re-run when user changes
+  }, [user]); // Re-run when user changes
 
   // Handle clicks outside dropdowns
   useEffect(() => {
@@ -97,7 +99,7 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    router.push(user ? "/orders" : "/login");
+    router.push(user ? "/cart" : "/login");
     setMenuOpen(false);
   };
 
@@ -200,11 +202,11 @@ const Header = () => {
               </Link>
             )}
 
-            {/* Cart Icon with Badge */}
+            {/* Cart Icon with Badge — now shows cart item count */}
             <div
               className="relative cursor-pointer"
               onClick={handleCartClick}
-              title="Your Orders"
+              title="Your Cart"
             >
               <AiOutlineShoppingCart
                 size={25}
@@ -285,7 +287,7 @@ const Header = () => {
             <div
               className="relative cursor-pointer"
               onClick={handleCartClick}
-              title="Your Orders"
+              title="Your Cart"
             >
               <HiOutlineShoppingBag
                 size={18}
@@ -361,9 +363,8 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`lg:hidden transition-all duration-300 ease-in-out ${
-            menuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
-          }`}
+          className={`lg:hidden transition-all duration-300 ease-in-out ${menuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+            }`}
         >
           <nav className="py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-1">
@@ -397,9 +398,8 @@ const Header = () => {
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out ${
-                    resourceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
-                  }`}
+                  className={`transition-all duration-300 ease-in-out ${resourceOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+                    }`}
                 >
                   <div className="pl-4 space-y-1">
                     {[

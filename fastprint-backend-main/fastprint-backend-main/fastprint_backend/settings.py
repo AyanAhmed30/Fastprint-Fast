@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'payment',
     'book_shipping',
     'userprofiles',
+    'cart'
 ]
 
 # REST Framework Configuration

@@ -7,6 +7,7 @@ import { BASE_URL } from "@/services/baseUrl";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripeCardForm from "@/components/StripeCardForm";
+import { deleteCartItem } from "@/services/cartService";
 
 const stripePromise = loadStripe(
   "pk_test_51QbTz6RxiPcxiXelLov7aonk68MVy3OVLHYOsdTyOaTH1pQ3FfSql0TjE4WNd0pgzs5qyJUaBXtd3ar5GLP4ESP400FHqiRJF9"
@@ -16,7 +17,7 @@ const Payment = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState(null);
   const [projectData, setProjectData] = useState(null);
-  
+
   // Load project data from localStorage
   useEffect(() => {
     const fetchLocalStorageData = () => {
@@ -38,6 +39,7 @@ const Payment = () => {
 
   // Get payment data from localStorage (passed from Shop)
   const [initialData, setInitialData] = useState({
+    previewProject: "",
     bookPrice: 0,
     productQuantity: 1,
     subtotal: 0,
@@ -63,6 +65,7 @@ const Payment = () => {
   }, []);
 
   const {
+    previewProject = "",
     bookPrice = 0,
     productQuantity = 1,
     subtotal = 0,
@@ -246,22 +249,26 @@ const Payment = () => {
         router.push("/shop");
         return;
       }
+
       const formData = new FormData();
       const design = JSON.parse(pendingOrder.previewForm);
       const project = JSON.parse(pendingOrder.previewProject);
       const bookFile = window.tempBookFileForSubmission;
       const coverFile = window.tempCoverFileForSubmission;
+
       formData.append("title", project.projectTitle || "");
       formData.append("category", project.category);
       formData.append("language", project.language);
       formData.append("pdf_file", bookFile);
       if (coverFile) formData.append("cover_file", coverFile);
+
       const drop = JSON.parse(localStorage.getItem("previewDropdowns") || "{}");
       const findName = (arr, id) => {
         if (!arr || !id) return "";
         const m = (arr || []).find((o) => String(o.id) === String(id));
         return m?.dbName || m?.name || "";
       };
+
       formData.append("binding_type", findName(drop.bindings, design.binding_id));
       formData.append("cover_finish", findName(drop.cover_finishes, design.cover_finish_id));
       formData.append("interior_color", findName(drop.interior_colors, design.interior_color_id));
@@ -270,23 +277,28 @@ const Payment = () => {
         formData.append("trim_size", findName(drop.trim_sizes, design.trim_size_id));
       }
       formData.append("page_count", design.page_count || 1);
+
       // Shipping + account details
       Object.entries(pendingOrder.form).forEach(([key, value]) => {
         formData.append(key, value);
       });
+
       // Shipping outcome
       if (pendingOrder.selectedService) formData.append("selected_service", JSON.stringify(pendingOrder.selectedService));
       if (pendingOrder.courierName) formData.append("courier_name", pendingOrder.courierName);
       if (pendingOrder.estimatedDelivery) formData.append("estimated_delivery", pendingOrder.estimatedDelivery);
+
       const toMoney = (v) => (v === null || v === undefined || isNaN(v) ? "" : Number(v).toFixed(2));
       if (pendingOrder.shippingRate !== null) formData.append("shipping_rate", toMoney(pendingOrder.shippingRate));
       if (pendingOrder.tax !== null) formData.append("tax", toMoney(pendingOrder.tax));
+
       // Pricing summary
       formData.append("product_quantity", String(pendingOrder.productQuantity));
       formData.append("product_price", toMoney(pendingOrder.productPrice || 0));
       formData.append("subtotal", toMoney(pendingOrder.subtotal || 0));
-      // Set order_status to 'paid'
       formData.append("order_status", "paid");
+
+      // Save the order
       await axios.post(
         `${BASE_URL}api/book/save-order/`,
         formData,
@@ -297,8 +309,15 @@ const Payment = () => {
           },
         }
       );
-      // Clean up
+
+      // ✅ NEW: Delete the cart item from backend after successful order
+      await deleteCartItem(pendingOrder.id);
+
+      // Clean up localStorage
       localStorage.removeItem("pendingOrderData");
+      localStorage.removeItem("paymentData");
+
+      // Redirect to success
       router.push("/success");
     } catch (error) {
       console.error("Order save after payment error:", error.response?.data || error.message);
@@ -359,15 +378,15 @@ const Payment = () => {
                   />
                   <span className="text-sm font-semibold">Credit Card</span>
                   <div className="flex gap-2 ml-auto">
-                    <img 
-                      src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" 
-                      alt="Visa" 
-                      className="h-5 md:h-6" 
+                    <img
+                      src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg"
+                      alt="Visa"
+                      className="h-5 md:h-6"
                     />
-                    <img 
-                      src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" 
-                      alt="Mastercard" 
-                      className="h-5 md:h-6" 
+                    <img
+                      src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg"
+                      alt="Mastercard"
+                      className="h-5 md:h-6"
                     />
                   </div>
                 </label>
@@ -488,65 +507,77 @@ const Payment = () => {
 
           {/* Right Section - Cart Summary */}
           <div className="w-full lg:w-[42%] flex items-stretch">
-  <div className="w-full h-auto bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-2xl shadow-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[600px]">
-    {/* Header */}
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart Summary</h3>
-      <button
-        onClick={handleEditClick}
-        className="flex items-center gap-1 md:gap-2 text-[#2A428C] font-semibold text-sm md:text-base cursor-pointer hover:text-blue-600 transition-colors focus:outline-none"
-        aria-label="Edit cart"
-      >
-        <span>Edit</span>
-        <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
-          <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
-        </svg>
-      </button>
-    </div>
+            <div className="w-full h-auto bg-gradient-to-br from-[#e0f3ff] via-white to-[#ffe4ec] rounded-2xl shadow-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[600px]">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-[#2A428C] text-lg md:text-xl font-semibold">Cart Summary</h3>
+                <button
+                  onClick={handleEditClick}
+                  className="flex items-center gap-1 md:gap-2 text-[#2A428C] font-semibold text-sm md:text-base cursor-pointer hover:text-blue-600 transition-colors focus:outline-none"
+                  aria-label="Edit cart"
+                >
+                  <span>Edit</span>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
+                  </svg>
+                </button>
+              </div>
 
-    {/* Project Info Card */}
-    <div className="bg-[#E5FBFF] rounded-xl p-4 mb-6">
-      <h4 className="text-[#2A428C] font-bold text-base md:text-lg mb-2">
-        Project Title: {projectData?.projectTitle || '—'}
-      </h4>
-      <div className="space-y-1.5 text-sm md:text-base">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span className="font-bold text-black">${bookPrice ? bookPrice.toFixed(2) : '0.00'}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Quantity</span>
-          <span className="font-bold text-[#2A428C]">{productQuantity}</span>
-        </div>
-      </div>
-    </div>
+              {/* Project Info Card */}
+              <div className="bg-[#E5FBFF] rounded-xl p-4 mb-6">
+                <h4 className="text-[#2A428C] font-bold text-base md:text-lg mb-2">
+                  Project Title: {(() => {
+                    try {
+                      const parsed = typeof previewProject === "string" ? JSON.parse(previewProject) : previewProject;
+                      return parsed?.projectTitle || '—';
+                    } catch {
+                      return '—';
+                    }
+                  })()}
+                </h4>
 
-    {/* Pricing Breakdown */}
-    <div className="text-xs md:text-sm space-y-2.5 mb-6">
-      <div className="flex justify-between font-medium">
-        <span className="text-gray-600">Subtotal</span>
-        <span className="text-[#2A428C] font-bold">${subtotal ? subtotal.toFixed(2) : '0.00'}</span>
-      </div>
-      <div className="flex justify-between font-medium">
-        <span className="text-gray-600">
-          Shipping {selectedService && `(${selectedService.courier_name})`}
-        </span>
-        <span className="text-gray-900 font-bold">${shippingRate ? shippingRate.toFixed(2) : '0.00'}</span>
-      </div>
-      <div className="flex justify-between font-medium">
-        <span className="text-gray-600">
-          Taxes {taxRate && taxRate !== "0.00%" && `(${taxRate})`}
-        </span>
-        <span className="text-gray-900 font-bold">${tax ? tax.toFixed(2) : '0.00'}</span>
-      </div>
-      <hr className="border-gray-200 my-2" />
-      <div className="flex justify-between font-bold text-base md:text-lg">
-        <span className="text-[#2A428C]">Total</span>
-        <span className="text-[#2A428C]">${totalAmount ? totalAmount.toFixed(2) : '0.00'}</span>
-      </div>
-    </div>
-  </div>
-</div>
+                <div className="space-y-1.5 text-sm md:text-base">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-bold text-black">  ${(
+                      (bookPrice || 0) +
+                      (shippingRate || 0) +
+                      (tax || 0)
+                    ).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Quantity</span>
+                    <span className="font-bold text-[#2A428C]">{productQuantity}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing Breakdown */}
+              <div className="text-xs md:text-sm space-y-2.5 mb-6">
+                <div className="flex justify-between font-medium">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-[#2A428C] font-bold">${subtotal ? subtotal.toFixed(2) : '0.00'}</span>
+                </div>
+                <div className="flex justify-between font-medium">
+                  <span className="text-gray-600">
+                    Shipping {selectedService && `(${selectedService.courier_name})`}
+                  </span>
+                  <span className="text-gray-900 font-bold">${shippingRate ? shippingRate.toFixed(2) : '0.00'}</span>
+                </div>
+                <div className="flex justify-between font-medium">
+                  <span className="text-gray-600">
+                    Taxes {taxRate && taxRate !== "0.00%" && `(${taxRate})`}
+                  </span>
+                  <span className="text-gray-900 font-bold">${tax ? tax.toFixed(2) : '0.00'}</span>
+                </div>
+                <hr className="border-gray-200 my-2" />
+                <div className="flex justify-between font-bold text-base md:text-lg">
+                  <span className="text-[#2A428C]">Total</span>
+                  <span className="text-[#2A428C]">${totalAmount ? totalAmount.toFixed(2) : '0.00'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -3,29 +3,86 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Edit3, ShoppingBag, ArrowRight, Package } from "lucide-react";
+import { getCartItems, deleteCartItem } from "@/services/cartService";
 
 const Cart = () => {
   const router = useRouter();
   const [cartItems, setCartItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Transform backend data to frontend format
+  const transformCartItem = (backendItem) => {
+    return {
+      id: backendItem.id,
+      previewForm: backendItem.preview_form,
+      previewProject: backendItem.preview_project,
+      form: {
+        first_name: backendItem.first_name,
+        last_name: backendItem.last_name,
+        company: backendItem.company || "",
+        address: backendItem.address,
+        apt_floor: backendItem.apt_floor || "",
+        country: backendItem.country,
+        state: backendItem.state,
+        city: backendItem.city,
+        postal_code: backendItem.postal_code,
+        phone_number: backendItem.phone_number,
+        account_type: backendItem.account_type,
+        has_resale_cert: backendItem.has_resale_cert,
+      },
+      shippingRate: parseFloat(backendItem.shipping_rate) || 0,
+      tax: parseFloat(backendItem.tax) || 0,
+      taxRate: backendItem.tax_rate,
+      taxReason: backendItem.tax_reason,
+      accountType: backendItem.account_type,
+      courierName: backendItem.courier_name,
+      estimatedDelivery: backendItem.estimated_delivery,
+      selectedService: backendItem.selected_service,
+      productQuantity: backendItem.product_quantity || 1,
+      productPrice: parseFloat(backendItem.product_price) || 0,
+      subtotal: parseFloat(backendItem.subtotal) || 0,
+      displayTotalCost: parseFloat(backendItem.display_total_cost) || 0,
+      addedAt: backendItem.created_at,
+    };
+  };
 
   useEffect(() => {
-    try {
-      const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
-      if (items.length === 0) {
-        return;
+    const fetchCartItems = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        setIsLoading(true);
+        const response = await getCartItems();
+        
+        if (response.status === "success" && response.data) {
+          const transformedItems = response.data.map(transformCartItem);
+          setCartItems(transformedItems);
+        } else {
+          setCartItems([]);
+        }
+      } catch (error) {
+        console.error("Failed to load cart items", error);
+        setCartItems([]);
+        // Don't redirect on error - just show empty cart
+      } finally {
+        setIsLoading(false);
       }
-      setCartItems(items);
-    } catch (e) {
-      console.error("Failed to load cart items", e);
-      router.push("/shop");
-    }
+    };
+
+    fetchCartItems();
   }, [router]);
 
   const handleProceedToPayment = (item) => {
+    // Store payment data for payment page
     localStorage.setItem("pendingOrderData", JSON.stringify(item));
     localStorage.setItem(
       "paymentData",
       JSON.stringify({
+        previewProject: item.previewProject,
         bookPrice: item.displayTotalCost || 0,
         productQuantity: item.productQuantity || 1,
         subtotal: item.subtotal || 0,
@@ -40,7 +97,39 @@ const Cart = () => {
     router.push("/payment");
   };
 
+  const handleDeleteItem = async (itemId) => {
+    if (!confirm("Are you sure you want to remove this item from your cart?")) {
+      return;
+    }
+
+    try {
+      const response = await deleteCartItem(itemId);
+      // Consider 204/200 status or success status as successful deletion
+      if (response.status === "success" || !response.error) {
+        // Remove item from local state immediately
+        setCartItems(cartItems.filter(item => item.id !== itemId));
+      } else {
+        alert(response.message || "Failed to delete cart item");
+      }
+    } catch (error) {
+      // Only show error if it's a real error (not a successful 204)
+      if (error.error && error.error !== "Failed to delete cart item") {
+        console.error("Failed to delete cart item", error);
+        alert(error.error || error.message || "Failed to delete cart item");
+      } else {
+        // If it's a 204 or successful response that axios didn't parse correctly, treat as success
+        setCartItems(cartItems.filter(item => item.id !== itemId));
+      }
+    }
+  };
+
   const handleEditItem = (item) => {
+    try {
+      // mark which cart item is being edited so /shop can update instead of creating
+      localStorage.setItem("editingCartItemId", String(item.id));
+    } catch (e) {
+      // ignore storage errors and fall back to normal behavior
+    }
     localStorage.setItem("previewFormData", item.previewForm);
     localStorage.setItem("previewProjectData", item.previewProject);
 
@@ -84,8 +173,22 @@ const Cart = () => {
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+    return cartItems.reduce((sum, item) => {
+      const itemTotal = (item.subtotal || 0) + (item.shippingRate || 0) + (item.tax || 0);
+      return sum + itemTotal;
+    }, 0);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#016AB3] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading cart...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -180,7 +283,7 @@ const Cart = () => {
                           <div className="text-center md:text-right flex-1 md:flex-none">
                             <div className="text-xs text-gray-500 mb-1">Total</div>
                             <div className="text-2xl font-bold text-[#016AB3]">
-                              ${item.subtotal?.toFixed(2) || "0.00"}
+                              ${((item.subtotal || 0) + (item.shippingRate || 0) + (item.tax || 0)).toFixed(2)}
                             </div>
                           </div>
 
@@ -191,6 +294,13 @@ const Cart = () => {
                             >
                               <Edit3 className="w-4 h-4" />
                               Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(item.id)}
+                              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-red-300 text-red-700 rounded-lg hover:border-red-500 hover:text-red-900 hover:bg-red-50 transition-all duration-200 font-medium text-sm"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
                             </button>
                             <button
                               onClick={() => handleProceedToPayment(item)}
@@ -227,7 +337,7 @@ const Cart = () => {
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600">Total books</span>
                   <span className="font-semibold text-gray-900">
-                    {cartItems.reduce((sum, item) => sum + (item.productQuantity || 1), 0)}
+                    {cartItems.length}
                   </span>
                 </div>
 
@@ -250,7 +360,7 @@ const Cart = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
       </div>
     </div>

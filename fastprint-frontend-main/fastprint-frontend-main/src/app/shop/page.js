@@ -802,7 +802,7 @@ const deliveryHandler = async () => {
   const isReadyForCheckout =
     selectedService && !isLoading && shippingRate !== null;
   const buttonText = isReadyForCheckout
-    ? "Checkout"
+    ? "Add to Cart"
     : isLoading
     ? "Calculating Shipping..."
     : "Check Delivery Method";

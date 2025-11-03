@@ -74,26 +74,36 @@ const StartProjectContent = () => {
   const isEdit = searchParams.get("edit") === "true";
 
   useEffect(() => {
-    const storedProjectData = localStorage.getItem("projectData");
-    if (storedProjectData) {
-      const projectData = JSON.parse(storedProjectData);
-      if (projectData.projectId) {
-        setSelectedId(projectData.projectId);
+    // ✅ ONLY load data from localStorage if it's an edit operation
+    if (isEdit) {
+      const storedProjectData = localStorage.getItem("projectData");
+      if (storedProjectData) {
+        const projectData = JSON.parse(storedProjectData);
+        if (projectData.projectId) {
+          setSelectedId(projectData.projectId);
+        }
+        if (projectData.projectTitle) {
+          setText(projectData.projectTitle);
+        }
+        if (projectData.language) {
+          setSelectedLanguage(projectData.language);
+        }
+        if (projectData.category) {
+          setSelectedCategory(projectData.category);
+        }
+        if (projectData.genre) {
+          setSelectedGenre(projectData.genre);
+        }
       }
-      if (projectData.projectTitle) {
-        setText(projectData.projectTitle);
-      }
-      if (projectData.language) {
-        setSelectedLanguage(projectData.language);
-      }
-      if (projectData.category) {
-        setSelectedCategory(projectData.category);
-      }
-      if (projectData.genre) {
-        setSelectedGenre(projectData.genre);
-      }
+    } else {
+      // ✅ For new projects, clear all fields
+      setText("");
+      setSelectedLanguage("");
+      setSelectedCategory("");
+      setSelectedGenre("");
+      setSelectedId("");
     }
-  }, []);
+  }, [isEdit]);
 
   useEffect(() => {
     console.log("Selected Language:", selectedLanguage);
@@ -207,7 +217,7 @@ const StartProjectContent = () => {
                   borderRadius: "120px",
                 }}
               >
-                Start Your Project
+                {isEdit ? "Edit Your Project" : "Start Your Project"}
               </div>
             </div>
 

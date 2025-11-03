@@ -1004,6 +1004,124 @@ const DesignProjectPreview = () => {
     };
     restoreFiles();
   }, []);
+  // Add this useEffect after your existing file restoration useEffect
+// This ensures files are restored from IndexedDB/localStorage when component mounts
+
+useEffect(() => {
+  const restoreFilesOnMount = async () => {
+    // Check if we have files in window object first (session data)
+    if (window.tempBookFileForSubmission) {
+      updateState({
+        selectedFile: window.tempBookFileForSubmission,
+        uploadStatus: "success",
+        fileError: "",
+      });
+    }
+    
+    if (window.tempCoverFileForSubmission) {
+      try {
+        const pdfjs = await loadPdfLib();
+        if (pdfjs) {
+          const arrayBuffer = await window.tempCoverFileForSubmission.arrayBuffer();
+          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+          const pageCount = pdf.numPages;
+          if (pageCount === 1) {
+            const page = await pdf.getPage(1);
+            const scale = 2;
+            const viewport = page.getViewport({ scale });
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            await page.render({
+              canvasContext: context,
+              viewport: viewport,
+            }).promise;
+            const pdfImageUrl = canvas.toDataURL("image/png");
+            updateState({
+              coverFile: window.tempCoverFileForSubmission,
+              coverPdfUrl: pdfImageUrl,
+              coverFileError: "",
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error processing cover file from window:', error);
+      }
+    }
+    
+    // If no files in window object, try to restore from saved data
+    if (!window.tempBookFileForSubmission || !window.tempCoverFileForSubmission) {
+      const savedData = loadDesignProjectData();
+      if (savedData) {
+        // Restore interior file if available and not already loaded
+        if (savedData.interiorFileData && !window.tempBookFileForSubmission) {
+          try {
+            const restoredFile = await restoreFileFromRecord(savedData.interiorFileData);
+            if (restoredFile) {
+              window.tempBookFileForSubmission = restoredFile; // Save to window
+              updateState({
+                selectedFile: restoredFile,
+                uploadStatus: "success",
+                fileError: "",
+              });
+            }
+          } catch (error) {
+            console.error('Error restoring interior file:', error);
+          }
+        }
+        
+        // Restore cover file if available and not already loaded
+        if (savedData.coverFileData && !window.tempCoverFileForSubmission) {
+          try {
+            const restoredCoverFile = await restoreFileFromRecord(savedData.coverFileData);
+            if (restoredCoverFile) {
+              window.tempCoverFileForSubmission = restoredCoverFile; // Save to window
+              // Process the cover file to generate the PDF URL
+              try {
+                const pdfjs = await loadPdfLib();
+                if (pdfjs) {
+                  const arrayBuffer = await restoredCoverFile.arrayBuffer();
+                  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+                  const pageCount = pdf.numPages;
+                  if (pageCount === 1) {
+                    const page = await pdf.getPage(1);
+                    const scale = 2;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    await page.render({
+                      canvasContext: context,
+                      viewport: viewport,
+                    }).promise;
+                    const pdfImageUrl = canvas.toDataURL("image/png");
+                    updateState({
+                      coverFile: restoredCoverFile,
+                      coverPdfUrl: pdfImageUrl,
+                      coverFileError: "",
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error('Error processing restored cover file:', error);
+                updateState({
+                  coverFile: restoredCoverFile,
+                  coverFileError: "",
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error restoring cover file:', error);
+          }
+        }
+      }
+    }
+  };
+
+  restoreFilesOnMount();
+}, []); // Run once on mount
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     updateState({
@@ -1769,119 +1887,114 @@ const DesignProjectPreview = () => {
             >
               Check Cover Design Guidelines
             </button>
-            <button
-              onClick={() => {
-                const isCalendar = state.projectData?.category === "Calender";
-                const requiredFields = isCalendar
-                  ? [
-                    "binding_id",
-                    "interior_color_id",
-                    "paper_type_id",
-                    "cover_finish_id",
-                  ]
-                  : [
-                    "trim_size_id",
-                    "page_count",
-                    "binding_id",
-                    "interior_color_id",
-                    "paper_type_id",
-                    "cover_finish_id",
-                  ];
-                const missingFields = requiredFields.filter(
-                  (field) => !state.form[field]
-                );
-                if (missingFields.length > 0) {
-                  alert(
-                    "Please complete all book configuration options before previewing."
-                  );
-                  return;
-                }
-                if (!state.selectedFile) {
-                  alert("Please upload your book PDF file first.");
-                  return;
-                }
-                if (!state.coverFile || state.coverFileError) {
-                  alert(
-                    "Please upload a valid single-page PDF for your book cover before previewing."
-                  );
-                  return;
-                }
-                // Store files in window object instead of localStorage to avoid quota issues
-                window.tempBookFileForSubmission = state.selectedFile;
-                if (state.coverFile) {
-                  window.tempCoverFileForSubmission = state.coverFile;
-                }
+         <button
+  onClick={async () => {
+    const isCalendar = isCalendarCategory(state.projectData?.category);
+    const requiredFields = isCalendar
+      ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
+      : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"];
+    
+    const missingFields = requiredFields.filter((field) => !state.form[field]);
+    if (missingFields.length > 0) {
+      alert("Please complete all book configuration options before previewing.");
+      return;
+    }
+    
+    if (!state.selectedFile) {
+      alert("Please upload your book PDF file first.");
+      return;
+    }
+    
+    if (!state.coverFile || state.coverFileError) {
+      alert("Please upload a valid single-page PDF for your book cover before previewing.");
+      return;
+    }
+    
+    // Store files in window object for session persistence
+    window.tempBookFileForSubmission = state.selectedFile;
+    if (state.coverFile) {
+      window.tempCoverFileForSubmission = state.coverFile;
+    }
+    
+    // Also ensure files are saved to IndexedDB for long-term persistence
+    try {
+      const interiorFileData = await saveFileData(state.selectedFile, 'interior');
+      const coverFileData = state.coverFile ? await saveFileData(state.coverFile, 'cover') : null;
+      
+      const currentData = loadDesignProjectData() || {};
+      saveDesignProjectData({
+        ...currentData,
+        interiorFileData,
+        coverFileData,
+      });
+    } catch (error) {
+      console.error('Error saving files before preview:', error);
+    }
 
-                // 👇 NEW: Build and save shopBookDetails
-                const getOptionName = (options, id) =>
-                  options.find((opt) => String(opt.id) === String(id))?.name || "";
+    // 👇 Ye sab purana code waise hi rahega
+    localStorage.setItem("previewFormData", JSON.stringify(state.form));
+    localStorage.setItem("previewProjectData", JSON.stringify(state.projectData));
+    localStorage.setItem(
+      "previewDropdowns",
+      JSON.stringify({
+        bindings: state.bindings || [],
+        interior_colors: state.dropdowns.interior_colors || [],
+        paper_types: state.dropdowns.paper_types || [],
+        cover_finishes: state.dropdowns.cover_finishes || [],
+        trim_sizes: state.dropdowns.trim_sizes || [],
+      })
+    );
+    
+    const quantity = state.form.quantity || 0;
+    const originalTotalCost =
+      state.result?.original_total_cost ??
+      (state.result?.cost_per_book ?? 0) * quantity;
+    const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
+    
+    localStorage.setItem(
+      "shopData",
+      JSON.stringify({
+        originalTotalCost: state.result?.original_total_cost ?? 0,
+        finalTotalCost: state.result?.total_cost ?? 0,
+        totalCost: state.result?.total_cost ?? 0,
+        productQuantity: state.form.quantity,
+        costPerBook: state.result?.cost_per_book ?? 0,
+      })
+    );
 
-                const shopBookDetails = {
-                  "page_count": state.form.page_count || "",
-                  "trim_size": isCalendar
-                    ? ""
-                    : getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id),
-                  "cover_finish": getOptionName(
-                    state.dropdowns.cover_finishes || [],
-                    state.form.cover_finish_id
-                  ),
-                  "interior_color": getOptionName(
-                    state.dropdowns.interior_colors || [],
-                    state.form.interior_color_id
-                  ),
-                  "paper_type": getOptionName(
-                    state.dropdowns.paper_types || [],
-                    state.form.paper_type_id
-                  ),
-                  "binding_type": getOptionName(state.bindings || [], state.form.binding_id),
-                };
+    // NEW: Build and save shopBookDetails
+    const getOptionName = (options, id) =>
+      options.find((opt) => String(opt.id) === String(id))?.name || "";
 
-                localStorage.setItem("shopBookDetails", JSON.stringify(shopBookDetails));
+    const shopBookDetails = {
+      "page_count": state.form.page_count || "",
+      "trim_size": isCalendar
+        ? ""
+        : getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id),
+      "cover_finish": getOptionName(
+        state.dropdowns.cover_finishes || [],
+        state.form.cover_finish_id
+      ),
+      "interior_color": getOptionName(
+        state.dropdowns.interior_colors || [],
+        state.form.interior_color_id
+      ),
+      "paper_type": getOptionName(
+        state.dropdowns.paper_types || [],
+        state.form.paper_type_id
+      ),
+      "binding_type": getOptionName(state.bindings || [], state.form.binding_id),
+    };
 
-                // Keep existing localStorage saves
-                localStorage.setItem(
-                  "previewFormData",
-                  JSON.stringify(state.form)
-                );
-                localStorage.setItem(
-                  "previewProjectData",
-                  JSON.stringify(state.projectData)
-                );
-                localStorage.setItem(
-                  "previewDropdowns",
-                  JSON.stringify({
-                    bindings: state.bindings || [],
-                    interior_colors: state.dropdowns.interior_colors || [],
-                    paper_types: state.dropdowns.paper_types || [],
-                    cover_finishes: state.dropdowns.cover_finishes || [],
-                    trim_sizes: state.dropdowns.trim_sizes || [],
-                  })
-                );
-                const quantity = state.form.quantity || 0;
-                const originalTotalCost =
-                  state.result?.original_total_cost ??
-                  (state.result?.cost_per_book ?? 0) * quantity;
-                const finalTotalCost =
-                  state.result?.total_cost ?? originalTotalCost;
-                localStorage.setItem(
-                  "shopData",
-                  JSON.stringify({
-                    originalTotalCost: state.result?.original_total_cost ?? 0,
-                    finalTotalCost: state.result?.total_cost ?? 0,
-                    totalCost: state.result?.total_cost ?? 0,
-                    productQuantity: state.form.quantity,
-                    costPerBook: state.result?.cost_per_book ?? 0,
-                  })
-                );
-                const targetUrl = isEditUrl
-                  ? "/book-preview?edit=true"
-                  : "/book-preview";
-                router.push(targetUrl);
-              }}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer `}
-            >
-              Preview Your Book
-            </button>
+    localStorage.setItem("shopBookDetails", JSON.stringify(shopBookDetails));
+    
+    const targetUrl = isEditUrl ? "/book-preview?edit=true" : "/book-preview";
+    router.push(targetUrl);
+  }}
+  className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer`}
+>
+  Preview Your Book
+</button>
           </div>
         </div>
       </div>

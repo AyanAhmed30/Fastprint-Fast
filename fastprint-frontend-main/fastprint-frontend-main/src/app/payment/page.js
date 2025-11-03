@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -78,7 +79,7 @@ const Payment = () => {
   } = initialData;
 
   // Payment method state
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [isPayPalLoading, setIsPayPalLoading] = useState(false);
   const [paypalError, setPaypalError] = useState(null);
 
@@ -404,11 +405,15 @@ const Payment = () => {
                     className="w-4 h-4"
                   />
                   <span className="text-sm font-semibold">PayPal</span>
-                  <svg className="w-16 md:w-20 h-5 md:h-6 ml-auto" viewBox="0 0 101 25" fill="none">
-                    <path d="M12.017 0l.358-.002a5.888 5.888 0 0 1 6.09 5.023c.359 2.278-.2 4.167-1.492 5.729C15.696 12.235 13.779 13 11.547 13H9.86c-.424 0-.787.31-.858.734l-.91 5.769-.258 1.634a.5.5 0 0 1-.494.426H3.682a.294.294 0 0 1-.291-.338L6.47 1.61A.885.885 0 0 1 7.344.948l4.64.052h.033z" fill="#009cde" />
-                    <path d="M39.252 9.632c0 2.152-.844 3.799-2.532 4.942-1.688 1.143-4.077 1.714-7.167 1.714s-5.529-.526-7.297-1.577c-1.768-1.052-2.652-2.523-2.652-4.413 0-.79.195-1.49.585-2.099.39-.61.936-1.109 1.637-1.497.702-.388 1.521-.678 2.457-.87.936-.193 1.954-.289 3.054-.289 1.039 0 1.988.089 2.847.266.858.178 1.594.423 2.207.735v-.266c0-.976-.364-1.685-1.091-2.128-.728-.442-1.832-.664-3.313-.664-1.182 0-2.227.133-3.133.399-.907.266-1.683.61-2.329 1.032l-1.273-3.059c.711-.487 1.683-.899 2.914-1.234C27.043.133 28.423 0 30.007 0c2.889 0 5.077.571 6.563 1.714 1.487 1.143 2.23 2.834 2.23 5.073v2.845zm-7.036 2.395c1.039 0 1.819-.2 2.34-.599.52-.399.781-.976.781-1.731v-.532c-.325-.178-.793-.333-1.403-.466-.611-.133-1.273-.2-1.988-.2-1.039 0-1.806.167-2.301.5-.494.333-.741.796-.741 1.387 0 .532.195.932.585 1.199.39.266.923.399 1.598.399h.129zm8.775 3.859V9.367c0-1.309.299-2.456.897-3.44.598-.985 1.448-1.748 2.551-2.29C45.542 3.196 46.776 2.975 48.14 2.975c1.182 0 2.207.155 3.074.466.868.31 1.526.707 1.975 1.188l-1.533 2.79c-.325-.31-.741-.565-1.247-.763-.507-.199-1.078-.299-1.715-.299-1.234 0-2.155.333-2.762.998-.608.665-.911 1.642-.911 2.93v6.601h-4.021zm20.405.111c-1.624 0-3.035-.255-4.234-.764-1.199-.51-2.129-1.232-2.79-2.168-.66-.936-.991-2.051-.991-3.346 0-1.298.331-2.415.994-3.35.663-.936 1.593-1.659 2.79-2.168 1.198-.51 2.603-.764 4.215-.764 1.624 0 3.042.254 4.253.764 1.212.509 2.149 1.232 2.812 2.168.663.935.994 2.052.994 3.35 0 1.295-.331 2.41-.994 3.346-.663.936-1.6 1.659-2.812 2.168-1.211.51-2.629.764-4.253.764h.016zm0-3.325c1.039 0 1.832-.277 2.379-.83.546-.554.819-1.332.819-2.335 0-1.003-.273-1.784-.819-2.345-.547-.56-1.34-.841-2.379-.841-1.052 0-1.851.28-2.398.841-.546.561-.819 1.342-.819 2.345 0 1.003.273 1.781.819 2.335.547.553 1.346.83 2.398.83zm8.775 3.214V0h4.021v15.886h-4.021zm" fill="#003087" />
-                  </svg>
+                  
                 </label>
+                <Image
+  src="data:image/webp;base64,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"
+  alt="PayPal Logo"
+  width={40}
+  height={25}
+  className="object-contain"
+/>
               </div>
 
               {/* Error Display */}
@@ -489,7 +494,7 @@ const Payment = () => {
                         <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.045.289c-1.07 5.455-4.665 7.314-9.244 7.314H9.942a.641.641 0 0 0-.633.74l-.678 4.299-.191 1.207a.33.33 0 0 0 .326.384h2.292c.459 0 .85-.334.924-.788l.038-.207.730-4.625.047-.253c.074-.454.465-.788.924-.788h.582c3.729 0 6.646-1.514 7.49-5.895.354-1.837.171-3.373-.645-4.483-.302-.412-.714-.744-1.202-.99z" />
                         </svg>
-                        <span>Continue with PayPal</span>
+                        <span>Confirm & Place Order</span>
                       </div>
                     )}
                   </button>

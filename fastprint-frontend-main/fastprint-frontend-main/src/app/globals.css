@@ -119,7 +119,7 @@
   /* Background image ki height kam kar di */
   z-index: 0;
   opacity: 1;
-  background: url("../assets/images/HomeBanner.png") center/cover no-repeat;
+  background: url("../assets/images/main111.jpg") center/cover no-repeat;
   pointer-events: none;
   filter: none;
 }

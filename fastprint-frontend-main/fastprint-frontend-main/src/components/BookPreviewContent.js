@@ -275,6 +275,22 @@ const BookPreviewContent = () => {
       }
 
       if (response.data?.status === "success") {
+        try {
+          const serverData = response.data?.data;
+          if (serverData) {
+            const prevStr = localStorage.getItem("previewProjectData");
+            const prev = (prevStr && JSON.parse(prevStr)) || {};
+            const merged = {
+              ...prev,
+              projectId: serverData.id || prev.projectId,
+              title: serverData.title || prev.title,
+              category: serverData.category || prev.category,
+              language: serverData.language || prev.language,
+            };
+            localStorage.setItem("previewProjectData", JSON.stringify(merged));
+          }
+        } catch (_) {}
+
         alert(isEditPreview ? "Project updated successfully!" : "Project submitted successfully!");
         router.push("/shop");
       } else {

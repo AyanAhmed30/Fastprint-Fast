@@ -165,6 +165,56 @@ class SaveOrderAPIView(APIView):
     def post(self, request):
         data = request.data.copy()
 
+        # If a book_project_id is provided, update the existing draft project instead of creating a new one
+        project_id = data.get('book_project_id') or data.get('project_id')
+        if project_id:
+            try:
+                project = BookProject.objects.get(pk=project_id, user=request.user)
+            except BookProject.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'Book project not found.'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # Normalize money fields
+            def norm_money(val):
+                try:
+                    if val is None or val == "":
+                        return None
+                    return f"{float(val):.2f}"
+                except Exception:
+                    return None
+
+            # Update fields from request
+            updatable_fields = [
+                'first_name','last_name','company','address','apt_floor','country','state','city','postal_code','phone_number','account_type',
+                'shipping_rate','tax','courier_name','estimated_delivery','selected_service',
+                'product_quantity','product_price','subtotal'
+            ]
+            for f in updatable_fields:
+                if f in data:
+                    v = data.get(f)
+                    if f in ['shipping_rate','tax','product_price','subtotal']:
+                        v = norm_money(v)
+                    setattr(project, f, v)
+
+            project.order_status = 'paid'
+            try:
+                project.save()
+            except Exception:
+                logger.error("Error updating existing project during save-order", exc_info=True)
+                return Response({
+                    'status': 'error',
+                    'message': 'An error occurred while saving the order.'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({
+                'status': 'success',
+                'message': 'Order saved successfully.',
+                'data': BookProjectSerializer(project).data
+            }, status=status.HTTP_200_OK)
+
+        # Legacy path: create a new project (requires files or description)
         cover_file = request.FILES.get('cover_file')
         cover_description = data.get('cover_description')
         

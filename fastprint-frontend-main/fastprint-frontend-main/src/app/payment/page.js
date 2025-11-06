@@ -254,14 +254,22 @@ const Payment = () => {
       const formData = new FormData();
       const design = JSON.parse(pendingOrder.previewForm);
       const project = JSON.parse(pendingOrder.previewProject);
-      const bookFile = window.tempBookFileForSubmission;
-      const coverFile = window.tempCoverFileForSubmission;
 
-      formData.append("title", project.projectTitle || "");
-      formData.append("category", project.category);
-      formData.append("language", project.language);
-      formData.append("pdf_file", bookFile);
-      if (coverFile) formData.append("cover_file", coverFile);
+      // Prefer using existing uploaded project to avoid requiring files after re-login
+      const existingProjectId = project?.projectId || project?.id;
+      if (existingProjectId) {
+        formData.append("book_project_id", String(existingProjectId));
+      } else {
+        // Fallback: include full project metadata and files (legacy path)
+        const bookFile = window.tempBookFileForSubmission;
+        const coverFile = window.tempCoverFileForSubmission;
+
+        formData.append("title", project.projectTitle || "");
+        formData.append("category", project.category);
+        formData.append("language", project.language);
+        formData.append("pdf_file", bookFile);
+        if (coverFile) formData.append("cover_file", coverFile);
+      }
 
       const drop = JSON.parse(localStorage.getItem("previewDropdowns") || "{}");
       const findName = (arr, id) => {
@@ -270,14 +278,17 @@ const Payment = () => {
         return m?.dbName || m?.name || "";
       };
 
-      formData.append("binding_type", findName(drop.bindings, design.binding_id));
-      formData.append("cover_finish", findName(drop.cover_finishes, design.cover_finish_id));
-      formData.append("interior_color", findName(drop.interior_colors, design.interior_color_id));
-      formData.append("paper_type", findName(drop.paper_types, design.paper_type_id));
-      if (project.category !== "Calendar" && project.category !== "Calender") {
-        formData.append("trim_size", findName(drop.trim_sizes, design.trim_size_id));
+      // Only send spec fields if creating a new project (no existing id)
+      if (!existingProjectId) {
+        formData.append("binding_type", findName(drop.bindings, design.binding_id));
+        formData.append("cover_finish", findName(drop.cover_finishes, design.cover_finish_id));
+        formData.append("interior_color", findName(drop.interior_colors, design.interior_color_id));
+        formData.append("paper_type", findName(drop.paper_types, design.paper_type_id));
+        if (project.category !== "Calendar" && project.category !== "Calender") {
+          formData.append("trim_size", findName(drop.trim_sizes, design.trim_size_id));
+        }
+        formData.append("page_count", design.page_count || 1);
       }
-      formData.append("page_count", design.page_count || 1);
 
       // Shipping + account details
       Object.entries(pendingOrder.form).forEach(([key, value]) => {

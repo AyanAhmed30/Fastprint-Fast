@@ -131,7 +131,7 @@ const Home = () => {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fast Print Guyssss
+            Fast Print Guys
           </h1>
 
           <h2

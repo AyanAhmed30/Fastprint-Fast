@@ -32,8 +32,8 @@ const Header = () => {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  // 🔁 Fetch CART items count (not paid orders)
-  useEffect(() => {
+  // Fetch CART items count (not paid orders)
+  const fetchCartItemsCount = async () => {
     if (user) {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -41,30 +41,43 @@ const Header = () => {
         return;
       }
 
-      axios
-        .get(`${BASE_URL}api/cart/items/`, {
+      try {
+        const response = await axios.get(`${BASE_URL}api/cart/items/`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          // Assuming response.data is an array of cart items
-          const cartItems = Array.isArray(response.data) ? response.data : response.data?.data || [];
-          setCartCount(cartItems.length);
-
-          // Optional: Save to localStorage for consistency
-          const cartCountKey = `cart_count_${user.id}`;
-          localStorage.setItem(cartCountKey, JSON.stringify(cartItems.length));
-
-          // Clean up old order-based cart key if needed
-          localStorage.removeItem("cart");
-        })
-        .catch((error) => {
-          console.error("Failed to fetch cart items:", error);
-          setCartCount(0);
         });
+        const data = response.data;
+        const cartItems = Array.isArray(data)
+          ? data
+          : data?.data || [];
+        setCartCount(cartItems.length);
+
+        // Optional: Save to localStorage for consistency
+        const cartCountKey = `cart_count_${user.id}`;
+        localStorage.setItem(cartCountKey, JSON.stringify(cartItems.length));
+
+        // Clean up old order-based cart key if needed
+        localStorage.removeItem("cart");
+      } catch (error) {
+        console.error("Failed to fetch cart items:", error);
+        setCartCount(0);
+      }
     } else {
       setCartCount(0);
     }
-  }, [user]); // Re-run when user changes
+  };
+
+  // Poll every 5 seconds for cart updates
+  useEffect(() => {
+    // Only if user is logged in
+    if (user) {
+      fetchCartItemsCount(); // initial fetch
+      const intervalId = setInterval(fetchCartItemsCount, 5000); // every 5 seconds
+
+      return () => clearInterval(intervalId); // cleanup on unmount or user change
+    } else {
+      setCartCount(0);
+    }
+  }, [user]);
 
   // Handle clicks outside dropdowns
   useEffect(() => {
@@ -92,6 +105,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
+    localStorage.clear();
     router.push("/login");
     setMenuOpen(false);
     setProfileOpen(false);
@@ -356,7 +370,7 @@ const Header = () => {
               className="p-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
               aria-label="Toggle menu"
             >
-              {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+              {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />} 
             </button>
           </div>
         </div>
@@ -437,7 +451,7 @@ const Header = () => {
                 ) : (
                   <Link
                     href="/login"
-                    className="block w-full px-4 py-2 text-sm font-medium border rounded-full text-center transition-all duration-300 text-[#0096CD] border-[#0096CD] bg-white"
+                    className="block w-full px-4 py-2 text-sm font-medium border rounded-full transition-all duration-300 text-[#0096CD] border-[#0096CD] bg-white"
                     onClick={handleMobileLinkClick}
                   >
                     Login

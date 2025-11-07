@@ -14,6 +14,7 @@ class CartItemListCreateView(APIView):
     """
     GET: List all cart items for the authenticated user
     POST: Create a new cart item
+    DELETE: Clear all cart items for the authenticated user
     """
     permission_classes = [IsAuthenticated]
     
@@ -56,6 +57,21 @@ class CartItemListCreateView(APIView):
             return Response({
                 'status': 'error',
                 'message': 'Failed to create cart item'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request):
+        """Clear all cart items for the current user"""
+        try:
+            deleted_count, _ = CartItem.objects.filter(user=request.user).delete()
+            return Response({
+                'status': 'success',
+                'message': f'Cart cleared successfully ({deleted_count} items removed)'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error clearing cart: {str(e)}", exc_info=True)
+            return Response({
+                'status': 'error',
+                'message': 'Failed to clear cart'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

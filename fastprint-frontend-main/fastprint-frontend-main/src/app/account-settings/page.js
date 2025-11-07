@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
@@ -189,6 +188,12 @@ const loadFormDataFromLocalStorage = (email) => {
   }
 };
 
+// Helper: Extract email safely from user object or localStorage
+const getUserEmail = () => {
+  const { user } = useAuth(); // But we can't call hook outside component
+  // So we'll handle this inside component logic (see below)
+};
+
 // Loading Spinner Component
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center">
@@ -260,10 +265,60 @@ const FloatingLabelInput = ({
 
 export default function AccountSettings() {
   const { user, token } = useAuth();
+  const router = useRouter();
+
+  // 🔑 Extract email safely from `user` OR localStorage
+  const getEmailFromLocalStorage = () => {
+    if (typeof window === "undefined") return "";
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const parsed = JSON.parse(userStr);
+        if (parsed && parsed.email) return parsed.email;
+      }
+    } catch (e) {
+      console.warn("Failed to parse user from localStorage", e);
+    }
+    return "";
+  };
+
+  const userEmail = user?.email || getEmailFromLocalStorage();
+
+  const [formData, setFormData] = useState({
+    id: null,
+    first_name: "",
+    last_name: "",
+    username: "",
+    email: userEmail, // ✅ Always show correct email
+    password: "",
+    phone_number: "",
+    country: "",
+    state: "",
+    city: "",
+    postal_code: "",
+    address: "",
+    account_type: "personal",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
+  const [availableStates, setAvailableStates] = useState([]);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  useEffect(() => {
+    setAvailableStates(getStatesByCountry(formData.country));
+  }, [formData.country]);
+
   const apiService = {
     getHeaders() {
       if (typeof window === "undefined") return {};
-      // Support multiple token keys (modern apps store accessToken)
       const token =
         localStorage.getItem("accessToken") ||
         localStorage.getItem("token") ||
@@ -280,10 +335,7 @@ export default function AccountSettings() {
           method: "GET",
           headers: this.getHeaders(),
         });
-        if (!response.ok) {
-          // Not authenticated or not found
-          return null;
-        }
+        if (!response.ok) return null;
         const data = await response.json();
         return data || null;
       } catch (error) {
@@ -297,7 +349,6 @@ export default function AccountSettings() {
         const response = await fetch(`${API_BASE_URL}/profiles/?search=${encodeURIComponent(email)}`, {
           method: "GET",
           headers: this.getHeaders(),
-          // Avoid stale caches in some production setups
           cache: "no-store",
         });
         const data = await response.json();
@@ -305,7 +356,6 @@ export default function AccountSettings() {
           console.error("Profile fetch failed:", data);
           return null;
         }
-        // Expect either an array (list endpoint) or a single object
         if (Array.isArray(data)) return data.length > 0 ? data[0] : null;
         return data;
       } catch (error) {
@@ -340,70 +390,26 @@ export default function AccountSettings() {
       return resData;
     },
   };
-  
-
-  // Load user profile
-    const router = useRouter();
-
-    // Component state (was missing and caused ReferenceError)
-    const [formData, setFormData] = useState({
-      id: null,
-      first_name: "",
-      last_name: "",
-      username: "",
-      email: user?.email || "",
-      password: "",
-      phone_number: "",
-      country: "",
-      state: "",
-      city: "",
-      postal_code: "",
-      address: "",
-      account_type: "personal",
-    });
-
-    const [loading, setLoading] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [isSaved, setIsSaved] = useState(false);
-    const [profileLoaded, setProfileLoaded] = useState(false);
-    const [message, setMessage] = useState("");
-    const [isVisible, setIsVisible] = useState(false);
-    const [availableStates, setAvailableStates] = useState([]);
-
-    // Show entrance animation
-    useEffect(() => {
-      setIsVisible(true);
-    }, []);
-
-    // Update available states when country changes
-    useEffect(() => {
-      setAvailableStates(getStatesByCountry(formData.country));
-    }, [formData.country]);
 
   const loadUserProfile = useCallback(async () => {
-    if (!user?.email) {
+    if (!userEmail) {
       console.log("No user email available yet");
       setInitialLoading(false);
       return;
     }
 
-    console.log("Loading profile for:", user.email);
+    console.log("Loading profile for:", userEmail);
     setLoading(true);
 
     try {
-      // Try authenticated endpoint first (when logged in and token present)
       let profile = null;
       if (token) {
         profile = await apiService.getProfileMe();
       }
-      // Fallback to search-by-email if /me/ didn't return a profile
       if (!profile) {
-        profile = await apiService.getProfileByEmail(user.email);
+        profile = await apiService.getProfileByEmail(userEmail);
       }
-      const savedFormData = loadFormDataFromLocalStorage(user.email);
-
-      console.log("Profile loaded:", profile);
-      console.log("Saved form data:", savedFormData);
+      const savedFormData = loadFormDataFromLocalStorage(userEmail);
 
       if (profile) {
         const mergedData = {
@@ -411,7 +417,7 @@ export default function AccountSettings() {
           first_name: profile.first_name || "",
           last_name: profile.last_name || "",
           username: profile.username || "",
-          email: profile.email || "",
+          email: profile.email || userEmail,
           password: "",
           country: profile.country || "",
           phone_number: profile.phone_number || "",
@@ -421,20 +427,17 @@ export default function AccountSettings() {
           address: profile.address || "",
           account_type: profile.account_type || "personal",
         };
-        
         setFormData(mergedData);
         setIsSaved(true);
         setProfileLoaded(true);
         saveFormDataToLocalStorage(mergedData);
-        console.log("Profile data set successfully");
       } else {
-        console.log("No existing profile found, creating new form");
         const newFormData = {
           ...formData,
-          email: user.email,
-          username: user.username || "",
-          first_name: user.first_name || "",
-          last_name: user.last_name || "",
+          email: userEmail,
+          username: user?.username || "",
+          first_name: user?.first_name || "",
+          last_name: user?.last_name || "",
           state: (savedFormData?.state) || "",
           country: (savedFormData?.country) || "",
           city: (savedFormData?.city) || "",
@@ -442,7 +445,6 @@ export default function AccountSettings() {
           address: (savedFormData?.address) || "",
           phone_number: (savedFormData?.phone_number) || "",
         };
-        
         setFormData(newFormData);
         setIsSaved(false);
         setProfileLoaded(true);
@@ -451,14 +453,12 @@ export default function AccountSettings() {
     } catch (err) {
       console.error("Load profile error:", err);
       setMessage(`Failed to load profile: ${err.message}`);
-      const savedFormData = loadFormDataFromLocalStorage(user.email);
-      
+      const savedFormData = loadFormDataFromLocalStorage(userEmail);
       const fallbackData = {
         ...formData,
-        email: user.email,
+        email: userEmail,
         ...(savedFormData || {}),
       };
-      
       setFormData(fallbackData);
       setIsSaved(false);
       setProfileLoaded(true);
@@ -467,45 +467,31 @@ export default function AccountSettings() {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [user?.email, token]);
+  }, [userEmail, token, user]);
 
-  // Note: Removed automatic redirect to allow users to access their profile settings
-  // when they explicitly navigate to this page (e.g., from header dropdown)
-
-  // Load profile when user is available
   useEffect(() => {
-    if (user?.email && !profileLoaded) {
-      console.log("Triggering profile load");
+    if (userEmail && !profileLoaded) {
       loadUserProfile();
     }
-  }, [user?.email, profileLoaded, loadUserProfile]);
+  }, [userEmail, profileLoaded, loadUserProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedFormData = {
-      ...formData,
-      [name]: value,
-    };
-    
-    setFormData(updatedFormData);
-    
-    // Save all form data to localStorage whenever any field changes
-    saveFormDataToLocalStorage(updatedFormData);
-
+    const updated = { ...formData, [name]: value };
+    setFormData(updated);
+    saveFormDataToLocalStorage(updated);
     setIsSaved(false);
   };
 
   const handleRadioChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      account_type: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, account_type: e.target.value }));
     setIsSaved(false);
   };
 
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
+
     try {
       const { id, password, ...profileData } = formData;
       const dataToSend = {
@@ -513,20 +499,20 @@ export default function AccountSettings() {
         ...(password && password.trim() && { password }),
       };
 
-      console.log("Saving profile data:", dataToSend);
+      // 🔑 Ensure email is always sent
+      if (!dataToSend.email) {
+        throw new Error("Email is required.");
+      }
+
       const res = await apiService.saveSettings(dataToSend);
-      console.log("Save response:", res);
 
-      // Use backend response as canonical saved data when available
-      // API returns { success, message, data }
-      const canonical = (res && (res.data || res)) || dataToSend;
-
+      const canonical = res?.data || res || dataToSend;
       const canonicalForm = {
         id: canonical.id || formData.id || null,
         first_name: canonical.first_name || profileData.first_name || "",
         last_name: canonical.last_name || profileData.last_name || "",
         username: canonical.username || profileData.username || "",
-        email: canonical.email || profileData.email || user.email || "",
+        email: canonical.email || profileData.email || userEmail,
         password: "",
         country: canonical.country || profileData.country || "",
         phone_number: canonical.phone_number || profileData.phone_number || "",
@@ -537,25 +523,22 @@ export default function AccountSettings() {
         account_type: canonical.account_type || profileData.account_type || "personal",
       };
 
-      // Persist canonical to localStorage and to state
       saveFormDataToLocalStorage(canonicalForm);
       setFormData(canonicalForm);
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
 
-      // Give UI a moment, then reload profile to ensure fresh data
       setTimeout(async () => {
         await loadUserProfile();
         setMessage("Profile saved and reloaded successfully!");
-        setTimeout(() => {
-          router.push("/");
-        }, 800);
+        setTimeout(() => router.push("/"), 800);
       }, 300);
     } catch (err) {
       console.error("Save error:", err);
       setMessage(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async () => {
@@ -564,11 +547,7 @@ export default function AccountSettings() {
       return;
     }
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
       return;
     }
 
@@ -592,7 +571,7 @@ export default function AccountSettings() {
         first_name: "",
         last_name: "",
         username: "",
-        email: user?.email || "",
+        email: userEmail,
         password: "",
         country: "",
         city: "",
@@ -695,7 +674,7 @@ export default function AccountSettings() {
                 ["last_name", "Last Name"],
                 ["username", "User Name"],
                 ["email", "Email Address"],
-              ].map(([name, label, type = "text"], index) => {
+              ].map(([name, label], index) => {
                 const isEmailField = name === "email";
                 return (
                   <div
@@ -706,7 +685,7 @@ export default function AccountSettings() {
                     <FloatingLabelInput
                       name={name}
                       label={label}
-                      type={type}
+                      type="text"
                       value={formData[name]}
                       onChange={handleInputChange}
                       disabled={loading || isEmailField}
@@ -716,7 +695,6 @@ export default function AccountSettings() {
                 );
               })}
 
-              {/* Password and Phone Number in the same row */}
               <div className="transform transition-all duration-300">
                 <FloatingLabelInput
                   name="password"
@@ -755,9 +733,7 @@ export default function AccountSettings() {
               {[
                 ["country", "Country"],
                 ["state", "State"],
-
                 ["city", "City"],
-
                 ["postal_code", "Postal Code"],
                 ["address", "Address"],
               ].map(([name, label], index) => (
@@ -908,9 +884,7 @@ export default function AccountSettings() {
           </div>
 
           <div className="w-full">
-            <div className="flex items-center gap-3 mb-2">
-            
-            </div>
+            <div className="flex items-center gap-3 mb-2"></div>
             <hr className="border-black/20 mb-4 sm:mb-6" />
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
               {!isSaved && (
@@ -951,57 +925,25 @@ export default function AccountSettings() {
 
       <style jsx>{`
         @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slide-down {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(180deg);
-          }
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
         }
         @keyframes float-delayed {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-15px) rotate(-180deg);
-          }
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(-180deg); }
         }
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-        .animate-slide-down {
-          animation: slide-down 0.5s ease-out;
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-          animation-delay: 0s;
-        }
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite;
-          animation-delay: 2s;
-        }
+        .animate-fade-in { animation: fade-in 0.6s ease-out; }
+        .animate-slide-down { animation: slide-down 0.5s ease-out; }
+        .animate-float { animation: float 6s ease-in-out infinite; animation-delay: 0s; }
+        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; animation-delay: 2s; }
       `}</style>
     </>
   );

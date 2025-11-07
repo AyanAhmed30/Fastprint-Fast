@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PersonalIcon from "@/assets/images/newsletter.png";
 import { AuthContext } from "@/context/authContext";
 import axios from "axios";
-// Frontend-only calculators and config
+
+// Config & Calculators
 import {
   BOOK_SIZES,
   BINDING_RULES_BOOK,
@@ -32,17 +33,17 @@ import {
   calculatePriceCalendar,
 } from "@/calculators/pricing";
 import { BASE_URL } from "@/services/baseUrl";
+
+// Persistence utils — critical for fix
 import {
   saveDesignProjectData,
   loadDesignProjectData,
   clearDesignProjectData,
   saveFileData,
-  base64ToFile,
-  isValidFileData,
-  getDefaultFormState,
-  getDefaultComponentState,
   restoreFileFromRecord,
+  getDefaultComponentState,
 } from "@/utils/designProjectPersistence";
+
 // PDF.js worker setup
 let pdfjsLib = null;
 const loadPdfLib = async () => {
@@ -58,7 +59,71 @@ const loadPdfLib = async () => {
     throw new Error("PDF processor failed to initialize.");
   }
 };
-// Image imports - consolidated
+
+// Helper: restore files and preview
+const restoreInitialFiles = async (savedData) => {
+  let restored = {
+    selectedFile: null,
+    coverFile: null,
+    coverPdfUrl: savedData?.coverPdfUrl || null,
+    uploadStatus: "idle",
+    fileError: "",
+    coverFileError: "",
+  };
+  try {
+    const pdfjs = await loadPdfLib();
+    if (!pdfjs) return restored;
+
+    // Interior file
+    if (savedData?.interiorFileData) {
+      try {
+        const file = await restoreFileFromRecord(savedData.interiorFileData);
+        if (file && file instanceof File) {
+          restored.selectedFile = file;
+          restored.uploadStatus = "success";
+        }
+      } catch (e) {
+        console.warn("Failed to restore interior file:", e);
+      }
+    }
+
+    // Cover file + preview
+    if (savedData?.coverFileData) {
+      try {
+        const file = await restoreFileFromRecord(savedData.coverFileData);
+        if (file && file instanceof File) {
+          restored.coverFile = file;
+          if (!restored.coverPdfUrl) {
+            try {
+              const arrayBuffer = await file.arrayBuffer();
+              const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+              if (pdf.numPages === 1) {
+                const page = await pdf.getPage(1);
+                const scale = 2;
+                const viewport = page.getViewport({ scale });
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: ctx, viewport }).promise;
+                restored.coverPdfUrl = canvas.toDataURL("image/png");
+              }
+            } catch (err) {
+              console.warn("Failed to regenerate cover preview:", err);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to restore cover file:", e);
+      }
+    }
+  } catch (e) {
+    console.error("PDF.js failed during initial file restore:", e);
+  }
+  return restored;
+};
+
+// Images
 import PerfectBoundImg from "@/assets/images/img58.png";
 import CoilBoundImg from "@/assets/images/coill.jpg";
 import SaddleImg from "@/assets/images/saddlee.jpg";
@@ -76,8 +141,9 @@ import Whitecoatedd from "@/assets/images/qa4.png";
 import Glossy from "@/assets/images/gggg.jpg";
 import Matty from "@/assets/images/mmmm.jpg";
 import Image from "next/image";
+
 const API_BASE = `${BASE_URL}`;
-// Configuration objects
+
 const IMAGE_MAPS = {
   binding: {
     "Perfect Bound": PerfectBoundImg,
@@ -112,92 +178,77 @@ const IMAGE_MAPS = {
     Matte: Matty,
   },
 };
-// Local helpers
+
 const toOptions = (names) => names.map((name, idx) => ({ id: idx + 1, name }));
 const toOptionsFromObjects = (arr) =>
   arr.map((o, idx) => ({ id: idx + 1, name: o.name, dbName: o.dbName }));
+
 const getDiscountInfo = (qty) => {
   if (qty >= 1000) return { percent: 15 };
   if (qty >= 500) return { percent: 10 };
   if (qty >= 100) return { percent: 5 };
   return null;
 };
-// Reusable components
-const OptionField = ({
-  title,
-  name,
-  options,
-  imageMap,
-  form,
-  handleChange,
-  stepAccessible = true,
-}) => (
+
+// Reusable Components — unchanged
+const OptionField = ({ title, name, options, imageMap, form, handleChange, stepAccessible = true }) => (
   <fieldset className="mb-5 md:mb-6">
-    <legend className="font-semibold text-[#2A428C] mb-3 md:mb-4 text-lg">
-      {title}
-    </legend>
+    <legend className="font-semibold text-[#2A428C] mb-3 md:mb-4 text-lg">{title}</legend>
     <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto">
-      {Array.from(new Map(options.map((opt) => [opt.name, opt])).values()).map(
-        (opt) => (
-          <label
-            key={opt.id}
-            className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${String(form[name]) === String(opt.id)
+      {Array.from(new Map(options.map((opt) => [opt.name, opt])).values()).map((opt) => (
+        <label
+          key={opt.id}
+          className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
+            String(form[name]) === String(opt.id)
               ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
               : "border-gray-300 bg-white"
-              } ${!stepAccessible ? "opacity-40 cursor-not-allowed" : ""}`}
-            role="radio"
-            aria-checked={String(form[name]) === String(opt.id)}
-            aria-disabled={!stepAccessible}
+          } ${!stepAccessible ? "opacity-40 cursor-not-allowed" : ""}`}
+          role="radio"
+          aria-checked={String(form[name]) === String(opt.id)}
+          aria-disabled={!stepAccessible}
+        >
+          <input
+            type="radio"
+            name={name}
+            value={opt.id}
+            checked={String(form[name]) === String(opt.id)}
+            onChange={stepAccessible ? handleChange : undefined}
+            disabled={!stepAccessible}
+            className="sr-only"
+          />
+          <span
+            className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
+              String(form[name]) === String(opt.id) ? "border-blue-600" : "border-gray-400"
+            }`}
           >
-            <input
-              type="radio"
-              name={name}
-              value={opt.id}
-              checked={String(form[name]) === String(opt.id)}
-              onChange={stepAccessible ? handleChange : undefined}
-              disabled={!stepAccessible}
-              className="sr-only"
-            />
             <span
-              className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${String(form[name]) === String(opt.id)
-                ? "border-blue-600"
-                : "border-gray-400"
-                }`}
-            >
-              <span
-                className={`block m-[2px] w-2.5 h-2.5 rounded-full ${String(form[name]) === String(opt.id)
-                  ? "bg-blue-600"
-                  : "bg-transparent"
-                  }`}
-              ></span>
-            </span>
-            {(() => {
-              const src =
-                imageMap[opt.name] ||
-                (opt.dbName ? imageMap[opt.dbName] : undefined);
-              return src ? (
-                <Image
-                  src={src}
-                  alt={opt.name}
-                  className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2"
-                />
-              ) : null;
-            })()}
-            <span className="text-center text-xs md:text-sm text-gray-700">
-              {opt.name}
-            </span>
-          </label>
-        )
-      )}
+              className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
+                String(form[name]) === String(opt.id) ? "bg-blue-600" : "bg-transparent"
+              }`}
+            ></span>
+          </span>
+          {(() => {
+            const src = imageMap[opt.name] || (opt.dbName ? imageMap[opt.dbName] : undefined);
+            return src ? (
+              <Image
+                src={src}
+                alt={opt.name}
+                className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2"
+              />
+            ) : null;
+          })()}
+          <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
+        </label>
+      ))}
     </div>
   </fieldset>
 );
+
 const NavBar = ({ navigate }) => (
   <div
     className="w-full h-auto min-h-[51px] flex items-center justify-center gap-2 sm:gap-4 md:gap-8 px-2 sm:px-4 py-2"
     style={{
-      background:
-        "linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)",
+      background: "linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)",
     }}
   >
     <span
@@ -220,11 +271,10 @@ const NavBar = ({ navigate }) => (
     </span>
   </div>
 );
+
 const ProjectDetails = ({ projectData }) => (
   <div className="bg-white p-4 md:p-6 rounded-xl shadow-md">
-    <h2 className="text-[#2A428C] text-xl md:text-2xl font-bold mb-4 md:mb-6">
-      Project Details
-    </h2>
+    <h2 className="text-[#2A428C] text-xl md:text-2xl font-bold mb-4 md:mb-6">Project Details</h2>
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
       {[
         { label: "Project Title", value: projectData.projectTitle },
@@ -233,28 +283,17 @@ const ProjectDetails = ({ projectData }) => (
         { label: "Genre", value: projectData.genre || "Not specified" },
       ].map(({ label, value }) => (
         <div key={label} className="flex flex-col">
-          <span className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide">
-            {label}
-          </span>
-          <span className="text-gray-800 text-sm md:text-base mt-1">
-            {value}
-          </span>
+          <span className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide">{label}</span>
+          <span className="text-gray-800 text-sm md:text-base mt-1">{value}</span>
         </div>
       ))}
     </div>
   </div>
 );
-const FileUpload = ({
-  fileError,
-  selectedFile,
-  uploadStatus,
-  uploadProgress,
-  handleFileChange,
-}) => (
+
+const FileUpload = ({ fileError, selectedFile, uploadStatus, uploadProgress, handleFileChange }) => (
   <div className="w-full">
-    <h1 className="text-[#2A428C] text-lg md:text-[24px] font-bold">
-      Interior File Upload
-    </h1>
+    <h1 className="text-[#2A428C] text-lg md:text-[24px] font-bold">Interior File Upload</h1>
     <div className="w-full max-w-[675px] h-[160px] md:h-[206px] mx-auto border border-dashed border-[#2A428C] rounded-xl md:rounded-2xl flex flex-col items-center justify-center gap-2 md:gap-4 bg-white mt-4 md:mt-6 relative p-4">
       <input
         type="file"
@@ -263,27 +302,15 @@ const FileUpload = ({
         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
       />
       <div className="w-[32px] h-[32px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-[#2A428C]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="white"
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          className="md:w-5 md:h-5"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="16" height="16" className="md:w-5 md:h-5">
           <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.67v4h4V9h3.67L12 2z" />
         </svg>
       </div>
       {uploadStatus === "uploading" && (
         <>
-          <p className="text-[#2A428C] font-semibold text-sm md:text-[16px] text-center">
-            Uploading... {uploadProgress}%
-          </p>
+          <p className="text-[#2A428C] font-semibold text-sm md:text-[16px] text-center">Uploading... {uploadProgress}%</p>
           <div className="w-32 md:w-48 h-2 bg-gray-300 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-600 transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
+            <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
           </div>
         </>
       )}
@@ -298,9 +325,7 @@ const FileUpload = ({
               className="bg-[#2A428C] text-white font-semibold px-6 py-2 rounded-full shadow hover:bg-[#1d326c] transition"
               onClick={() => {
                 handleFileChange({ target: { files: [] } });
-                document.querySelector(
-                  'input[type="file"][accept="application/pdf"]'
-                ).value = "";
+                document.querySelector('input[type="file"][accept="application/pdf"]').value = "";
               }}
             >
               Replace File
@@ -310,25 +335,19 @@ const FileUpload = ({
       )}
       {(uploadStatus === "idle" || uploadStatus === "error") && (
         <p className="text-[#2A428C] font-semibold text-sm md:text-[16px] text-center px-2">
-          {selectedFile
-            ? selectedFile.name
-            : "Upload your PDF file or Drag & Drop it here"}
+          {selectedFile ? selectedFile.name : "Upload your PDF file or Drag & Drop it here"}
         </p>
       )}
       {fileError && (
         <>
-          <p className="text-red-600 text-xs md:text-sm text-center mt-1 md:mt-2 px-2">
-            {fileError}
-          </p>
+          <p className="text-red-600 text-xs md:text-sm text-center mt-1 md:mt-2 px-2">{fileError}</p>
           <div className="w-full flex justify-center mt-2">
             <button
               type="button"
               className="bg-[#2A428C] text-white font-semibold px-6 py-2 rounded-full shadow hover:bg-[#1d326c] transition"
               onClick={() => {
                 handleFileChange({ target: { files: [] } });
-                document.querySelector(
-                  'input[type="file"][accept="application/pdf"]'
-                ).value = "";
+                document.querySelector('input[type="file"][accept="application/pdf"]').value = "";
               }}
             >
               Replace File
@@ -338,15 +357,12 @@ const FileUpload = ({
       )}
     </div>
     <div>
-      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">
-        Requirements:
-      </div>
+      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">Requirements:</div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
         File Type: <span className="text-gray-800 font-semibold">PDF</span>
       </div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-        Page Count:{" "}
-        <span className="text-gray-800 font-semibold">2 - 800 pages</span>
+        Page Count: <span className="text-gray-800 font-semibold">2 - 800 pages</span>
       </div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
         Fonts: <span className="text-gray-800 font-semibold">Embedded</span>
@@ -357,33 +373,19 @@ const FileUpload = ({
     </div>
   </div>
 );
-const CoverDesign = ({
-  coverFileInputRef,
-  handleCoverFileChange,
-  coverFile,
-  coverFileError,
-}) => (
+
+const CoverDesign = ({ coverFileInputRef, handleCoverFileChange, coverFile, coverFileError }) => (
   <div className="w-full mt-6 md:mt-10">
-    <h2 className="text-[#2A428C] font-bold text-xl md:text-[36px] mb-2">
-      Book Cover Design
-    </h2>
+    <h2 className="text-[#2A428C] font-bold text-xl md:text-[36px] mb-2">Book Cover Design</h2>
     <hr className="border-t border-black w-full mb-4" />
     <div
       className="w-full border rounded-lg md:rounded-[20px] px-4 md:px-6 py-4 md:py-6 flex items-center gap-3 md:gap-4 shadow-sm mb-4 md:mb-6 bg-white border-[#ECECEC] cursor-pointer"
       onClick={() => coverFileInputRef.current?.click()}
     >
-      <Image
-        src={PersonalIcon}
-        alt="Personal"
-        className="h-8 w-8 md:h-[48px] md:w-[48px]"
-      />
+      <Image src={PersonalIcon} alt="Personal" className="h-8 w-8 md:h-[48px] md:w-[48px]" />
       <div>
-        <h3 className="text-black font-semibold text-sm md:text-base">
-          Upload Your Cover (PDF Only)
-        </h3>
-        <p className="text-black text-xs md:text-sm">
-          Upload a single-page PDF for your book cover
-        </p>
+        <h3 className="text-black font-semibold text-sm md:text-base">Upload Your Cover (PDF Only)</h3>
+        <p className="text-black text-xs md:text-sm">Upload a single-page PDF for your book cover</p>
       </div>
     </div>
     <input
@@ -394,15 +396,12 @@ const CoverDesign = ({
       style={{ display: "none" }}
     />
     <div>
-      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">
-        Requirements:
-      </div>
+      <div className="text-[#2A428C] font-semibold text-xs md:text-sm uppercase tracking-wide mt-10">Requirements:</div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
         File Type: <span className="text-gray-800 font-semibold">PDF</span>
       </div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
-        Page Count:{" "}
-        <span className="text-gray-800 font-semibold">1 page</span>
+        Page Count: <span className="text-gray-800 font-semibold">1 page</span>
       </div>
       <div className="text-[#4183C3] font-semibold text-xs md:text-sm uppercase tracking-wide">
         Fonts: <span className="text-gray-800 font-semibold">Embedded</span>
@@ -414,9 +413,7 @@ const CoverDesign = ({
     {coverFile && (
       <>
         <div className="flex items-center justify-between mb-4">
-          <p className="text-green-600 text-center text-sm md:text-base">
-            Selected cover: {coverFile.name}
-          </p>
+          <p className="text-green-600 text-center text-sm md:text-base">Selected cover: {coverFile.name}</p>
           <button
             type="button"
             className="bg-[#2A428C] text-white font-semibold px-4 py-2 rounded-full shadow hover:bg-[#1d326c] transition ml-4"
@@ -432,212 +429,186 @@ const CoverDesign = ({
         </div>
       </>
     )}
-    {coverFileError && (
-      <p className="text-red-600 text-xs md:text-sm text-center mt-2">
-        {coverFileError}
-      </p>
-    )}
+    {coverFileError && <p className="text-red-600 text-xs md:text-sm text-center mt-2">{coverFileError}</p>}
   </div>
 );
+
+// 🔑 CORE FIX: strict project data validation & isolation
+const isValidProjectData = (data) => {
+  return data && typeof data === "object" && data.projectTitle && data.category && data.category !== "Select Category";
+};
+
 const DesignProjectPreview = () => {
   const { token } = useContext(AuthContext);
   const router = useRouter();
   const searchParams = useSearchParams();
   const coverFileInputRef = useRef(null);
   const isEditUrl = searchParams.get("edit") === "true";
-  // State consolidation - initialize with saved data or defaults
+
+  // ✅ Initialize state WITHOUT assuming saved data is safe
   const [state, setState] = useState(() => {
-    const savedData = loadDesignProjectData();
-    if (savedData) {
-      return {
-        ...getDefaultComponentState(),
-        ...savedData,
-        // Keep file-related states from saved data, they will be restored by useEffect
-        selectedFile: null, // Will be restored by useEffect
-        coverFile: null, // Will be restored by useEffect
-        uploadStatus: "idle", // Will be updated by useEffect
-        uploadProgress: 0,
-        fileError: "",
-        coverFileError: "",
-        coverPdfUrl: null, // Will be restored by useEffect
-      };
+    const baseState = getDefaultComponentState();
+    const projectDataRaw = localStorage.getItem("projectData");
+    let projectData = null;
+    try {
+      if (projectDataRaw) projectData = JSON.parse(projectDataRaw);
+    } catch {
+      projectData = null;
     }
-    return getDefaultComponentState();
+
+    // 🔴 If no valid project → clear everything & start fresh
+    if (!isValidProjectData(projectData)) {
+      clearDesignProjectData();
+      localStorage.removeItem("projectData");
+      return baseState;
+    }
+
+    // Green-light: merge projectData + persisted design data
+    const savedData = loadDesignProjectData();
+    const merged = {
+      ...baseState,
+      projectData,
+      ...savedData,
+      selectedFile: null,
+      coverFile: null,
+      uploadStatus: savedData?.uploadStatus || "idle",
+      fileError: savedData?.fileError || "",
+      coverFileError: savedData?.coverFileError || "",
+      coverPdfUrl: savedData?.coverPdfUrl || null,
+    };
+
+    // Async restore files — safe & non-breaking
+    restoreInitialFiles(savedData)
+      .then((files) => {
+        setState((prev) => {
+          // Only apply if project *still* valid (avoid race)
+          const cur = (() => {
+            try { return JSON.parse(localStorage.getItem("projectData")); } catch { return null; }
+          })();
+          return isValidProjectData(cur) ? { ...prev, ...files } : prev;
+        });
+      })
+      .catch((err) => console.error("Initial file restore failed:", err));
+
+    return merged;
   });
+
   const updateState = (updates) => {
     setState((prev) => {
       const newState = { ...prev, ...updates };
-      // Save to localStorage whenever state changes
-      const dataToSave = {
-        ...newState,
-        // Don't save actual File objects, but keep other file-related states
-        selectedFile: null, // File objects can't be serialized
-        coverFile: null, // File objects can't be serialized
-        // Keep other file-related states for persistence
-        uploadStatus: newState.uploadStatus,
-        uploadProgress: newState.uploadProgress,
-        fileError: newState.fileError,
-        coverFileError: newState.coverFileError,
-        coverPdfUrl: newState.coverPdfUrl,
-      };
-      saveDesignProjectData(dataToSave);
+      // Save only if projectData is valid (prevent junk persistence)
+      const curProj = (() => {
+        try { return JSON.parse(localStorage.getItem("projectData")); } catch { return null; }
+      })();
+      if (isValidProjectData(curProj)) {
+        saveDesignProjectData({
+          ...newState,
+          selectedFile: null,
+          coverFile: null,
+        });
+      }
       return newState;
     });
   };
+
   const updateForm = (updates) => {
     setState((prev) => {
       const newState = { ...prev, form: { ...prev.form, ...updates } };
-      // Save to localStorage whenever form changes
-      const dataToSave = {
-        ...newState,
-        // Don't save actual File objects, but keep other file-related states
-        selectedFile: null, // File objects can't be serialized
-        coverFile: null, // File objects can't be serialized
-        // Keep other file-related states for persistence
-        uploadStatus: newState.uploadStatus,
-        uploadProgress: newState.uploadProgress,
-        fileError: newState.fileError,
-        coverFileError: newState.coverFileError,
-        coverPdfUrl: newState.coverPdfUrl,
-      };
-      saveDesignProjectData(dataToSave);
+      const curProj = (() => {
+        try { return JSON.parse(localStorage.getItem("projectData")); } catch { return null; }
+      })();
+      if (isValidProjectData(curProj)) {
+        saveDesignProjectData({
+          ...newState,
+          selectedFile: null,
+          coverFile: null,
+        });
+      }
       return newState;
     });
   };
-  // State for project data and ID
-  const [hasProjectId, setHasProjectId] = useState(false);
-  // Get projectData from localStorage - client-side only
+
+  // 🔁 Double-check on mount (in case localStorage changed externally)
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const saved = localStorage.getItem("projectData");
-        if (saved) {
-          const data = JSON.parse(saved);
-          updateState({ projectData: data });
-          setHasProjectId(!!(data && data.projectId));
-        } else {
-          router.push("/start-project");
-        }
+    const validateProject = () => {
+      const raw = localStorage.getItem("projectData");
+      let data = null;
+      try {
+        if (raw) data = JSON.parse(raw);
+      } catch {}
+      if (!isValidProjectData(data)) {
+        clearDesignProjectData();
+        localStorage.removeItem("projectData");
+        alert("No active project found. Redirecting to start fresh.");
+        router.push("/start-project");
+        return;
       }
-    } catch (e) {
-      console.warn("No project data found in localStorage");
-    }
+      updateState({ projectData: data });
+    };
+    validateProject();
   }, [router]);
-  const isCalendarCategory = (category) =>
-    category === "Calender" || category === "Calendar";
+
+  const [hasProjectId, setHasProjectId] = useState(false);
+
+  const isCalendarCategory = (category) => category === "Calender" || category === "Calendar";
+
   const buildLocalConfig = (category) => {
     switch (category) {
       case "Print Book":
       case "Photo Book": {
         const trim_sizes = toOptions(BOOK_SIZES);
-        const interior_colors = toOptionsFromObjects(
-          OPTIONS_CONFIG_BOOK.interiorColor
-        );
+        const interior_colors = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.interiorColor);
         const paper_types = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.paperType);
-        const cover_finishes = toOptionsFromObjects(
-          OPTIONS_CONFIG_BOOK.coverFinish
-        );
-        const allBindings = [
-          "Perfect Bound",
-          "Saddle Stitch",
-          "Case Wrap",
-          "Linen Wrap",
-          "Coil Bound",
-        ];
+        const cover_finishes = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.coverFinish);
+        const allBindings = ["Perfect Bound", "Saddle Stitch", "Case Wrap", "Linen Wrap", "Coil Bound"];
         return {
-          dropdowns: {
-            trim_sizes,
-            interior_colors,
-            paper_types,
-            cover_finishes,
-          },
+          dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes },
           allBindings: toOptions(allBindings),
         };
       }
       case "Comic Book": {
-        const trim_sizes = COMIC_TRIM_SIZES.map((t) => ({
-          id: t.id,
-          name: t.name,
-        }));
+        const trim_sizes = COMIC_TRIM_SIZES.map((t) => ({ id: t.id, name: t.name }));
         const interior_colors = toOptionsFromObjects(COMIC_INTERIOR_COLORS);
         const paper_types = toOptionsFromObjects(COMIC_PAPER_TYPES);
         const cover_finishes = toOptionsFromObjects(COMIC_COVER_FINISHES);
-        const allBindings = [
-          "Perfect Bound",
-          "Saddle Stitch",
-          "Case Wrap",
-          "Linen Wrap",
-          "Coil Bound",
-        ];
+        const allBindings = ["Perfect Bound", "Saddle Stitch", "Case Wrap", "Linen Wrap", "Coil Bound"];
         return {
-          dropdowns: {
-            trim_sizes,
-            interior_colors,
-            paper_types,
-            cover_finishes,
-          },
+          dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes },
           allBindings: toOptions(allBindings),
         };
       }
       case "Magazine":
       case "Year Book": {
         const trim_sizes = toOptions(SIMPLE_TRIM_SIZES);
-        const interior_colors = toOptionsFromObjects(
-          OPTIONS_CONFIG_SIMPLE.interiorColor
-        );
-        const paper_types = toOptionsFromObjects(
-          OPTIONS_CONFIG_SIMPLE.paperType
-        );
-        const cover_finishes = toOptionsFromObjects(
-          OPTIONS_CONFIG_SIMPLE.coverFinish
-        );
+        const interior_colors = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.interiorColor);
+        const paper_types = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.paperType);
+        const cover_finishes = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.coverFinish);
         const allBindings = Object.keys(BINDING_CONFIGS_SIMPLE);
         return {
-          dropdowns: {
-            trim_sizes,
-            interior_colors,
-            paper_types,
-            cover_finishes,
-          },
+          dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes },
           allBindings: toOptions(allBindings),
         };
       }
       case "Calender":
       case "Calendar": {
         const trim_sizes = toOptions(CALENDAR_SIZES);
-        const interior_colors = toOptionsFromObjects(
-          CALENDAR_OPTIONS.interiorColor
-        );
+        const interior_colors = toOptionsFromObjects(CALENDAR_OPTIONS.interiorColor);
         const paper_types = toOptionsFromObjects(CALENDAR_OPTIONS.paperType);
-        const cover_finishes = toOptionsFromObjects(
-          CALENDAR_OPTIONS.coverFinish
-        );
+        const cover_finishes = toOptionsFromObjects(CALENDAR_OPTIONS.coverFinish);
         const allBindings = CALENDAR_OPTIONS.bindingType.map((o) => o.name);
         return {
-          dropdowns: {
-            trim_sizes,
-            interior_colors,
-            paper_types,
-            cover_finishes,
-          },
+          dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes },
           allBindings: toOptions(allBindings),
         };
       }
       default:
-        return {
-          dropdowns: {
-            trim_sizes: [],
-            interior_colors: [],
-            paper_types: [],
-            cover_finishes: [],
-          },
-          allBindings: [],
-        };
+        return { dropdowns: { trim_sizes: [], interior_colors: [], paper_types: [], cover_finishes: [] }, allBindings: [] };
     }
   };
+
   useEffect(() => {
     if (!state.projectData?.category) return;
-    const cfg = buildLocalConfig(state.projectData?.category);
+    const cfg = buildLocalConfig(state.projectData.category);
     updateState({
       dropdowns: cfg.dropdowns,
       initialBindings: cfg.allBindings,
@@ -647,7 +618,8 @@ const DesignProjectPreview = () => {
       loading: false,
       result: null,
     });
-  }, [state.projectData?.category, token, router]);
+  }, [state.projectData?.category]);
+
   useEffect(() => {
     if (!state.initialBindingsLoaded) return;
     const { trim_size_id, page_count } = state.form;
@@ -665,60 +637,41 @@ const DesignProjectPreview = () => {
     }
     let available = [];
     if (cat === "Print Book" || cat === "Photo Book") {
-      const ts = state.dropdowns.trim_sizes.find(
-        (t) => String(t.id) === String(trim_size_id)
-      );
+      const ts = state.dropdowns.trim_sizes.find((t) => String(t.id) === String(trim_size_id));
       available = getAvailableBindingsBook(Number(page_count), ts?.name || "");
     } else if (cat === "Comic Book") {
       available = getAvailableBindingsComic(Number(page_count));
     } else {
       available = getAvailableBindingsSimple(Number(page_count));
     }
-    updateState({
-      bindings: state.initialBindings,
-      availableBindings: available,
-    });
-  }, [
-    state.form.trim_size_id,
-    state.form.page_count,
-    state.initialBindingsLoaded,
-    state.projectData?.category,
-  ]);
+    updateState({ bindings: state.initialBindings, availableBindings: available });
+  }, [state.form.trim_size_id, state.form.page_count, state.initialBindingsLoaded, state.projectData?.category]);
+
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    const val = type === "number" ? (value === "" ? "" : Number(value)) : value;
-    if (
-      (name === "trim_size_id" || name === "page_count") &&
-      state.projectData?.category !== "Calender"
-    ) {
+    let val = value;
+    if (type === "number") {
+      const num = value === "" ? NaN : Number(value);
+      if (name === "quantity") {
+        val = isNaN(num) || num < 1 ? "" : Math.floor(num);
+      } else {
+        val = isNaN(num) ? "" : num;
+      }
+    }
+    if ((name === "trim_size_id" || name === "page_count") && !isCalendarCategory(state.projectData?.category)) {
       updateForm({ [name]: val, binding_id: "" });
     } else {
       updateForm({ [name]: val });
     }
-    if (name !== "quantity") {
-      updateState({ result: null });
-    }
+    if (name !== "quantity") updateState({ result: null });
   };
+
   const handlePriceCalculation = (e) => {
     if (e) e.preventDefault();
     const isCalendar = isCalendarCategory(state.projectData?.category);
     const requiredFields = isCalendar
-      ? [
-        "binding_id",
-        "interior_color_id",
-        "paper_type_id",
-        "cover_finish_id",
-        "quantity",
-      ]
-      : [
-        "trim_size_id",
-        "page_count",
-        "binding_id",
-        "interior_color_id",
-        "paper_type_id",
-        "cover_finish_id",
-        "quantity",
-      ];
+      ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id", "quantity"]
+      : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id", "quantity"];
     const missingFields = requiredFields.filter((field) => !state.form[field]);
     if (missingFields.length > 0) {
       alert(`Please fill in all required fields: ${missingFields.join(", ")}`);
@@ -728,87 +681,41 @@ const DesignProjectPreview = () => {
     const qty = Number(state.form.quantity) || 1;
     let calc = null;
     if (cat === "Print Book" || cat === "Photo Book") {
-      const ts = state.dropdowns.trim_sizes.find(
-        (t) => String(t.id) === String(state.form.trim_size_id)
-      )?.name;
+      const ts = state.dropdowns.trim_sizes.find((t) => String(t.id) === String(state.form.trim_size_id))?.name;
       calc = calculatePriceBook({
         bookSize: ts,
         page_count: Number(state.form.page_count),
-        binding_id: state.bindings.find(
-          (b) => String(b.id) === String(state.form.binding_id)
-        )?.name,
-        interior_color_id:
-          state.dropdowns.interior_colors.find(
-            (o) => String(o.id) === String(state.form.interior_color_id)
-          )?.dbName ||
-          state.dropdowns.interior_colors.find(
-            (o) => String(o.id) === String(state.form.interior_color_id)
-          )?.name,
-        paper_type_id:
-          state.dropdowns.paper_types.find(
-            (o) => String(o.id) === String(state.form.paper_type_id)
-          )?.dbName ||
-          state.dropdowns.paper_types.find(
-            (o) => String(o.id) === String(state.form.paper_type_id)
-          )?.name,
-        cover_finish_id:
-          state.dropdowns.cover_finishes.find(
-            (o) => String(o.id) === String(state.form.cover_finish_id)
-          )?.dbName ||
-          state.dropdowns.cover_finishes.find(
-            (o) => String(o.id) === String(state.form.cover_finish_id)
-          )?.name,
+        binding_id: state.bindings.find((b) => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find((o) => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find((o) => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find((o) => String(o.id) === String(state.form.cover_finish_id))?.dbName,
         quantity: qty,
       });
     } else if (cat === "Comic Book") {
       calc = calculatePriceComic({
         trim_size_id: state.form.trim_size_id,
         page_count: Number(state.form.page_count),
-        binding_id: state.bindings.find(
-          (b) => String(b.id) === String(state.form.binding_id)
-        )?.name,
-        interior_color_id: state.dropdowns.interior_colors.find(
-          (o) => String(o.id) === String(state.form.interior_color_id)
-        )?.dbName,
-        paper_type_id: state.dropdowns.paper_types.find(
-          (o) => String(o.id) === String(state.form.paper_type_id)
-        )?.dbName,
-        cover_finish_id: state.dropdowns.cover_finishes.find(
-          (o) => String(o.id) === String(state.form.cover_finish_id)
-        )?.dbName,
+        binding_id: state.bindings.find((b) => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find((o) => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find((o) => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find((o) => String(o.id) === String(state.form.cover_finish_id))?.dbName,
         quantity: qty,
       });
     } else if (cat === "Magazine" || cat === "Year Book") {
       calc = calculatePriceSimple({
         page_count: Number(state.form.page_count),
-        binding_id: state.bindings.find(
-          (b) => String(b.id) === String(state.form.binding_id)
-        )?.name,
-        interior_color_id: state.dropdowns.interior_colors.find(
-          (o) => String(o.id) === String(state.form.interior_color_id)
-        )?.dbName,
-        paper_type_id: state.dropdowns.paper_types.find(
-          (o) => String(o.id) === String(state.form.paper_type_id)
-        )?.dbName,
-        cover_finish_id: state.dropdowns.cover_finishes.find(
-          (o) => String(o.id) === String(state.form.cover_finish_id)
-        )?.dbName,
+        binding_id: state.bindings.find((b) => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find((o) => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find((o) => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find((o) => String(o.id) === String(state.form.cover_finish_id))?.dbName,
         quantity: qty,
       });
     } else if (isCalendarCategory(cat)) {
       calc = calculatePriceCalendar({
-        binding_id: state.bindings.find(
-          (b) => String(b.id) === String(state.form.binding_id)
-        )?.name,
-        interior_color_id: state.dropdowns.interior_colors.find(
-          (o) => String(o.id) === String(state.form.interior_color_id)
-        )?.dbName,
-        paper_type_id: state.dropdowns.paper_types.find(
-          (o) => String(o.id) === String(state.form.paper_type_id)
-        )?.dbName,
-        cover_finish_id: state.dropdowns.cover_finishes.find(
-          (o) => String(o.id) === String(state.form.cover_finish_id)
-        )?.dbName,
+        binding_id: state.bindings.find((b) => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find((o) => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find((o) => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find((o) => String(o.id) === String(state.form.cover_finish_id))?.dbName,
         quantity: qty,
       });
     }
@@ -825,27 +732,17 @@ const DesignProjectPreview = () => {
     };
     updateState({ result });
   };
-  // Book Size Handling
+
   const parseSizeString = (sizeStr) => {
     const inchMatch = sizeStr.match(/([\d.]+)\s*x\s*([\d.]+)\s*in/);
-    if (inchMatch) {
-      return {
-        width: parseFloat(inchMatch[1]),
-        height: parseFloat(inchMatch[2]),
-        unit: "in",
-      };
-    }
+    if (inchMatch) return { width: parseFloat(inchMatch[1]), height: parseFloat(inchMatch[2]), unit: "in" };
     const mmMatch = sizeStr.match(/([\d.]+)\s*x\s*([\d.]+)\s*mm/);
-    if (mmMatch) {
-      return {
-        width: parseFloat(mmMatch[1]),
-        height: parseFloat(mmMatch[2]),
-        unit: "mm",
-      };
-    }
+    if (mmMatch) return { width: parseFloat(mmMatch[1]), height: parseFloat(mmMatch[2]), unit: "mm" };
     return null;
   };
+
   const pointsToInches = (points) => points / 72;
+
   const findClosestBookSize = (widthIn, heightIn) => {
     const toleranceIn = 0.15;
     for (const sizeName of BOOK_SIZES) {
@@ -857,68 +754,39 @@ const DesignProjectPreview = () => {
         targetW /= 25.4;
         targetH /= 25.4;
       }
-      const match1 =
-        Math.abs(widthIn - targetW) <= toleranceIn &&
-        Math.abs(heightIn - targetH) <= toleranceIn;
-      const match2 =
-        Math.abs(widthIn - targetH) <= toleranceIn &&
-        Math.abs(heightIn - targetW) <= toleranceIn;
-      if (match1 || match2) {
+      if (
+        (Math.abs(widthIn - targetW) <= toleranceIn && Math.abs(heightIn - targetH) <= toleranceIn) ||
+        (Math.abs(widthIn - targetH) <= toleranceIn && Math.abs(heightIn - targetW) <= toleranceIn)
+      ) {
         return sizeName;
       }
     }
     return null;
   };
+
   const handleContactExpert = () => {
     const isCalendar = isCalendarCategory(state.projectData?.category);
     const requiredFields = isCalendar
       ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
-      : [
-        "trim_size_id",
-        "page_count",
-        "binding_id",
-        "interior_color_id",
-        "paper_type_id",
-        "cover_finish_id",
-      ];
-    const missingFields = requiredFields.filter(
-      (field) => !state.form[field] || String(state.form[field]).trim() === ""
-    );
+      : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"];
+    const missingFields = requiredFields.filter((field) => !state.form[field] || String(state.form[field]).trim() === "");
     if (missingFields.length > 0) {
-      alert(
-        "Please complete all book configuration options before contacting the cover expert."
-      );
+      alert("Please complete all book configuration options before contacting the cover expert.");
       return;
     }
     if (!state.selectedFile) {
-      alert(
-        "Please upload your book PDF file before contacting the cover expert."
-      );
+      alert("Please upload your book PDF file before contacting the cover expert.");
       return;
     }
     localStorage.setItem("designForm", JSON.stringify(state.form));
     localStorage.setItem("projectData", JSON.stringify(state.projectData));
     localStorage.setItem("bindings", JSON.stringify(state.bindings));
-    localStorage.setItem(
-      "interior_colors",
-      JSON.stringify(state.dropdowns.interior_colors || [])
-    );
-    localStorage.setItem(
-      "paper_types",
-      JSON.stringify(state.dropdowns.paper_types || [])
-    );
-    localStorage.setItem(
-      "cover_finishes",
-      JSON.stringify(state.dropdowns.cover_finishes || [])
-    );
-    localStorage.setItem(
-      "trim_sizes",
-      JSON.stringify(state.dropdowns.trim_sizes || [])
-    );
+    localStorage.setItem("interior_colors", JSON.stringify(state.dropdowns.interior_colors || []));
+    localStorage.setItem("paper_types", JSON.stringify(state.dropdowns.paper_types || []));
+    localStorage.setItem("cover_finishes", JSON.stringify(state.dropdowns.cover_finishes || []));
+    localStorage.setItem("trim_sizes", JSON.stringify(state.dropdowns.trim_sizes || []));
     const quantity = state.form.quantity || 1;
-    const originalTotalCost =
-      state.result?.original_total_cost ??
-      (state.result?.cost_per_book ?? 0) * quantity;
+    const originalTotalCost = state.result?.original_total_cost ?? (state.result?.cost_per_book ?? 0) * quantity;
     const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
     localStorage.setItem(
       "shopData",
@@ -933,219 +801,97 @@ const DesignProjectPreview = () => {
     updateState({ usedExpertCover: true });
     router.push("/cover-expert");
   };
+
   useEffect(() => {
     loadPdfLib();
   }, []);
-  // Restore file information from saved data
+
   useEffect(() => {
-    const restoreFiles = async () => {
-      const savedData = loadDesignProjectData();
-      if (savedData) {
-        // Restore interior file if available (try IndexedDB first, then base64)
-        if (savedData.interiorFileData) {
-          try {
-            const restoredFile = await restoreFileFromRecord(savedData.interiorFileData);
-            if (restoredFile) {
-              updateState({
-                selectedFile: restoredFile,
-                uploadStatus: "success",
-                fileError: "",
-              });
+    const restoreFromSession = async () => {
+      if (state.selectedFile && state.coverFile) return;
+      const projectData = (() => {
+        try { return JSON.parse(localStorage.getItem("projectData")); } catch { return null; }
+      })();
+      if (!isValidProjectData(projectData)) return;
+
+      if (window.tempBookFileForSubmission && !state.selectedFile) {
+        updateState({ selectedFile: window.tempBookFileForSubmission, uploadStatus: "success" });
+      }
+      if (window.tempCoverFileForSubmission && !state.coverFile) {
+        try {
+          const pdfjs = await loadPdfLib();
+          if (pdfjs) {
+            const buf = await window.tempCoverFileForSubmission.arrayBuffer();
+            const pdf = await pdfjs.getDocument({ data: buf }).promise;
+            if (pdf.numPages === 1) {
+              const page = await pdf.getPage(1);
+              const scale = 2;
+              const vp = page.getViewport({ scale });
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+              canvas.width = vp.width;
+              canvas.height = vp.height;
+              await page.render({ canvasContext: ctx, viewport: vp }).promise;
+              const url = canvas.toDataURL("image/png");
+              updateState({ coverFile: window.tempCoverFileForSubmission, coverPdfUrl: url });
             }
-          } catch (error) {
-            console.error('Error restoring interior file:', error);
           }
+        } catch (err) {
+          console.warn("Fallback cover restore failed:", err);
         }
-        // Restore cover file if available (try IndexedDB first, then base64)
-        if (savedData.coverFileData) {
-          try {
-            const restoredCoverFile = await restoreFileFromRecord(savedData.coverFileData);
-            if (restoredCoverFile) {
-              // Process the cover file to generate the PDF URL
-              try {
+      }
+      if (!state.selectedFile || !state.coverFile) {
+        const saved = loadDesignProjectData();
+        if (saved) {
+          if (saved.interiorFileData && !state.selectedFile) {
+            try {
+              const file = await restoreFileFromRecord(saved.interiorFileData);
+              if (file) updateState({ selectedFile: file, uploadStatus: "success" });
+            } catch {}
+          }
+          if (saved.coverFileData && !state.coverFile) {
+            try {
+              const file = await restoreFileFromRecord(saved.coverFileData);
+              if (file) {
                 const pdfjs = await loadPdfLib();
                 if (pdfjs) {
-                  const arrayBuffer = await restoredCoverFile.arrayBuffer();
-                  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-                  const pageCount = pdf.numPages;
-                  if (pageCount === 1) {
+                  const buf = await file.arrayBuffer();
+                  const pdf = await pdfjs.getDocument({ data: buf }).promise;
+                  if (pdf.numPages === 1) {
                     const page = await pdf.getPage(1);
                     const scale = 2;
-                    const viewport = page.getViewport({ scale });
+                    const vp = page.getViewport({ scale });
                     const canvas = document.createElement("canvas");
-                    const context = canvas.getContext("2d");
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    await page.render({
-                      canvasContext: context,
-                      viewport: viewport,
-                    }).promise;
-                    const pdfImageUrl = canvas.toDataURL("image/png");
-                    updateState({
-                      coverFile: restoredCoverFile,
-                      coverPdfUrl: pdfImageUrl,
-                      coverFileError: "",
-                    });
+                    const ctx = canvas.getContext("2d");
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+                    const url = canvas.toDataURL("image/png");
+                    updateState({ coverFile: file, coverPdfUrl: url });
                   }
                 }
-              } catch (error) {
-                console.error('Error processing restored cover file:', error);
-                updateState({
-                  coverFile: restoredCoverFile,
-                  coverFileError: "",
-                });
               }
-            }
-          } catch (error) {
-            console.error('Error restoring cover file:', error);
+            } catch {}
           }
         }
       }
     };
-    restoreFiles();
-  }, []);
-  // Add this useEffect after your existing file restoration useEffect
-// This ensures files are restored from IndexedDB/localStorage when component mounts
+    restoreFromSession();
+  }, [state.selectedFile, state.coverFile]);
 
-useEffect(() => {
-  const restoreFilesOnMount = async () => {
-    // Check if we have files in window object first (session data)
-    if (window.tempBookFileForSubmission) {
-      updateState({
-        selectedFile: window.tempBookFileForSubmission,
-        uploadStatus: "success",
-        fileError: "",
-      });
-    }
-    
-    if (window.tempCoverFileForSubmission) {
-      try {
-        const pdfjs = await loadPdfLib();
-        if (pdfjs) {
-          const arrayBuffer = await window.tempCoverFileForSubmission.arrayBuffer();
-          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-          const pageCount = pdf.numPages;
-          if (pageCount === 1) {
-            const page = await pdf.getPage(1);
-            const scale = 2;
-            const viewport = page.getViewport({ scale });
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            await page.render({
-              canvasContext: context,
-              viewport: viewport,
-            }).promise;
-            const pdfImageUrl = canvas.toDataURL("image/png");
-            updateState({
-              coverFile: window.tempCoverFileForSubmission,
-              coverPdfUrl: pdfImageUrl,
-              coverFileError: "",
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error processing cover file from window:', error);
-      }
-    }
-    
-    // If no files in window object, try to restore from saved data
-    if (!window.tempBookFileForSubmission || !window.tempCoverFileForSubmission) {
-      const savedData = loadDesignProjectData();
-      if (savedData) {
-        // Restore interior file if available and not already loaded
-        if (savedData.interiorFileData && !window.tempBookFileForSubmission) {
-          try {
-            const restoredFile = await restoreFileFromRecord(savedData.interiorFileData);
-            if (restoredFile) {
-              window.tempBookFileForSubmission = restoredFile; // Save to window
-              updateState({
-                selectedFile: restoredFile,
-                uploadStatus: "success",
-                fileError: "",
-              });
-            }
-          } catch (error) {
-            console.error('Error restoring interior file:', error);
-          }
-        }
-        
-        // Restore cover file if available and not already loaded
-        if (savedData.coverFileData && !window.tempCoverFileForSubmission) {
-          try {
-            const restoredCoverFile = await restoreFileFromRecord(savedData.coverFileData);
-            if (restoredCoverFile) {
-              window.tempCoverFileForSubmission = restoredCoverFile; // Save to window
-              // Process the cover file to generate the PDF URL
-              try {
-                const pdfjs = await loadPdfLib();
-                if (pdfjs) {
-                  const arrayBuffer = await restoredCoverFile.arrayBuffer();
-                  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-                  const pageCount = pdf.numPages;
-                  if (pageCount === 1) {
-                    const page = await pdf.getPage(1);
-                    const scale = 2;
-                    const viewport = page.getViewport({ scale });
-                    const canvas = document.createElement("canvas");
-                    const context = canvas.getContext("2d");
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    await page.render({
-                      canvasContext: context,
-                      viewport: viewport,
-                    }).promise;
-                    const pdfImageUrl = canvas.toDataURL("image/png");
-                    updateState({
-                      coverFile: restoredCoverFile,
-                      coverPdfUrl: pdfImageUrl,
-                      coverFileError: "",
-                    });
-                  }
-                }
-              } catch (error) {
-                console.error('Error processing restored cover file:', error);
-                updateState({
-                  coverFile: restoredCoverFile,
-                  coverFileError: "",
-                });
-              }
-            }
-          } catch (error) {
-            console.error('Error restoring cover file:', error);
-          }
-        }
-      }
-    }
-  };
-
-  restoreFilesOnMount();
-}, []); // Run once on mount
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    updateState({
-      fileError: "",
-      selectedFile: null,
-      uploadStatus: "idle",
-      uploadProgress: 0,
-    });
+    updateState({ fileError: "", selectedFile: null, uploadStatus: "idle", uploadProgress: 0 });
     if (!file) return;
     if (file.type !== "application/pdf") {
-      updateState({
-        fileError: "Only PDF files are allowed.",
-        uploadStatus: "error",
-      });
+      updateState({ fileError: "Only PDF files are allowed.", uploadStatus: "error" });
       return;
     }
     updateState({ uploadStatus: "uploading" });
     try {
       const pdfjs = await loadPdfLib();
       if (!pdfjs) {
-        updateState({
-          fileError: "PDF processor not available.",
-          uploadStatus: "error",
-        });
+        updateState({ fileError: "PDF processor not available.", uploadStatus: "error" });
         return;
       }
       const fileReader = new FileReader();
@@ -1155,10 +901,7 @@ useEffect(() => {
           const pdf = await pdfjs.getDocument({ data: typedarray }).promise;
           const pageCount = pdf.numPages;
           if (pageCount < 2 || pageCount > 800) {
-            updateState({
-              fileError: "Page count must be between 2 and 800.",
-              uploadStatus: "error",
-            });
+            updateState({ fileError: "Page count must be between 2 and 800.", uploadStatus: "error" });
             return;
           }
           const firstPage = await pdf.getPage(1);
@@ -1168,57 +911,38 @@ useEffect(() => {
           const matchedSizeName = findClosestBookSize(widthIn, heightIn);
           let matchedId = "";
           if (matchedSizeName) {
-            const trimOption = state.dropdowns.trim_sizes?.find(
-              (opt) => opt.name === matchedSizeName
-            );
-            if (trimOption) {
-              matchedId = trimOption.id;
-            }
+            const trimOption = state.dropdowns.trim_sizes?.find((opt) => opt.name === matchedSizeName);
+            if (trimOption) matchedId = trimOption.id;
           }
-          updateForm({
-            page_count: pageCount,
-            ...(matchedId && { trim_size_id: matchedId }),
-          });
+          updateForm({ page_count: pageCount, ...(matchedId && { trim_size_id: matchedId }) });
           updateState({ selectedFile: file, uploadStatus: "success" });
-          // Save file data for persistence
           try {
-            const fileData = await saveFileData(file, 'interior');
+            const fileData = await saveFileData(file, "interior");
             if (fileData) {
               const currentData = loadDesignProjectData() || {};
-              saveDesignProjectData({
-                ...currentData,
-                interiorFileData: fileData,
-              });
+              saveDesignProjectData({ ...currentData, interiorFileData: fileData });
             }
           } catch (error) {
-            console.error('Error saving interior file data:', error);
+            console.error("Error saving interior file data:", error);
           }
         } catch (err) {
           console.error("PDF parsing error:", err);
-          updateState({
-            fileError: "Invalid PDF file or corrupted.",
-            uploadStatus: "error",
-          });
+          updateState({ fileError: "Invalid PDF file or corrupted.", uploadStatus: "error" });
         }
       };
       fileReader.readAsArrayBuffer(file);
     } catch (err) {
       console.error("PDF.js load error:", err);
-      updateState({
-        fileError: err.message || "Failed to initialize PDF processor.",
-        uploadStatus: "error",
-      });
+      updateState({ fileError: err.message || "Failed to initialize PDF processor.", uploadStatus: "error" });
     }
   };
+
   const handleCoverFileChange = async (e) => {
     const file = e.target.files?.[0];
     updateState({ coverFile: null, coverPdfUrl: null, coverFileError: "" });
     if (!file) return;
-    // Only allow PDF
     if (file.type !== "application/pdf") {
-      updateState({
-        coverFileError: "Only PDF files are allowed for cover design.",
-      });
+      updateState({ coverFileError: "Only PDF files are allowed for cover design." });
       return;
     }
     try {
@@ -1231,52 +955,37 @@ useEffect(() => {
       const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const pageCount = pdf.numPages;
       if (pageCount !== 1) {
-        updateState({
-          coverFileError: "Book cover design PDF must be exactly 1 page.",
-        });
+        updateState({ coverFileError: "Book cover design PDF must be exactly 1 page." });
         return;
       }
-      // Render page 1
       const page = await pdf.getPage(1);
-      const scale = 2; // higher = better quality
+      const scale = 2;
       const viewport = page.getViewport({ scale });
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       canvas.height = viewport.height;
       canvas.width = viewport.width;
-      await page.render({
-        canvasContext: context,
-        viewport: viewport,
-      }).promise;
+      await page.render({ canvasContext: context, viewport }).promise;
       const pdfImageUrl = canvas.toDataURL("image/png");
-      updateState({
-        coverFile: file,
-        coverPdfUrl: pdfImageUrl,
-        coverFileError: "",
-      });
-      // Save cover file data for persistence
+      updateState({ coverFile: file, coverPdfUrl: pdfImageUrl, coverFileError: "" });
       try {
-        const coverFileData = await saveFileData(file, 'cover');
+        const coverFileData = await saveFileData(file, "cover");
         if (coverFileData) {
           const currentData = loadDesignProjectData() || {};
-          saveDesignProjectData({
-            ...currentData,
-            coverFileData: coverFileData,
-          });
+          saveDesignProjectData({ ...currentData, coverFileData, coverPdfUrl: pdfImageUrl });
         }
       } catch (error) {
-        console.error('Error saving cover file data:', error);
+        console.error("Error saving cover file data:", error);
       }
     } catch (err) {
       console.error("Cover PDF processing error:", err);
-      updateState({
-        coverFileError: "Failed to process cover PDF. Please try again.",
-      });
+      updateState({ coverFileError: "Failed to process cover PDF. Please try again." });
     }
   };
+
   const handleSubmit = async () => {
     const isEditMode = isEditUrl && hasProjectId;
-    const isCalendar = state.projectData?.category === "Calender";
+    const isCalendar = isCalendarCategory(state.projectData?.category);
     if (isEditMode) {
       await updateBook(state.projectData.projectId, isCalendar);
       return;
@@ -1284,31 +993,14 @@ useEffect(() => {
     if (!state.selectedFile) return alert("Please upload your book PDF file");
     const requiredFields = isCalendar
       ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
-      : [
-        "trim_size_id",
-        "page_count",
-        "binding_id",
-        "interior_color_id",
-        "paper_type_id",
-        "cover_finish_id",
-      ];
+      : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"];
     if (!requiredFields.every((field) => state.form[field])) {
       return alert("Please complete all book configuration options");
     }
-    if (
-      !state.projectData?.category ||
-      !state.projectData?.language ||
-      !token
-    ) {
-      return alert(
-        token
-          ? "Please select a valid category and language."
-          : "You must be logged in to submit the project."
-      );
+    if (!state.projectData?.category || !state.projectData?.language || !token) {
+      return alert(token ? "Please select a valid category and language." : "You must be logged in to submit the project.");
     }
-    if (state.coverFileError) {
-      return alert(state.coverFileError);
-    }
+    if (state.coverFileError) return alert(state.coverFileError);
     try {
       const formData = new FormData();
       formData.append("title", state.projectData.projectTitle || "");
@@ -1316,68 +1008,26 @@ useEffect(() => {
       formData.append("language", state.projectData.language);
       formData.append("pdf_file", state.selectedFile);
       if (state.coverFile) formData.append("cover_file", state.coverFile);
-      const getOptionName = (options, id) =>
-        options.find((opt) => opt.id === Number(id))?.name || "";
-      formData.append(
-        "binding_type",
-        getOptionName(state.bindings, state.form.binding_id)
-      );
-      formData.append(
-        "cover_finish",
-        getOptionName(
-          state.dropdowns.cover_finishes || [],
-          state.form.cover_finish_id
-        )
-      );
-      formData.append(
-        "interior_color",
-        getOptionName(
-          state.dropdowns.interior_colors || [],
-          state.form.interior_color_id
-        )
-      );
-      formData.append(
-        "paper_type",
-        getOptionName(
-          state.dropdowns.paper_types || [],
-          state.form.paper_type_id
-        )
-      );
-      if (!isCalendar)
-        formData.append(
-          "trim_size",
-          getOptionName(
-            state.dropdowns.trim_sizes || [],
-            state.form.trim_size_id
-          )
-        );
-      formData.append(
-        "page_count",
-        isCalendar ? state.form.page_count || 1 : state.form.page_count
-      );
+      const getOptionName = (options, id) => options.find((opt) => opt.id === Number(id))?.name || "";
+      formData.append("binding_type", getOptionName(state.bindings, state.form.binding_id));
+      formData.append("cover_finish", getOptionName(state.dropdowns.cover_finishes || [], state.form.cover_finish_id));
+      formData.append("interior_color", getOptionName(state.dropdowns.interior_colors || [], state.form.interior_color_id));
+      formData.append("paper_type", getOptionName(state.dropdowns.paper_types || [], state.form.paper_type_id));
+      if (!isCalendar) formData.append("trim_size", getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id));
+      formData.append("page_count", isCalendar ? state.form.page_count || 1 : state.form.page_count);
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
         onUploadProgress: (progressEvent) =>
-          updateState({
-            uploadProgress: Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            ),
-          }),
+          updateState({ uploadProgress: Math.round((progressEvent.loaded * 100) / progressEvent.total) }),
       };
-      const response = await axios.post(
-        `${API_BASE}api/book/upload-book/`,
-        formData,
-        config
-      );
+      const response = await axios.post(`${API_BASE}api/book/upload-book/`, formData, config);
       if (response.data?.status === "success") {
         alert("Project submitted successfully!");
         const quantity = state.form.quantity || 0;
-        const originalTotalCost =
-          state.result?.original_total_cost ??
-          state.result?.cost_per_book * quantity;
+        const originalTotalCost = state.result?.original_total_cost ?? (state.result?.cost_per_book ?? 0) * quantity;
         const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
         localStorage.setItem(
           "shopData",
@@ -1389,23 +1039,17 @@ useEffect(() => {
             costPerBook: state.result?.cost_per_book ?? 0,
           })
         );
-        // Clear saved design project data after successful submission
         clearDesignProjectData();
         router.push("/shop");
       } else {
-        alert(
-          "Submission failed: " + (response.data.message || "Unknown error")
-        );
+        alert("Submission failed: " + (response.data.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Submission error:", error);
-      alert(
-        error.response?.data?.message ||
-        error.message ||
-        "An error occurred while submitting your project."
-      );
+      alert(error.response?.data?.message || error.message || "An error occurred while submitting your project.");
     }
   };
+
   const updateBook = async (projectId, isCalendar) => {
     if (!projectId) {
       alert("No project ID found for update.");
@@ -1418,58 +1062,21 @@ useEffect(() => {
       formData.append("language", state.projectData.language);
       formData.append("pdf_file", state.selectedFile);
       if (state.coverFile) formData.append("cover_file", state.coverFile);
-      const getOptionName = (options, id) =>
-        options.find((opt) => opt.id === Number(id))?.name || "";
-      formData.append(
-        "binding_type",
-        getOptionName(state.bindings, state.form.binding_id)
-      );
-      formData.append(
-        "cover_finish",
-        getOptionName(
-          state.dropdowns.cover_finishes || [],
-          state.form.cover_finish_id
-        )
-      );
-      formData.append(
-        "interior_color",
-        getOptionName(
-          state.dropdowns.interior_colors || [],
-          state.form.interior_color_id
-        )
-      );
-      formData.append(
-        "paper_type",
-        getOptionName(
-          state.dropdowns.paper_types || [],
-          state.form.paper_type_id
-        )
-      );
-      if (!isCalendar)
-        formData.append(
-          "trim_size",
-          getOptionName(
-            state.dropdowns.trim_sizes || [],
-            state.form.trim_size_id
-          )
-        );
+      const getOptionName = (options, id) => options.find((opt) => opt.id === Number(id))?.name || "";
+      formData.append("binding_type", getOptionName(state.bindings, state.form.binding_id));
+      formData.append("cover_finish", getOptionName(state.dropdowns.cover_finishes || [], state.form.cover_finish_id));
+      formData.append("interior_color", getOptionName(state.dropdowns.interior_colors || [], state.form.interior_color_id));
+      formData.append("paper_type", getOptionName(state.dropdowns.paper_types || [], state.form.paper_type_id));
+      if (!isCalendar) formData.append("trim_size", getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id));
       formData.append("page_count", state.form.page_count);
-      const response = await axios.put(
-        `${API_BASE}api/book/books/${projectId}/update/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) =>
-            updateState({
-              uploadProgress: Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              ),
-            }),
-        }
-      );
+      const response = await axios.put(`${API_BASE}api/book/books/${projectId}/update/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) =>
+          updateState({ uploadProgress: Math.round((progressEvent.loaded * 100) / progressEvent.total) }),
+      });
       if (response.data?.status === "success") {
         localStorage.setItem(
           "shopData",
@@ -1481,7 +1088,6 @@ useEffect(() => {
             costPerBook: state.result?.cost_per_book ?? 0,
           })
         );
-        // Clear saved design project data after successful update
         clearDesignProjectData();
         alert("Project updated successfully!");
         router.push("/shop");
@@ -1493,35 +1099,20 @@ useEffect(() => {
       alert("Error updating project.");
     }
   };
+
   const renderCalculatorOptions = () => {
-    if (state.loading)
-      return (
-        <div className="text-center py-8 text-blue-700">
-          Loading calculator options...
-        </div>
-      );
-    const {
-      interior_colors = [],
-      paper_types = [],
-      cover_finishes = [],
-      trim_sizes = [],
-    } = state.dropdowns;
+    if (state.loading) return <div className="text-center py-8 text-blue-700">Loading calculator options...</div>;
+    const { interior_colors = [], paper_types = [], cover_finishes = [], trim_sizes = [] } = state.dropdowns;
     const isCalendar = state.projectData?.category === "Calender";
-    if (!pdfjsLib && state.uploadStatus === "uploading") {
-      return <p>Loading PDF processor...</p>;
-    }
+    if (!pdfjsLib && state.uploadStatus === "uploading") return <p>Loading PDF processor...</p>;
     return (
       <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
         {!isCalendar && (
           <div className="mb-6 md:mb-8 p-4 md:p-6 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-lg">
-            <h3 className="text-white text-base md:text-lg font-semibold mb-3 md:mb-4">
-              Book Size & Page Count
-            </h3>
+            <h3 className="text-white text-base md:text-lg font-semibold mb-3 md:mb-4">Book Size & Page Count</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-white text-xs md:text-sm font-medium mb-1 md:mb-2">
-                  Trim Size
-                </label>
+                <label className="block text-white text-xs md:text-sm font-medium mb-1 md:mb-2">Trim Size</label>
                 <select
                   name="trim_size_id"
                   value={state.form.trim_size_id}
@@ -1531,16 +1122,12 @@ useEffect(() => {
                 >
                   <option value="">Select Trim Size</option>
                   {trim_sizes.map((ts) => (
-                    <option key={ts.id} value={ts.id}>
-                      {ts.name}
-                    </option>
+                    <option key={ts.id} value={ts.id}>{ts.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-white text-xs md:text-sm font-medium mb-1 md:mb-2">
-                  Page Count
-                </label>
+                <label className="block text-white text-xs md:text-sm font-medium mb-1 md:mb-2">Page Count</label>
                 <input
                   type="number"
                   name="page_count"
@@ -1557,35 +1144,22 @@ useEffect(() => {
           </div>
         )}
         <fieldset className="mb-6">
-          <legend className="font-semibold text-[#2A428C] mb-4 text-lg">
-            Binding Type
-          </legend>
-          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">
-            Paperback Options
-          </h4>
+          <legend className="font-semibold text-[#2A428C] mb-4 text-lg">Binding Type</legend>
+          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Paperback Options</h4>
           <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto mb-5 md:mb-6">
             {state.bindings
-              .filter((opt) =>
-                ["Coil Bound", "Saddle Stitch", "Perfect Bound"].includes(
-                  opt.name
-                )
-              )
+              .filter((opt) => ["Coil Bound", "Saddle Stitch", "Perfect Bound"].includes(opt.name))
               .map((opt) => {
                 const hasSize = Boolean(state.form.trim_size_id);
                 const hasPage = Boolean(state.form.page_count);
-                const isAvailable =
-                  hasSize &&
-                  hasPage &&
-                  state.availableBindings.includes(opt.name);
-                const isSelected =
-                  String(state.form.binding_id) === String(opt.id);
+                const isAvailable = hasSize && hasPage && state.availableBindings.includes(opt.name);
+                const isSelected = String(state.form.binding_id) === String(opt.id);
                 return (
                   <label
                     key={opt.id}
-                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected
-                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                      : "border-gray-300 bg-white"
-                      } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
+                      isSelected ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 bg-white"
+                    } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
                     role="radio"
                     aria-checked={isSelected}
                     aria-disabled={!isAvailable}
@@ -1600,53 +1174,42 @@ useEffect(() => {
                       className="sr-only"
                     />
                     <span
-                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? "border-blue-600" : "border-gray-400"
-                        }`}
+                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
+                        isSelected ? "border-blue-600" : "border-gray-400"
+                      }`}
                     >
                       <span
-                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? "bg-blue-600" : "bg-transparent"
-                          }`}
+                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
+                          isSelected ? "bg-blue-600" : "bg-transparent"
+                        }`}
                       ></span>
                     </span>
                     {(() => {
                       const src = IMAGE_MAPS.binding[opt.name];
                       return src ? (
-                        <Image
-                          src={src}
-                          alt={opt.name}
-                          className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2"
-                        />
+                        <Image src={src} alt={opt.name} className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2" />
                       ) : null;
                     })()}
-                    <span className="text-center text-xs md:text-sm text-gray-700">
-                      {opt.name}
-                    </span>
+                    <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
                   </label>
                 );
               })}
           </div>
-          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">
-            Hardcover Options
-          </h4>
+          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Hardcover Options</h4>
           <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto">
             {state.bindings
               .filter((opt) => ["Case Wrap", "Linen Wrap"].includes(opt.name))
               .map((opt) => {
                 const hasSize = Boolean(state.form.trim_size_id);
                 const hasPage = Boolean(state.form.page_count);
-                const isAvailable =
-                  hasSize &&
-                  hasPage &&
-                  state.availableBindings.includes(opt.name);
-                const isSelected =
-                  String(state.form.binding_id) === String(opt.id);
+                const isAvailable = hasSize && hasPage && state.availableBindings.includes(opt.name);
+                const isSelected = String(state.form.binding_id) === String(opt.id);
                 return (
                   <label
                     key={opt.id}
-                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected
-                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                      : "border-gray-300 bg-white"
-                      } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${
+                      isSelected ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 bg-white"
+                    } ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
                     role="radio"
                     aria-checked={isSelected}
                     aria-disabled={!isAvailable}
@@ -1661,27 +1224,23 @@ useEffect(() => {
                       className="sr-only"
                     />
                     <span
-                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? "border-blue-600" : "border-gray-400"
-                        }`}
+                      className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${
+                        isSelected ? "border-blue-600" : "border-gray-400"
+                      }`}
                     >
                       <span
-                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? "bg-blue-600" : "bg-transparent"
-                          }`}
+                        className={`block m-[2px] w-2.5 h-2.5 rounded-full ${
+                          isSelected ? "bg-blue-600" : "bg-transparent"
+                        }`}
                       ></span>
                     </span>
                     {(() => {
                       const src = IMAGE_MAPS.binding[opt.name];
                       return src ? (
-                        <Image
-                          src={src}
-                          alt={opt.name}
-                          className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2"
-                        />
+                        <Image src={src} alt={opt.name} className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2" />
                       ) : null;
                     })()}
-                    <span className="text-center text-xs md:text-sm text-gray-700">
-                      {opt.name}
-                    </span>
+                    <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
                   </label>
                 );
               })}
@@ -1703,9 +1262,7 @@ useEffect(() => {
           imageMap={IMAGE_MAPS.paperType}
           form={state.form}
           handleChange={handleChange}
-          stepAccessible={Boolean(
-            state.form.binding_id && state.form.interior_color_id
-          )}
+          stepAccessible={Boolean(state.form.binding_id && state.form.interior_color_id)}
         />
         <OptionField
           title="Cover Finish"
@@ -1714,11 +1271,7 @@ useEffect(() => {
           imageMap={IMAGE_MAPS.coverFinish}
           form={state.form}
           handleChange={handleChange}
-          stepAccessible={Boolean(
-            state.form.binding_id &&
-            state.form.interior_color_id &&
-            state.form.paper_type_id
-          )}
+          stepAccessible={Boolean(state.form.binding_id && state.form.interior_color_id && state.form.paper_type_id)}
         />
         <div className="mt-6 md:mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
           <div className="flex gap-4 items-end flex-wrap">
@@ -1742,9 +1295,7 @@ useEffect(() => {
             </button>
           </div>
           <div className="mt-4 p-3 bg-white border border-blue-100 rounded">
-            <h4 className="font-semibold text-[#2A428C] mb-2">
-              Bulk Discount Tiers
-            </h4>
+            <h4 className="font-semibold text-[#2A428C] mb-2">Bulk Discount Tiers</h4>
             <div className="space-y-1 text-sm">
               {DISCOUNTS.map((tier, idx) => {
                 const min = tier.min;
@@ -1753,11 +1304,7 @@ useEffect(() => {
                 const q = Number(state.form.quantity) || 0;
                 const active = q >= min && (!next || q < next);
                 return (
-                  <div
-                    key={min}
-                    className={`flex justify-between ${active ? "font-semibold text-green-700" : "text-gray-700"
-                      }`}
-                  >
+                  <div key={min} className={`flex justify-between ${active ? "font-semibold text-green-700" : "text-gray-700"}`}>
                     <span>{label} units:</span>
                     <span>{tier.percent}% off</span>
                   </div>
@@ -1767,27 +1314,12 @@ useEffect(() => {
           </div>
           {state.result && (
             <div className="mt-4">
-              <p>
-                <strong>Cost per Book:</strong> $
-                {Number(state.result.cost_per_book).toFixed(2)}
-              </p>
-              <p>
-                <strong>Total (before discount):</strong> $
-                {Number(
-                  state.result.original_total_cost ?? state.result.total_cost
-                ).toFixed(2)}
-              </p>
+              <p><strong>Cost per Book:</strong> ${Number(state.result.cost_per_book).toFixed(2)}</p>
+              <p><strong>Total (before discount):</strong> ${Number(state.result.original_total_cost ?? state.result.total_cost).toFixed(2)}</p>
               {state.result.discount_percent > 0 && (
                 <>
-                  <p className="text-green-700">
-                    <strong>Bulk Discount:</strong>{" "}
-                    {state.result.discount_percent}% (- $
-                    {Number(state.result.discount_amount).toFixed(2)})
-                  </p>
-                  <p>
-                    <strong>Final Total:</strong> $
-                    {Number(state.result.total_cost).toFixed(2)}
-                  </p>
+                  <p className="text-green-700"><strong>Bulk Discount:</strong> {state.result.discount_percent}% (- ${Number(state.result.discount_amount).toFixed(2)})</p>
+                  <p><strong>Final Total:</strong> ${Number(state.result.total_cost).toFixed(2)}</p>
                 </>
               )}
             </div>
@@ -1796,6 +1328,7 @@ useEffect(() => {
       </div>
     );
   };
+
   return (
     <>
       <NavBar navigate={router.push} />
@@ -1804,25 +1337,19 @@ useEffect(() => {
           <div className="relative flex justify-center items-center px-2">
             <div
               className="absolute left-0 right-0 h-[2px] sm:h-[3px] lg:h-[4px]"
-              style={{
-                background:
-                  "linear-gradient(90deg, #D15D9E 38.04%, #5D4495 121.51%)",
-              }}
+              style={{ background: "linear-gradient(90deg, #D15D9E 38.04%, #5D4495 121.51%)" }}
             />
             <div
               className="h-[35px] sm:h-[42px] lg:h-[47px] w-full max-w-[300px] sm:max-w-[380px] lg:max-w-[440px] mx-2 sm:mx-4 flex items-center justify-center text-white font-medium text-xs sm:text-sm lg:text-base z-10 px-2 sm:px-4"
               style={{
-                background:
-                  "linear-gradient(90deg, #D15D9E 38.04%, #5D4495 121.51%)",
+                background: "linear-gradient(90deg, #D15D9E 38.04%, #5D4495 121.51%)",
                 borderRadius: "120px",
               }}
             >
               Design Your Project
             </div>
           </div>
-          {state.projectData && (
-            <ProjectDetails projectData={state.projectData} />
-          )}
+          {state.projectData && <ProjectDetails projectData={state.projectData} />}
           <FileUpload
             fileError={state.fileError}
             selectedFile={state.selectedFile}
@@ -1831,9 +1358,7 @@ useEffect(() => {
             handleFileChange={handleFileChange}
           />
           <div className="flex flex-col gap-3">
-            <h2 className="text-[#2A428C] text-lg md:text-xl lg:text-[24px] font-bold">
-              Book Configuration
-            </h2>
+            <h2 className="text-[#2A428C] text-lg md:text-xl lg:text-[24px] font-bold">Book Configuration</h2>
             {renderCalculatorOptions()}
           </div>
           <CoverDesign
@@ -1844,27 +1369,13 @@ useEffect(() => {
           />
           {(state.coverFile || state.coverPdfUrl) && (
             <div className="w-full mt-6 md:mt-10">
-              <h2 className="text-[#2A428C] font-bold text-xl md:text-[36px] mb-4">
-                Preview Book Cover Design
-              </h2>
+              <h2 className="text-[#2A428C] font-bold text-xl md:text-[36px] mb-4">Preview Book Cover Design</h2>
               <div className="w-full bg-white border border-gray-300 rounded-lg p-4 md:p-6 flex justify-center items-center">
                 <div className="relative w-full h-96 md:h-[500px] flex justify-center items-center">
                   {state.coverPdfUrl ? (
-                    <Image
-                      src={state.coverPdfUrl}
-                      alt="Book Cover Preview (PDF)"
-                      fill
-                      className="object-contain"
-                      unoptimized
-                    />
+                    <Image src={state.coverPdfUrl} alt="Book Cover Preview (PDF)" fill className="object-contain" unoptimized />
                   ) : state.coverFile ? (
-                    <Image
-                      src={URL.createObjectURL(state.coverFile)}
-                      alt="Book Cover Preview"
-                      fill
-                      className="object-contain"
-                      unoptimized
-                    />
+                    <Image src={URL.createObjectURL(state.coverFile)} alt="Book Cover Preview" fill className="object-contain" unoptimized />
                   ) : null}
                 </div>
               </div>
@@ -1873,132 +1384,93 @@ useEffect(() => {
           <div className="flex flex-col items-center gap-4 md:gap-6 mt-6 md:mt-10">
             <button
               onClick={handleContactExpert}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer
-                }`}
+              className="w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer"
             >
               Contact Cover Design Expert
             </button>
             <button
-              onClick={() => {
-                router.push("/resources/guide-templates");
-              }}
-              className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer
-                }`}
+              onClick={() => router.push("/resources/guide-templates")}
+              className="w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer"
             >
               Check Cover Design Guidelines
             </button>
-         <button
-  onClick={async () => {
-    const isCalendar = isCalendarCategory(state.projectData?.category);
-    const requiredFields = isCalendar
-      ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
-      : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"];
-    
-    const missingFields = requiredFields.filter((field) => !state.form[field]);
-    if (missingFields.length > 0) {
-      alert("Please complete all book configuration options before previewing.");
-      return;
-    }
-    
-    if (!state.selectedFile) {
-      alert("Please upload your book PDF file first.");
-      return;
-    }
-    
-    if (!state.coverFile || state.coverFileError) {
-      alert("Please upload a valid single-page PDF for your book cover before previewing.");
-      return;
-    }
-    
-    // Store files in window object for session persistence
-    window.tempBookFileForSubmission = state.selectedFile;
-    if (state.coverFile) {
-      window.tempCoverFileForSubmission = state.coverFile;
-    }
-    
-    // Also ensure files are saved to IndexedDB for long-term persistence
-    try {
-      const interiorFileData = await saveFileData(state.selectedFile, 'interior');
-      const coverFileData = state.coverFile ? await saveFileData(state.coverFile, 'cover') : null;
-      
-      const currentData = loadDesignProjectData() || {};
-      saveDesignProjectData({
-        ...currentData,
-        interiorFileData,
-        coverFileData,
-      });
-    } catch (error) {
-      console.error('Error saving files before preview:', error);
-    }
-
-    // 👇 Ye sab purana code waise hi rahega
-    localStorage.setItem("previewFormData", JSON.stringify(state.form));
-    localStorage.setItem("previewProjectData", JSON.stringify(state.projectData));
-    localStorage.setItem(
-      "previewDropdowns",
-      JSON.stringify({
-        bindings: state.bindings || [],
-        interior_colors: state.dropdowns.interior_colors || [],
-        paper_types: state.dropdowns.paper_types || [],
-        cover_finishes: state.dropdowns.cover_finishes || [],
-        trim_sizes: state.dropdowns.trim_sizes || [],
-      })
-    );
-    
-    const quantity = state.form.quantity || 0;
-    const originalTotalCost =
-      state.result?.original_total_cost ??
-      (state.result?.cost_per_book ?? 0) * quantity;
-    const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
-    
-    localStorage.setItem(
-      "shopData",
-      JSON.stringify({
-        originalTotalCost: state.result?.original_total_cost ?? 0,
-        finalTotalCost: state.result?.total_cost ?? 0,
-        totalCost: state.result?.total_cost ?? 0,
-        productQuantity: state.form.quantity,
-        costPerBook: state.result?.cost_per_book ?? 0,
-      })
-    );
-
-    // NEW: Build and save shopBookDetails
-    const getOptionName = (options, id) =>
-      options.find((opt) => String(opt.id) === String(id))?.name || "";
-
-    const shopBookDetails = {
-      "page_count": state.form.page_count || "",
-      "trim_size": isCalendar
-        ? ""
-        : getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id),
-      "cover_finish": getOptionName(
-        state.dropdowns.cover_finishes || [],
-        state.form.cover_finish_id
-      ),
-      "interior_color": getOptionName(
-        state.dropdowns.interior_colors || [],
-        state.form.interior_color_id
-      ),
-      "paper_type": getOptionName(
-        state.dropdowns.paper_types || [],
-        state.form.paper_type_id
-      ),
-      "binding_type": getOptionName(state.bindings || [], state.form.binding_id),
-    };
-
-    localStorage.setItem("shopBookDetails", JSON.stringify(shopBookDetails));
-    
-    const targetUrl = isEditUrl ? "/book-preview?edit=true" : "/book-preview";
-    router.push(targetUrl);
-  }}
-  className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer`}
->
-  Preview Your Book
-</button>
+            <button
+              onClick={async () => {
+                const isCalendar = isCalendarCategory(state.projectData?.category);
+                const requiredFields = isCalendar
+                  ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"]
+                  : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id"];
+                const missingFields = requiredFields.filter((field) => !state.form[field]);
+                if (missingFields.length > 0) {
+                  alert("Please complete all book configuration options before previewing.");
+                  return;
+                }
+                if (!state.selectedFile) {
+                  alert("Please upload your book PDF file first.");
+                  return;
+                }
+                if (!state.coverFile || state.coverFileError) {
+                  alert("Please upload a valid single-page PDF for your book cover before previewing.");
+                  return;
+                }
+                window.tempBookFileForSubmission = state.selectedFile;
+                if (state.coverFile) window.tempCoverFileForSubmission = state.coverFile;
+                try {
+                  const interiorFileData = await saveFileData(state.selectedFile, "interior");
+                  const coverFileData = state.coverFile ? await saveFileData(state.coverFile, "cover") : null;
+                  const currentData = loadDesignProjectData() || {};
+                  saveDesignProjectData({ ...currentData, interiorFileData, coverFileData, coverPdfUrl: state.coverPdfUrl });
+                } catch (error) {
+                  console.error("Error saving files before preview:", error);
+                }
+                localStorage.setItem("previewFormData", JSON.stringify(state.form));
+                localStorage.setItem("previewProjectData", JSON.stringify(state.projectData));
+                localStorage.setItem(
+                  "previewDropdowns",
+                  JSON.stringify({
+                    bindings: state.bindings || [],
+                    interior_colors: state.dropdowns.interior_colors || [],
+                    paper_types: state.dropdowns.paper_types || [],
+                    cover_finishes: state.dropdowns.cover_finishes || [],
+                    trim_sizes: state.dropdowns.trim_sizes || [],
+                  })
+                );
+                const quantity = state.form.quantity || 0;
+                const originalTotalCost = state.result?.original_total_cost ?? (state.result?.cost_per_book ?? 0) * quantity;
+                const finalTotalCost = state.result?.total_cost ?? originalTotalCost;
+                localStorage.setItem(
+                  "shopData",
+                  JSON.stringify({
+                    originalTotalCost: state.result?.original_total_cost ?? 0,
+                    finalTotalCost: state.result?.total_cost ?? 0,
+                    totalCost: state.result?.total_cost ?? 0,
+                    productQuantity: state.form.quantity,
+                    costPerBook: state.result?.cost_per_book ?? 0,
+                  })
+                );
+                const getOptionName = (options, id) =>
+                  options.find((opt) => String(opt.id) === String(id))?.name || "";
+                const shopBookDetails = {
+                  page_count: state.form.page_count || "",
+                  trim_size: isCalendar ? "" : getOptionName(state.dropdowns.trim_sizes || [], state.form.trim_size_id),
+                  cover_finish: getOptionName(state.dropdowns.cover_finishes || [], state.form.cover_finish_id),
+                  interior_color: getOptionName(state.dropdowns.interior_colors || [], state.form.interior_color_id),
+                  paper_type: getOptionName(state.dropdowns.paper_types || [], state.form.paper_type_id),
+                  binding_type: getOptionName(state.bindings || [], state.form.binding_id),
+                };
+                localStorage.setItem("shopBookDetails", JSON.stringify(shopBookDetails));
+                const targetUrl = isEditUrl ? "/book-preview?edit=true" : "/book-preview";
+                router.push(targetUrl);
+              }}
+              className="w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition cursor-pointer"
+            >
+              Preview Your Book
+            </button>
           </div>
         </div>
       </div>
     </>
   );
 };
+
 export default DesignProjectPreview;

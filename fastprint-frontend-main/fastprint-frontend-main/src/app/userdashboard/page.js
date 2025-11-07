@@ -372,7 +372,7 @@ const UserDashboard = () => {
                 </div>
               </div>
             </div>
-        
+
           </div>
 
           {/* Table */}
@@ -385,7 +385,14 @@ const UserDashboard = () => {
                   <p className="text-blue-100">Monitor and manage all your projects from one place</p>
                 </div>
                 <button
-                  onClick={() => router.push("/start-project")}
+                  onClick={() => {
+                    router.push("/start-project")
+                    localStorage.removeItem("designProjectData")
+                    localStorage.removeItem("previewDropdowns")
+                    localStorage.removeItem("previewFormData")
+                    localStorage.removeItem("previewProjectData")
+
+                  }}
                   className="flex items-center gap-3 bg-gradient-to-r from-[#F8C20A] to-[#EE831E] text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition"
                 >
                   <FaPlus /> <span>New Project</span>
@@ -503,7 +510,7 @@ const UserDashboard = () => {
                       </td>
                       <td className="px-8 py-6 text-center">
                         <div className="flex items-center justify-center gap-2">
-                         
+
                           <button
                             onClick={() => handleEdit(book)}
                             className="p-3 text-[#016AB3] hover:text-[#0096CD] hover:bg-blue-50 rounded-xl transition hover:scale-110"

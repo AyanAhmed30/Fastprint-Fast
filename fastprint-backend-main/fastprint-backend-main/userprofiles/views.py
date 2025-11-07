@@ -1,29 +1,26 @@
+# userprofiles/views.py
 from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import UserProfile
 from .serializers import UserProfileSerializer
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
 
 class UserProfileListCreateView(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['email', 'username', 'id']  # For exact filtering via ?email=...
-    search_fields = ['email', 'username', 'first_name', 'last_name']  # For partial matching via ?search=...
-    authentication_classes = []  # Remove authentication requirement
-    permission_classes = []      # Remove permission requirement
-    
+    filterset_fields = ['email', 'username', 'id']
+    search_fields = ['email', 'username', 'first_name', 'last_name']
+    authentication_classes = []
+    permission_classes = []
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        # Handle search parameter specifically for email lookup
         search_param = self.request.query_params.get('search', None)
         if search_param:
-            # First try exact email match, then fallback to general search
             exact_match = queryset.filter(email=search_param)
             if exact_match.exists():
                 return exact_match
@@ -32,63 +29,54 @@ class UserProfileListCreateView(generics.ListCreateAPIView):
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    authentication_classes = []  # Remove authentication requirement
-    permission_classes = []      # Remove permission requirement
-
+    authentication_classes = []
+    permission_classes = []
 
 class UserProfileMeView(APIView):
-    """Return the profile for the currently authenticated user.
-
-    This is a small, authenticated endpoint the frontend can call to
-    reliably fetch per-user profile data without relying on public list/search
-    endpoints that can be cached by CDNs/proxies.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Try to match profile by the authenticated user's email or username
         user_email = getattr(request.user, 'email', None)
         user_username = getattr(request.user, 'username', None)
-
         profile = None
         if user_email:
             profile = UserProfile.objects.filter(email=user_email).first()
         if not profile and user_username:
             profile = UserProfile.objects.filter(username=user_username).first()
-
         if not profile:
             return Response(None, status=status.HTTP_204_NO_CONTENT)
-
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def save_account_settings(request):
     try:
-        email = request.data.get('email')
-        username = request.data.get('username')
-        
-        profile = None
-        if email:
-            profile = UserProfile.objects.filter(email=email).first()
-        elif username:
+        email = request.data.get('email', '').strip()
+        username = request.data.get('username', '').strip()
+
+        if not email:
+            return Response({
+                'success': False,
+                'message': 'Email is required.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find profile by email (primary) or username
+        profile = UserProfile.objects.filter(email=email).first()
+        if not profile and username:
             profile = UserProfile.objects.filter(username=username).first()
-        
+
         if profile:
-            # Update existing profile
             serializer = UserProfileSerializer(profile, data=request.data, partial=True)
         else:
-            # Create new profile
             serializer = UserProfileSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             saved_profile = serializer.save()
             return Response({
                 'success': True,
                 'message': 'Account settings saved successfully',
-                'data': serializer.data
+                'data': UserProfileSerializer(saved_profile).data
             }, status=status.HTTP_200_OK)
         else:
             return Response({
@@ -96,13 +84,12 @@ def save_account_settings(request):
                 'message': 'Validation failed',
                 'errors': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
-            
+
     except Exception as e:
         return Response({
             'success': False,
             'message': f'An error occurred: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])

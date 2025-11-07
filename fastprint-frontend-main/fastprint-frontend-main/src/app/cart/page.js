@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Edit3, ShoppingBag, ArrowRight, Package } from "lucide-react";
-import { getCartItems, deleteCartItem } from "@/services/cartService";
+import { Trash2, Edit3, ShoppingBag, ArrowRight, Package, RotateCcw } from "lucide-react";
+import { getCartItems, deleteCartItem, clearCart } from "@/services/cartService";
 
 const Cart = () => {
   const router = useRouter();
@@ -172,6 +172,24 @@ const Cart = () => {
     router.push("/shop");
   };
 
+  const handleClearCart = async () => {
+    if (!confirm("Are you sure you want to clear your entire cart? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const response = await clearCart();
+      if (response.status === "success" || response.message?.includes("cleared")) {
+        setCartItems([]);
+      } else {
+        alert(response.message || "Failed to clear cart");
+      }
+    } catch (error) {
+      console.error("Failed to clear cart", error);
+      alert(error.error || error.message || "Failed to clear cart");
+    }
+  };
+
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => {
       const itemTotal = (item.subtotal || 0) + (item.shippingRate || 0) + (item.tax || 0);
@@ -221,11 +239,20 @@ const Cart = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <ShoppingBag className="w-6 h-6 text-white" />
             <h1 className="text-white text-2xl font-bold tracking-tight">Shopping Cart</h1>
           </div>
+
+          {/* Clear Cart Button — top-right, subtle */}
+          <button
+            onClick={handleClearCart}
+            className="mt-3 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition-colors backdrop-blur-sm"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Clear All
+          </button>
         </div>
       </div>
 
@@ -317,8 +344,6 @@ const Cart = () => {
                 })}
               </div>
             </div>
-
-
           </div>
 
           {/* Order Summary Sidebar */}
@@ -337,7 +362,7 @@ const Cart = () => {
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600">Total books</span>
                   <span className="font-semibold text-gray-900">
-                    {cartItems.length}
+                    {cartItems.reduce((sum, item) => sum + (item.productQuantity || 1), 0)}
                   </span>
                 </div>
 

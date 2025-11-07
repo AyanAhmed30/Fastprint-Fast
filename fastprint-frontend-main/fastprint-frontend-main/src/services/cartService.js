@@ -92,3 +92,20 @@ export const deleteCartItem = async (itemId) => {
     throw error.response?.data || { error: 'Failed to delete cart item' };
   }
 };
+
+/**
+ * Clear all cart items for the current user
+ */
+export const clearCart = async () => {
+  try {
+    const response = await axios.delete(`${API_BASE}/items/`, {
+      headers: getAuthHeaders(),
+    });
+    if (response.status === 204 || response.status === 200) {
+      return { status: 'success', message: 'Cart cleared successfully' };
+    }
+    return response.data || { status: 'success', message: 'Cart cleared successfully' };
+  } catch (error) {
+    throw error.response?.data || { error: 'Failed to clear cart' };
+  }
+};
